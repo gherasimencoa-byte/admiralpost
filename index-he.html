@@ -1047,6 +1047,19 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
 
 
 
+
+<style>
+.hero-tracking{display:flex;align-items:center;gap:8px;position:relative;width:min(100%,560px);margin:18px 0 14px;padding:7px 8px 7px 15px;border:1px solid #dce3ec;border-radius:15px;background:rgba(255,255,255,.96);box-shadow:0 8px 24px rgba(13,43,82,.08);color:#14243a;flex-wrap:wrap}
+.hero-tracking-icon{font-size:24px;line-height:1;color:#ff8a00;flex:0 0 auto}
+.hero-tracking input{flex:1 1 180px;min-width:0;width:100%;border:0!important;outline:none!important;box-shadow:none!important;background:transparent!important;padding:10px 4px;color:#14243a;font:inherit;font-size:15px}
+.hero-tracking input::placeholder{color:#7b8796;opacity:1}
+.hero-tracking button{flex:0 0 auto;border:0;border-radius:10px;background:#ff8a00;color:#fff;font:inherit;font-weight:800;padding:11px 19px;cursor:pointer;transition:background .15s ease}
+.hero-tracking button:hover{background:#e97800}
+.hero-tracking button:disabled{opacity:.65;cursor:wait}
+.hero-tracking-hint{flex:1 0 100%;margin:0 0 0 32px;font-size:12px;line-height:1.4;color:#64748b}
+.hero-tracking-result{flex:1 0 100%;margin:0 0 0 32px;font-size:13px;color:#14243a;overflow-wrap:anywhere}
+@media(max-width:600px){.hero-tracking{gap:5px;padding:6px 7px 9px 11px}.hero-tracking button{padding:10px 13px}.hero-tracking-hint,.hero-tracking-result{margin-left:30px}}
+</style>
 </head>
 <body>
   <!-- כותרת האתר -->
@@ -1085,6 +1098,13 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
           <a href="#tariffs" class="btn btn-outline">חישוב עלות משלוח</a>
           <a class="btn whatsapp-hero" href="https://wa.me/972522323554" target="_blank" rel="noopener noreferrer">WhatsApp</a>
         </div>
+        <form class="hero-tracking" id="heroTrackForm" onsubmit="event.preventDefault(); return runTracking('tracking-number', 'tracking-result', 'he', event.submitter || event.currentTarget.querySelector('button[type=submit]'));" role="search" aria-label="מעקב מהיר אחר חבילה">
+          <span class="hero-tracking-icon" aria-hidden="true">⌕</span>
+          <input type="text" id="tracking-number" placeholder="הזינו מספר מעקב" aria-label="הזינו מספר מעקב" autocomplete="off" required>
+          <button type="submit">מעקב</button>
+          <p class="hero-tracking-hint">הזינו מספר מעקב כדי לראות את התוצאה כאן.</p>
+          <div id="tracking-result" class="tracking-result hero-tracking-result" aria-live="polite"></div>
+        </form>
         <ul class="hero-benefits"><li>📍 איסוף מהכתובת</li><li>⌕ מעקב משלוחים</li><li>♙ שירות אישי</li></ul>
       </div>
       <div class="hero-visual"><div class="hero-card"><div class="hero-card-icon" aria-hidden="true">📦</div><h2>מהדלת עד ליעד</h2><p>נסייע בהכנת המשלוח, בבדיקת ההגבלות ובבחירת מסלול מתאים.</p><div class="hero-mini-stats"><div><span class="stat-label">שירות</span><span class="stat-value">אישי</span></div><div><span class="stat-label">מעקב</span><span class="stat-value">לפי מספר</span></div></div></div></div>
@@ -1202,28 +1222,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
   </section>
 
   <!-- Parcel tracking immediately below the shipping calculator -->
-  <section class="section section-tracking" id="tracking">
-    <div class="container tracking-inner">
-      <div class="tracking-text">
-        <h2>מעקב אחר חבילה מישראל</h2>
-        <p>
-          הזינו מספר מעקב של Admiral Post כדי לבדוק את סטטוס המשלוח:
-          קבלה, מיון, מעבר בינלאומי, מכס ומסירה לנמען.
-        </p>
-      </div>
-      <form class="tracking-form" onsubmit="return handleTracking(event)">
-        <input
-          type="text"
-          id="tracking-number"
-          placeholder="הזינו מספר מעקב (לדוגמה AE123456789IL)"
-          required
-        />
-        <button type="submit" class="btn btn-primary">מעקב אחר חבילה</button>
-        <p class="tracking-hint">דוגמה למספר מעקב: AE123456789IL</p>
-        <div id="tracking-result" class="tracking-result" aria-live="polite"></div>
-      </form>
-    </div>
-  </section>
+  
 
 
   <!-- מסלולים וזמני משלוח -->
@@ -1569,19 +1568,6 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
       event.preventDefault();
       const button = event.submitter || event.currentTarget.querySelector('button[type="submit"]');
       return runTracking("tracking-number", "tracking-result", "he", button);
-    }
-
-    function submitHeaderTracking(event, lang) {
-      event.preventDefault();
-      const headerInput = document.getElementById("header-tracking-number");
-      const targetInputId = lang === "en" ? "trackingNumber" : "tracking-number";
-      const resultId = lang === "en" ? "trackMessage" : "tracking-result";
-      const targetInput = document.getElementById(targetInputId);
-      const result = document.getElementById(resultId);
-      const number = headerInput ? headerInput.value.trim() : "";
-      if (!number || !targetInput || !result) return false;
-      targetInput.value = number;
-      return runTracking(targetInputId, resultId, lang, event.submitter || event.currentTarget.querySelector('button[type="submit"]'));
     }
 
     async function runTracking(inputId, resultId, lang, button) {
