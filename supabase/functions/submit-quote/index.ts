@@ -25,7 +25,7 @@ const clean = (v: unknown, max = 500) => typeof v === "string" ? v.trim().slice(
 
 Deno.serve(async (req) => {
   const origin = req.headers.get("origin") ?? "";
-  if (req.method === "OPTIONS") return response({}, 204, origin);
+  if (req.method === "OPTIONS") return response({}, 200, origin);
   if (req.method !== "POST") return response({ error: "Method not allowed" }, 405, origin);
   if (!allowedOrigins.has(origin)) return response({ error: "Origin not allowed" }, 403, origin);
 
