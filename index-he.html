@@ -1047,10 +1047,17 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
 
 
 <style>
-/* Prominent parcel-tracking shortcut in the primary navigation */
-nav a.tracking-nav-link{display:inline-flex;align-items:center;justify-content:center;padding:8px 13px;border-radius:999px;background:#ff8a00;color:#fff!important;font-weight:800;box-shadow:0 3px 10px rgba(255,138,0,.22);white-space:nowrap}
-nav a.tracking-nav-link:hover,nav a.tracking-nav-link:focus-visible{background:#e97800;color:#fff!important;outline-offset:3px}
-@media(max-width:850px){nav a.tracking-nav-link{padding:7px 11px}}
+/* Compact, functional parcel tracking in the main navigation */
+.header-tracking{display:flex;align-items:center;gap:5px;width:clamp(190px,20vw,255px);padding:4px 5px 4px 12px;border:1px solid #dce3ec;border-radius:999px;background:#fff;box-shadow:0 2px 8px rgba(13,43,82,.05);flex-shrink:0}
+.header-tracking:focus-within{border-color:#ff8a00;box-shadow:0 0 0 3px rgba(255,138,0,.12)}
+.header-tracking input{min-width:0;width:100%;padding:6px 0;border:0!important;outline:none!important;box-shadow:none!important;background:transparent!important;color:#14243a;font:inherit;font-size:13px;line-height:1.35}
+.header-tracking input::placeholder{color:#7b8796;opacity:1}
+.header-tracking button{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-height:32px;padding:0 12px;border:0;border-radius:999px;background:#ff8a00;color:#fff;font-size:12px;font-weight:800;cursor:pointer;transition:background .15s ease}
+.header-tracking button:hover{background:#e97800}
+.header-tracking button:disabled{opacity:.65;cursor:wait}
+@media(max-width:1100px){.header-tracking{width:210px}}
+@media(max-width:900px){.header-tracking{order:2;width:min(100%,340px);margin-inline-start:auto}.nav{order:3}}
+@media(max-width:600px){.header-tracking{order:2;width:100%;margin:8px 0 0}.header-tracking button{min-height:36px}}
 </style>
 </head>
 <body>
@@ -1062,7 +1069,7 @@ nav a.tracking-nav-link:hover,nav a.tracking-nav-link:focus-visible{background:#
         <span class="logo-text">ADMIRAL POST<br><small style="font-size:10px;letter-spacing:1.2px;color:var(--color-muted)">INTERNATIONAL EXPRESS</small></span>
       </a>
       <nav class="nav">
-        <a class="tracking-nav-link" href="#tracking">מעקב משלוחים</a>
+        <form class="header-tracking" id="headerTrackingForm" onsubmit="return submitHeaderTracking(event, 'he')" role="search" aria-label="מעקב מהיר אחר חבילה"><input id="header-tracking-number" type="text" placeholder="הזינו מספר מעקב" aria-label="הזינו מספר מעקב" autocomplete="off" required><button type="submit" aria-label="חיפוש" title="חיפוש"><span>←</span></button></form>
         <a href="#services">השירותים שלנו</a>
         <a href="#how-it-works">איך זה עובד</a>
         <a href="#tariffs">תעריפים</a>
@@ -1570,6 +1577,21 @@ nav a.tracking-nav-link:hover,nav a.tracking-nav-link:focus-visible{background:#
       event.preventDefault();
       const button = event.submitter || event.currentTarget.querySelector('button[type="submit"]');
       return runTracking("tracking-number", "tracking-result", "he", button);
+    }
+
+    function submitHeaderTracking(event, lang) {
+      event.preventDefault();
+      const headerInput = document.getElementById("header-tracking-number");
+      const targetInputId = lang === "en" ? "trackingNumber" : "tracking-number";
+      const resultId = lang === "en" ? "trackMessage" : "tracking-result";
+      const targetInput = document.getElementById(targetInputId);
+      const result = document.getElementById(resultId);
+      const number = headerInput ? headerInput.value.trim() : "";
+      if (!number || !targetInput || !result) return false;
+      targetInput.value = number;
+      const trackingSection = document.getElementById("tracking");
+      if (trackingSection) trackingSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      return runTracking(targetInputId, resultId, lang, event.submitter || event.currentTarget.querySelector('button[type="submit"]'));
     }
 
     async function runTracking(inputId, resultId, lang, button) {
