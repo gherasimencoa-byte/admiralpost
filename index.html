@@ -1023,6 +1023,19 @@ body { color:#25364b; line-height:1.65; }
 <style>.destination-detail{display:block;color:#ff8a00;font-size:12px;font-weight:700;text-decoration:none;margin-top:8px}.destination-detail:hover{text-decoration:underline}.destination-page{max-width:900px;margin:0 auto}.destination-page h1{color:#0d2b52;font-size:clamp(30px,4vw,44px);line-height:1.15}.destination-page h2{color:#0d2b52;margin-top:32px}.destination-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.breadcrumb{font-size:13px;color:#5b6b7a;margin-bottom:18px}.breadcrumb a{color:#0d2b52}</style>
 
 
+
+<style>
+.hero-tracking{display:flex;align-items:center;gap:8px;position:relative;width:min(100%,560px);margin:18px 0 14px;padding:7px 8px 7px 15px;border:1px solid #dce3ec;border-radius:15px;background:rgba(255,255,255,.96);box-shadow:0 8px 24px rgba(13,43,82,.08);color:#14243a;flex-wrap:wrap}
+.hero-tracking-icon{font-size:24px;line-height:1;color:#ff8a00;flex:0 0 auto}
+.hero-tracking input{flex:1 1 180px;min-width:0;width:100%;border:0!important;outline:none!important;box-shadow:none!important;background:transparent!important;padding:10px 4px;color:#14243a;font:inherit;font-size:15px}
+.hero-tracking input::placeholder{color:#7b8796;opacity:1}
+.hero-tracking button{flex:0 0 auto;border:0;border-radius:10px;background:#ff8a00;color:#fff;font:inherit;font-weight:800;padding:11px 19px;cursor:pointer;transition:background .15s ease}
+.hero-tracking button:hover{background:#e97800}
+.hero-tracking button:disabled{opacity:.65;cursor:wait}
+.hero-tracking-hint{flex:1 0 100%;margin:0 0 0 32px;font-size:12px;line-height:1.4;color:#64748b}
+.hero-tracking-result{flex:1 0 100%;margin:0 0 0 32px;font-size:13px;color:#14243a;overflow-wrap:anywhere}
+@media(max-width:600px){.hero-tracking{gap:5px;padding:6px 7px 9px 11px}.hero-tracking button{padding:10px 13px}.hero-tracking-hint,.hero-tracking-result{margin-left:30px}}
+</style>
 </head>
 <body>
   <!-- Хедер -->
@@ -1061,6 +1074,13 @@ body { color:#25364b; line-height:1.65; }
           <a href="#tariffs" class="btn btn-outline">Рассчитать стоимость</a>
           <a class="btn whatsapp-hero" href="https://wa.me/972522323554" target="_blank" rel="noopener noreferrer">WhatsApp</a>
         </div>
+        <form class="hero-tracking" id="heroTrackForm" onsubmit="event.preventDefault(); return runTracking('tracking-number', 'tracking-result', 'ru', event.submitter || event.currentTarget.querySelector('button[type=submit]'));" role="search" aria-label="Быстрый поиск посылки">
+          <span class="hero-tracking-icon" aria-hidden="true">⌕</span>
+          <input type="text" id="tracking-number" placeholder="Введите трек-номер" aria-label="Введите трек-номер" autocomplete="off" required>
+          <button type="submit">Отследить</button>
+          <p class="hero-tracking-hint">Введите номер посылки — результат появится здесь.</p>
+          <div id="tracking-result" class="tracking-result hero-tracking-result" aria-live="polite"></div>
+        </form>
         <ul class="hero-benefits"><li>📍 Забор по адресу</li><li>⌕ Отслеживание</li><li>♙ Персональная поддержка</li></ul>
       </div>
       <div class="hero-visual"><div class="hero-card"><div class="hero-card-icon" aria-hidden="true">📦</div><h2>От двери до двери</h2><p>Помогаем подготовить отправление, проверить ограничения и подобрать доступный маршрут.</p><div class="hero-mini-stats"><div><span class="stat-label">Поддержка</span><span class="stat-value">Лично</span></div><div><span class="stat-label">Отслеживание</span><span class="stat-value">По номеру</span></div></div></div></div>
@@ -1178,28 +1198,7 @@ body { color:#25364b; line-height:1.65; }
   </section>
 
   <!-- Parcel tracking immediately below the shipping calculator -->
-  <section class="section section-tracking" id="tracking">
-    <div class="container tracking-inner">
-      <div class="tracking-text">
-        <h2>Отследить посылку из Израиля</h2>
-        <p>
-          Введите трек-номер Admiral Express, чтобы узнать статус отправки из Израиля:
-          приём, сортировка, вылет, транзит, таможня и доставка получателю.
-        </p>
-      </div>
-      <form class="tracking-form" onsubmit="return handleTracking(event)">
-        <input
-          type="text"
-          id="tracking-number"
-          placeholder="Введите номер отслеживания (например, AE123456789IL)"
-          required
-        />
-        <button type="submit" class="btn btn-primary">Отследить посылку</button>
-        <p class="tracking-hint">Пример трек-номера: AE123456789IL</p>
-        <div id="tracking-result" class="tracking-result" aria-live="polite"></div>
-      </form>
-    </div>
-  </section>
+  
 
 
   <!-- Визуализация маршрутов и сроков -->
@@ -1545,19 +1544,6 @@ body { color:#25364b; line-height:1.65; }
       event.preventDefault();
       const button = event.submitter || event.currentTarget.querySelector('button[type="submit"]');
       return runTracking("tracking-number", "tracking-result", "ru", button);
-    }
-
-    function submitHeaderTracking(event, lang) {
-      event.preventDefault();
-      const headerInput = document.getElementById("header-tracking-number");
-      const targetInputId = lang === "en" ? "trackingNumber" : "tracking-number";
-      const resultId = lang === "en" ? "trackMessage" : "tracking-result";
-      const targetInput = document.getElementById(targetInputId);
-      const result = document.getElementById(resultId);
-      const number = headerInput ? headerInput.value.trim() : "";
-      if (!number || !targetInput || !result) return false;
-      targetInput.value = number;
-      return runTracking(targetInputId, resultId, lang, event.submitter || event.currentTarget.querySelector('button[type="submit"]'));
     }
 
     async function runTracking(inputId, resultId, lang, button) {
