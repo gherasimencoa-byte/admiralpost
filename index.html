@@ -1288,6 +1288,7 @@
                 </label>
               </div>
 
+              <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden"><label>Leave blank<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
               <button type="submit" class="btn btn-primary">Отправить запрос</button>
               <div id="formStatus" class="form-status"></div>
             </form>
@@ -1348,6 +1349,7 @@
     </div>
   </footer>
 
+  <script src="./supabase-config.js"></script>
   <!-- Скрипты сайта -->
   <script>
     // Год в футере
@@ -1376,35 +1378,22 @@
       return false;
     }
 
-    // ====== Локальное хранение заявок (localStorage) ======
-
-    const STORAGE_KEY = "ae_orders";
-
-    function loadOrdersFromStorage() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? JSON.parse(raw) : [];
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function saveOrdersToStorage(orders) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
-    }
-
-    // Обработка формы ограничений
+    // Заявки отправляются в защищённую Supabase Edge Function. В localStorage PII не сохраняются.
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById("orderForm");
       const statusEl = document.getElementById("formStatus");
-      if (!form) return;
-
-      form.addEventListener("submit", (e) => {
+      if (!form || !statusEl) return;
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
         statusEl.textContent = "";
         statusEl.className = "form-status";
-
-        const formData = {
+        const cfg = window.ADMIRAL_SUPABASE_CONFIG || {};
+        if (!cfg.url || !cfg.publishableKey) {
+          statusEl.textContent = "Онлайн-форма временно не подключена. Пожалуйста, отправьте запрос через WhatsApp или напишите info@admiral-express.com.";
+          statusEl.classList.add("error");
+          return;
+        }
+        const payload = {
           country: form.country.value.trim(),
           weight: form.weight.value.trim(),
           type: form.type.value.trim(),
@@ -1412,36 +1401,34 @@
           phone: form.phone.value.trim(),
           email: form.email.value.trim(),
           message: form.message.value.trim(),
-          agree: form.agree.checked
+          agree: form.agree.checked,
+          website: (form.website?.value || ""),
+          language: "ru"
         };
-
-        if (!formData.country || !formData.weight || !formData.name || !formData.phone || !formData.email || !formData.agree) {
+        if (!payload.country || !payload.weight || !payload.name || !payload.phone || !payload.email || !payload.agree) {
           statusEl.textContent = "Проверьте, что все обязательные поля заполнены.";
           statusEl.classList.add("error");
           return;
         }
-
-        const orders = loadOrdersFromStorage();
-        const order = {
-          id: Date.now().toString(),
-          createdAt: new Date().toISOString(),
-          country: formData.country,
-          weight: formData.weight,
-          type: formData.type,
-          name: formData.name,
-          phone: formData.phone,
-          email: formData.email,
-          message: formData.message,
-          agree: formData.agree,
-          status: "new"
-        };
-        orders.push(order);
-        saveOrdersToStorage(orders);
-
-        statusEl.textContent = "Спасибо! Заявка сохранена. Оператор свяжется с вами.";
-        statusEl.classList.add("success");
-        form.reset();
-
+        const button = form.querySelector('button[type="submit"]');
+        if (button) button.disabled = true;
+        try {
+          const response = await fetch(cfg.url.replace(/\/$/, "") + "/functions/v1/submit-quote", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "apikey": cfg.publishableKey },
+            body: JSON.stringify(payload)
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.error || "Не удалось отправить заявку.");
+          statusEl.textContent = "Спасибо! Заявка отправлена. Оператор свяжется с вами.";
+          statusEl.classList.add("success");
+          form.reset();
+        } catch (error) {
+          statusEl.textContent = error.message || "Ошибка отправки. Пожалуйста, свяжитесь с нами через WhatsApp.";
+          statusEl.classList.add("error");
+        } finally {
+          if (button) button.disabled = false;
+        }
       });
     });
   </script>
