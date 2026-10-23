@@ -86,3 +86,7 @@ with check ((auth.jwt() -> 'app_metadata' ->> 'is_admin') = 'true');
 
 -- The Edge Function uses its server-side secret key to write quote requests and rate-limit records.
 -- Do not grant anon access to either table.
+
+-- Explicit grants for the trusted Edge Function role.
+grant insert on public.quote_requests to service_role;
+grant select, insert, update, delete on public.request_rate_limits to service_role;
