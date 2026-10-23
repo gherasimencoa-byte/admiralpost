@@ -1046,19 +1046,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
 </style>
 
 
-<style>
-/* Compact, functional parcel tracking in the main navigation */
-.header-tracking{display:flex;align-items:center;gap:5px;width:clamp(190px,20vw,255px);padding:4px 5px 4px 12px;border:1px solid #dce3ec;border-radius:999px;background:#fff;box-shadow:0 2px 8px rgba(13,43,82,.05);flex-shrink:0}
-.header-tracking:focus-within{border-color:#ff8a00;box-shadow:0 0 0 3px rgba(255,138,0,.12)}
-.header-tracking input{min-width:0;width:100%;padding:6px 0;border:0!important;outline:none!important;box-shadow:none!important;background:transparent!important;color:#14243a;font:inherit;font-size:13px;line-height:1.35}
-.header-tracking input::placeholder{color:#7b8796;opacity:1}
-.header-tracking button{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-height:32px;padding:0 12px;border:0;border-radius:999px;background:#ff8a00;color:#fff;font-size:12px;font-weight:800;cursor:pointer;transition:background .15s ease}
-.header-tracking button:hover{background:#e97800}
-.header-tracking button:disabled{opacity:.65;cursor:wait}
-@media(max-width:1100px){.header-tracking{width:210px}}
-@media(max-width:900px){.header-tracking{order:2;width:min(100%,340px);margin-inline-start:auto}.nav{order:3}}
-@media(max-width:600px){.header-tracking{order:2;width:100%;margin:8px 0 0}.header-tracking button{min-height:36px}}
-</style>
+
 </head>
 <body>
   <!-- כותרת האתר -->
@@ -1069,7 +1057,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
         <span class="logo-text">ADMIRAL POST<br><small style="font-size:10px;letter-spacing:1.2px;color:var(--color-muted)">INTERNATIONAL EXPRESS</small></span>
       </a>
       <nav class="nav">
-        <form class="header-tracking" id="headerTrackingForm" onsubmit="return submitHeaderTracking(event, 'he')" role="search" aria-label="מעקב מהיר אחר חבילה"><input id="header-tracking-number" type="text" placeholder="הזינו מספר מעקב" aria-label="הזינו מספר מעקב" autocomplete="off" required><button type="submit" aria-label="חיפוש" title="חיפוש"><span>←</span></button></form>
+        
         <a href="#services">השירותים שלנו</a>
         <a href="#how-it-works">איך זה עובד</a>
         <a href="#tariffs">תעריפים</a>
@@ -1213,6 +1201,31 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
     </div>
   </section>
 
+  <!-- Parcel tracking immediately below the shipping calculator -->
+  <section class="section section-tracking" id="tracking">
+    <div class="container tracking-inner">
+      <div class="tracking-text">
+        <h2>מעקב אחר חבילה מישראל</h2>
+        <p>
+          הזינו מספר מעקב של Admiral Post כדי לבדוק את סטטוס המשלוח:
+          קבלה, מיון, מעבר בינלאומי, מכס ומסירה לנמען.
+        </p>
+      </div>
+      <form class="tracking-form" onsubmit="return handleTracking(event)">
+        <input
+          type="text"
+          id="tracking-number"
+          placeholder="הזינו מספר מעקב (לדוגמה AE123456789IL)"
+          required
+        />
+        <button type="submit" class="btn btn-primary">מעקב אחר חבילה</button>
+        <p class="tracking-hint">דוגמה למספר מעקב: AE123456789IL</p>
+        <div id="tracking-result" class="tracking-result" aria-live="polite"></div>
+      </form>
+    </div>
+  </section>
+
+
   <!-- מסלולים וזמני משלוח -->
   <section class="section section-alt" id="delivery-visuals">
     <div class="container">
@@ -1244,28 +1257,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
   </section>
 
   <!-- מעקב משלוחים -->
-  <section class="section section-tracking" id="tracking">
-    <div class="container tracking-inner">
-      <div class="tracking-text">
-        <h2>מעקב אחר חבילה מישראל</h2>
-        <p>
-          הזינו מספר מעקב של Admiral Post כדי לבדוק את סטטוס המשלוח:
-          קבלה, מיון, מעבר בינלאומי, מכס ומסירה לנמען.
-        </p>
-      </div>
-      <form class="tracking-form" onsubmit="return handleTracking(event)">
-        <input
-          type="text"
-          id="tracking-number"
-          placeholder="הזינו מספר מעקב (לדוגמה AE123456789IL)"
-          required
-        />
-        <button type="submit" class="btn btn-primary">מעקב אחר חבילה</button>
-        <p class="tracking-hint">דוגמה למספר מעקב: AE123456789IL</p>
-        <div id="tracking-result" class="tracking-result" aria-live="polite"></div>
-      </form>
-    </div>
-  </section>
+  
 
   <!-- יצירת קשר -->
   <section class="section section-alt" id="contacts">
@@ -1589,8 +1581,6 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
       const number = headerInput ? headerInput.value.trim() : "";
       if (!number || !targetInput || !result) return false;
       targetInput.value = number;
-      const trackingSection = document.getElementById("tracking");
-      if (trackingSection) trackingSection.scrollIntoView({ behavior: "smooth", block: "start" });
       return runTracking(targetInputId, resultId, lang, event.submitter || event.currentTarget.querySelector('button[type="submit"]'));
     }
 
