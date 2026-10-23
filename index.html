@@ -1514,17 +1514,24 @@
   }
   country.addEventListener('change', calculate);
   weight.addEventListener('input', calculate);
-  quoteButton.addEventListener('click', function(){
+  quoteButton.addEventListener('click', function(event){
+    event.preventDefault();
     const countryField = document.getElementById('country');
     const weightField = document.getElementById('weight');
     const typeField = document.getElementById('type');
     const messageField = document.getElementById('message');
-    if(countryField) countryField.value = this.dataset.country || tariffs[country.value].name;
+    const form = document.getElementById('orderForm');
+    if(countryField) countryField.value = tariffs[country.value].name;
     if(weightField) weightField.value = weight.value;
-    if(typeField && !typeField.value) typeField.value = 'Морская доставка';
+    if(typeField) typeField.value = 'Морская доставка';
     if(messageField) {
       const note = 'Расчёт морской доставки: ' + tariffs[country.value].name + ', вес ' + weight.value + ' кг, ориентировочная стоимость ' + price.textContent + '.';
-      if (!messageField.value.includes(note)) messageField.value = [messageField.value, note].filter(Boolean).join('\n');
+      if (!messageField.value.includes(note)) messageField.value = [messageField.value, note].filter(Boolean).join('\\n');
+    }
+    const target = form || document.getElementById('restrictions');
+    if (target) {
+      target.scrollIntoView({behavior:'smooth', block:'start'});
+      if (countryField) window.setTimeout(() => countryField.focus({preventScroll:true}), 450);
     }
   });
   calculate();
