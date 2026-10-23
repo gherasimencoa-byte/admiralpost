@@ -957,6 +957,51 @@ body { color:#25364b; line-height:1.65; }
  #restrictions .grid-2 .card h3 { font-size:18px; line-height:1.35; }
  #restrictions .grid-2 .card p { font-size:13px; line-height:1.6; }
 }
+/* Mobile layout corrections: balanced hero width and compact navigation */
+@media(max-width:600px) {
+  .header { position:relative; top:auto; }
+  .header-inner {
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px 10px;
+    padding:10px 0 8px;
+    min-height:0;
+  }
+  .header .logo { min-width:0; flex:1 1 auto; gap:8px; }
+  .header .logo-image { width:40px; height:40px; flex:0 0 40px; }
+  .header .logo-text { font-size:15px; line-height:1.05; }
+  .header .logo-text small { font-size:8px!important; letter-spacing:.8px!important; }
+  .header-actions { flex:0 0 auto; gap:6px; }
+  .lang-switch { min-width:34px; height:34px; }
+  .header .nav {
+    order:3;
+    display:flex;
+    flex:0 0 100%;
+    width:100%;
+    min-width:0;
+    flex-wrap:nowrap;
+    justify-content:flex-start;
+    gap:18px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:7px 0 5px;
+    white-space:nowrap;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .header .nav::-webkit-scrollbar { display:none; }
+  .header .nav a { flex:0 0 auto; font-size:13px; }
+  .hero { padding:32px 0 36px; background-position:58% center; }
+  .hero-inner { display:grid; grid-template-columns:minmax(0,1fr); gap:0; width:100%; }
+  .hero-content { width:100%; min-width:0; max-width:none; }
+  .hero-content h1 { max-width:none; width:100%; font-size:clamp(29px,7.2vw,36px); line-height:1.1; letter-spacing:-.55px; margin:0 0 16px; overflow-wrap:normal; }
+  .hero-content p { max-width:none; width:100%; font-size:16px; line-height:1.6; margin:0 0 20px; }
+  .hero-actions { display:grid; grid-template-columns:minmax(0,1fr); width:100%; gap:10px; margin-bottom:16px; }
+  .hero-actions .btn { box-sizing:border-box; width:100%; min-width:0; min-height:54px; padding:14px 18px; justify-content:center; text-align:center; white-space:normal; line-height:1.35; }
+  .hero-benefits { display:grid; grid-template-columns:minmax(0,1fr); gap:8px; margin-top:14px; }
+}
 @media(prefers-reduced-motion:reduce) {
  html { scroll-behavior:auto; }
  *,*::before,*::after { transition:none!important; animation:none!important; }
