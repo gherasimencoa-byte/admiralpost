@@ -1,1 +1,7 @@
-Upload all files in this folder to the ROOT of the GitHub Pages repository, replacing index.html and index-en.html. Keep the existing CNAME file in the repository. New pages are delivery-*.html. Upload robots.txt and sitemap.xml to the root too. After deployment, submit https://www.admiral-post.com/sitemap.xml in Google Search Console. Verify that www.admiral-post.com is the canonical domain before publishing.
+ADMIRAL POST — UNIQUE DESTINATION PAGES
+
+This release contains original Russian and English destination-page copy for Russia, Belarus, Ukraine, Moldova, Georgia, Europe, and the USA/Canada. The copy is newly written for Admiral Post and is not copied verbatim from ALILPOST.
+
+Sea-shipping estimate: 21–35 days. This is an indicative range, not a guaranteed delivery date; actual transit depends on route schedules, consolidation, customs processing and destination-country delivery. Confirm route availability and the quote before accepting a shipment.
+
+Upload the extracted files to the repository root. Keep CNAME unchanged.
