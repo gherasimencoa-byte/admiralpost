@@ -854,6 +854,21 @@
 .whatsapp-hero{background:#20b95a!important;border-color:#20b95a!important;color:#fff!important}
 .whatsapp-hero:hover{background:#159447!important}
 @media(max-width:600px){.whatsapp-float{right:14px;bottom:14px;padding:12px;border-radius:50%;width:56px;height:56px;justify-content:center}.whatsapp-float .wa-label{display:none}.whatsapp-float svg{width:28px;height:28px}}
+
+/* Морской тарифный калькулятор */
+.sea-calculator{background:#fff;border:1px solid #e4eaf1;border-radius:20px;padding:clamp(20px,4vw,34px);box-shadow:0 10px 34px rgba(13,43,82,.07);max-width:900px;margin:28px auto}
+.sea-calculator .calc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:22px}
+.sea-calculator label{display:block;font-weight:700;font-size:14px;color:#0d2b52;margin-bottom:7px}
+.sea-calculator select,.sea-calculator input{width:100%;padding:13px 14px;border:1px solid #d6dee8;border-radius:10px;background:#fff;color:#14243a;font:inherit}
+.sea-calculator .calc-hint{font-size:12px;color:#64748b;margin-top:6px}
+.sea-calculator .calc-result{margin-top:22px;padding:20px;border-radius:14px;background:#f3f6fa;border:1px solid #e3eaf2}
+.sea-calculator .calc-price{font-size:clamp(30px,5vw,42px);line-height:1.15;font-weight:850;color:#0d2b52;margin:6px 0}
+.sea-calculator .calc-price span{color:#ff8a00}
+.sea-calculator .calc-warning{font-size:13px;color:#5b6b7a;margin-top:8px}
+.sea-calculator .calc-cta{display:inline-flex;align-items:center;justify-content:center;margin-top:15px;padding:12px 18px;border-radius:10px;background:#ff8a00;color:#fff;text-decoration:none;font-weight:800;border:0;cursor:pointer}
+.sea-calculator .calc-error{color:#a52d2d;font-weight:700;margin-top:10px}
+@media(max-width:600px){.sea-calculator .calc-grid{grid-template-columns:1fr}.sea-calculator{padding:18px}}
+
 </style>
 <link rel="alternate" hreflang="ru" href="https://www.admiral-post.com/" /><link rel="alternate" hreflang="en" href="https://www.admiral-post.com/index-en.html" /><link rel="alternate" hreflang="x-default" href="https://www.admiral-post.com/" />
 <style>.destination-detail{display:block;color:#ff8a00;font-size:12px;font-weight:700;text-decoration:none;margin-top:8px}.destination-detail:hover{text-decoration:underline}.destination-page{max-width:900px;margin:0 auto}.destination-page h1{color:#0d2b52;font-size:clamp(30px,4vw,44px);line-height:1.15}.destination-page h2{color:#0d2b52;margin-top:32px}.destination-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.breadcrumb{font-size:13px;color:#5b6b7a;margin-bottom:18px}.breadcrumb a{color:#0d2b52}</style>
@@ -967,40 +982,44 @@
     </div>
   </section>
 
-  <!-- Тарифы -->
+
+  <!-- Калькулятор морской доставки -->
   <section class="section" id="tariffs">
     <div class="container">
-      <h2 class="section-title">Примерные тарифы на отправку из Израиля</h2>
-      <p class="section-subtitle">
-        Ниже приведены примерные тарифы для популярных направлений. Точные цены зависят от веса, страны назначения и типа посылки.
-      </p>
-      <div class="tariff-grid">
-        <div class="tariff-card">
-          <h3>Израиль → Россия / СНГ</h3>
-          <p class="tariff-price">от 35 $</p>
-          <ul>
-            <li>Отправка посылок и бандеролей из Израиля в Россию, Молдову, Грузию и другие страны СНГ</li>
-            <li>Срок морской доставки: в среднем 21–35 дней</li>
-            <li>Формат: до двери или до пунктов выдачи партнёров</li>
-          </ul>
+      <h2 class="section-title">Рассчитайте стоимость морской доставки</h2>
+      <p class="section-subtitle">Из Израиля в выбранную страну. Тарифы указаны в израильских шекелях (₪).</p>
+      <div class="sea-calculator">
+        <div>
+          <h3 style="margin:0;color:#0d2b52;font-size:24px">Морской тарифный калькулятор</h3>
+          <p class="muted" style="margin:6px 0 0">Выберите направление и укажите вес посылки.</p>
         </div>
-        <div class="tariff-card">
-          <h3>Израиль → Украина</h3>
-          <p class="tariff-price">от 39 $</p>
-          <ul>
-            <li>Посылки, почта и личные вещи из Израиля в Украину</li>
-            <li>Оптимальные маршруты и трекинг на каждом этапе</li>
-            <li>Поддержка на русском и украинском языках</li>
-          </ul>
+        <div class="calc-grid">
+          <div>
+            <label for="seaCountry">Страна назначения</label>
+            <select id="seaCountry">
+              <option value="russia">Россия</option>
+              <option value="belarus">Беларусь</option>
+              <option value="usa">США</option>
+              <option value="canada">Канада</option>
+              <option value="ukraine">Украина</option>
+              <option value="moldova">Молдова</option>
+              <option value="georgia">Грузия</option>
+              <option value="europe">Европа — тариф Европа 1</option>
+            </select>
+          </div>
+          <div>
+            <label for="seaWeight">Вес посылки, кг</label>
+            <input id="seaWeight" type="number" min="0.1" step="0.1" value="1" inputmode="decimal" placeholder="Например, 5">
+            <div class="calc-hint" id="seaLimit">Максимальный вес: 20 кг</div>
+          </div>
         </div>
-        <div class="tariff-card">
-          <h3>Израиль → Европа / США / Канада</h3>
-          <p class="tariff-price">от 45 $</p>
-          <ul>
-            <li>Международная доставка из Израиля в Европу, США и Канаду</li>
-            <li>Срок морской доставки: в среднем 21–35 дней</li>
-            <li>Подходит для личных посылок и небольшого e-commerce</li>
-          </ul>
+        <div class="calc-result" aria-live="polite">
+          <div class="muted">Предварительная стоимость</div>
+          <div class="calc-price" id="seaPrice">₪154</div>
+          <div id="seaFormula" class="muted">Россия: первые 2 кг — ₪154</div>
+          <div class="calc-warning" id="seaRounding">Вес для расчёта округляется вверх до полного килограмма.</div>
+          <div id="seaError" class="calc-error" role="alert" hidden></div>
+          <a class="calc-cta" id="seaQuoteButton" href="#order">Оформить заявку</a>
         </div>
       </div>
     </div>
@@ -1434,5 +1453,82 @@
   </script>
 
 <a class="whatsapp-float" href="https://wa.me/972522323554" target="_blank" rel="noopener noreferrer" aria-label="Написать в WhatsApp"><span class="wa-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16.04 3.2A12.72 12.72 0 0 0 5.1 22.42L3.4 28.6l6.34-1.66A12.7 12.7 0 1 0 16.04 3.2Zm0 23.1a10.3 10.3 0 0 1-5.25-1.43l-.38-.23-3.76.98 1-3.66-.25-.4a10.34 10.34 0 1 1 8.64 4.74Zm5.67-7.74c-.31-.16-1.84-.91-2.13-1.02-.29-.1-.5-.16-.71.16-.21.31-.81 1.02-.99 1.23-.18.2-.36.23-.67.08-.31-.16-1.31-.49-2.5-1.55-.92-.82-1.54-1.83-1.72-2.14-.18-.31-.02-.48.14-.63.14-.14.31-.36.46-.54.16-.18.21-.31.31-.52.1-.2.05-.39-.03-.54-.08-.15-.71-1.7-.97-2.33-.25-.6-.51-.52-.71-.53h-.61c-.21 0-.54.08-.82.39-.28.31-1.08 1.06-1.08 2.59s1.11 3 1.26 3.21c.16.2 2.18 3.33 5.28 4.67.74.32 1.32.51 1.77.65.74.23 1.41.2 1.94.12.59-.09 1.84-.75 2.1-1.48.26-.72.26-1.34.18-1.48-.08-.13-.28-.21-.59-.36Z"/></svg></span><span class="wa-label">Написать в WhatsApp</span></a>
+
+<script>
+(function(){
+  const country = document.getElementById('seaCountry');
+  const weight = document.getElementById('seaWeight');
+  const price = document.getElementById('seaPrice');
+  const formula = document.getElementById('seaFormula');
+  const limitText = document.getElementById('seaLimit');
+  const error = document.getElementById('seaError');
+  const quoteButton = document.getElementById('seaQuoteButton');
+  if (!country || !weight || !price) return;
+  const tariffs = {
+    russia:  {name:'Россия', limit:20, base:154, included:2, extra:29},
+    belarus: {name:'Беларусь', limit:30, base:154, included:2, extra:29},
+    usa:     {name:'США', limit:20, base:199, included:1, extra:40},
+    canada:  {name:'Канада', limit:30, base:199, included:1, extra:30},
+    ukraine: {name:'Украина', limit:50, base:156, included:3, extra:13},
+    moldova: {name:'Молдова', limit:30, base:129, included:2, extra:8},
+    georgia: {name:'Грузия', limit:30, base:200, included:15, extra:10},
+    europe:  {name:'Европа — тариф Европа 1', limit:30, base:149, included:2, extra:25}
+  };
+  const money = n => '₪' + Math.round(n).toLocaleString('ru-RU');
+  function calculate(){
+    const t = tariffs[country.value];
+    const raw = Number(weight.value);
+    limitText.textContent = 'Максимальный вес: ' + t.limit + ' кг';
+    weight.max = String(t.limit);
+    error.hidden = true;
+    quoteButton.style.pointerEvents = '';
+    quoteButton.style.opacity = '';
+    if (!Number.isFinite(raw) || raw <= 0) {
+      price.textContent = '—';
+      formula.textContent = 'Введите вес больше 0 кг.';
+      error.hidden = true;
+      quoteButton.style.pointerEvents = 'none';
+      quoteButton.style.opacity = '.5';
+      return;
+    }
+    if (raw > t.limit) {
+      price.textContent = '—';
+      formula.textContent = 'Для этого направления превышен лимит веса.';
+      error.textContent = 'Максимальный вес для направления «' + t.name + '» — ' + t.limit + ' кг.';
+      error.hidden = false;
+      quoteButton.style.pointerEvents = 'none';
+      quoteButton.style.opacity = '.5';
+      return;
+    }
+    const billed = Math.ceil(raw);
+    const total = t.base + Math.max(0, billed - t.included) * t.extra;
+    price.textContent = money(total);
+    formula.textContent = t.name + ': ' + (billed <= t.included
+      ? 'до ' + t.included + ' кг — ' + money(t.base)
+      : money(t.base) + ' за первые ' + t.included + ' кг + ' + (billed-t.included) + ' кг × ' + money(t.extra)) + '.';
+    quoteButton.href = '#order';
+    quoteButton.dataset.country = t.name;
+    quoteButton.dataset.weight = String(raw);
+    quoteButton.dataset.price = String(total);
+  }
+  country.addEventListener('change', calculate);
+  weight.addEventListener('input', calculate);
+  quoteButton.addEventListener('click', function(){
+    const countryField = document.getElementById('country');
+    const weightField = document.getElementById('weight');
+    const typeField = document.getElementById('type');
+    const messageField = document.getElementById('message');
+    if(countryField) countryField.value = this.dataset.country || tariffs[country.value].name;
+    if(weightField) weightField.value = weight.value;
+    if(typeField && !typeField.value) typeField.value = 'Морская доставка';
+    if(messageField) {
+      const note = 'Расчёт морской доставки: ' + tariffs[country.value].name + ', вес ' + weight.value + ' кг, ориентировочная стоимость ' + price.textContent + '.';
+      if (!messageField.value.includes(note)) messageField.value = [messageField.value, note].filter(Boolean).join('\n');
+    }
+  });
+  calculate();
+})();
+</script>
+
 </body>
 </html>
