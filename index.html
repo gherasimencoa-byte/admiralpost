@@ -1807,12 +1807,14 @@ body { color:#25364b; line-height:1.65; }
     error.hidden = true;
     quoteButton.style.pointerEvents = '';
     quoteButton.style.opacity = '';
+    quoteButton.removeAttribute('aria-disabled');
     if (!Number.isFinite(raw) || raw <= 0) {
       price.textContent = '—';
       formula.textContent = 'Введите вес больше 0 кг.';
       error.hidden = true;
       quoteButton.style.pointerEvents = 'none';
       quoteButton.style.opacity = '.5';
+      quoteButton.setAttribute('aria-disabled', 'true');
       return;
     }
     if (raw > t.limit) {
@@ -1822,6 +1824,7 @@ body { color:#25364b; line-height:1.65; }
       error.hidden = false;
       quoteButton.style.pointerEvents = 'none';
       quoteButton.style.opacity = '.5';
+      quoteButton.setAttribute('aria-disabled', 'true');
       return;
     }
     const billed = Math.ceil(raw);
@@ -1839,6 +1842,7 @@ body { color:#25364b; line-height:1.65; }
   weight.addEventListener('input', calculate);
   quoteButton.addEventListener('click', function(event){
     event.preventDefault();
+    if (quoteButton.getAttribute('aria-disabled') === 'true') return;
     const countryField = document.getElementById('country');
     const weightField = document.getElementById('weight');
     const typeField = document.getElementById('type');
@@ -1849,7 +1853,9 @@ body { color:#25364b; line-height:1.65; }
     if(typeField) typeField.value = 'Морская доставка';
     if(messageField) {
       const note = 'Расчёт морской доставки: ' + tariffs[country.value].name + ', вес ' + weight.value + ' кг, ориентировочная стоимость ' + price.textContent + '.';
-      if (!messageField.value.includes(note)) messageField.value = [messageField.value, note].filter(Boolean).join('\\n');
+      const previousQuote = /^Расчёт морской доставки:.*(?:\\n|$)/gm;
+      const cleanMessage = messageField.value.replace(previousQuote, '').trim();
+      messageField.value = [cleanMessage, note].filter(Boolean).join('\u005c\u005cn');
     }
     const target = form || document.getElementById('restrictions');
     if (target) {
