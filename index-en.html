@@ -83,6 +83,49 @@
 .hero-tracking-result{flex:1 0 100%;margin:0 0 0 32px;font-size:13px;color:#14243a;overflow-wrap:anywhere}
 @media(max-width:600px){.hero-tracking{gap:5px;padding:6px 7px 9px 11px}.hero-tracking button{padding:10px 13px;min-height:44px;font-size:15px}.hero-tracking-hint,.hero-tracking-result{margin-left:30px}}
 </style>
+
+<style id="hero-button-attention">
+/* A short, staggered sheen every eight seconds, clipped inside each CTA. */
+.hero-actions > .btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --cta-sheen: rgba(255, 255, 255, .28);
+}
+.hero-actions > .btn.btn-outline,
+.hero-actions > .btn.alt {
+  --cta-sheen: rgba(255, 138, 0, .12);
+}
+.hero-actions > .btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 25%, var(--cta-sheen) 50%, transparent 75%);
+  transform: translateX(-110%);
+  opacity: 0;
+  animation: hero-cta-sheen 8s ease-in-out infinite;
+  animation-delay: 1s;
+}
+.hero-actions > .btn:nth-child(2)::after { animation-delay: 2.4s; }
+.hero-actions > .btn:nth-child(3)::after { animation-delay: 3.8s; }
+@keyframes hero-cta-sheen {
+  0% { transform: translateX(-110%); opacity: 0; }
+  2% { opacity: 1; }
+  14% { transform: translateX(110%); opacity: 1; }
+  16%, 100% { transform: translateX(110%); opacity: 0; }
+}
+.hero-actions > .btn:hover::after,
+.hero-actions > .btn:focus-visible::after {
+  animation: none;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-actions > .btn::after { animation: none; opacity: 0; }
+}
+</style>
+
 </head><body>
 <header class="header"><div class="container head"><a class="brand" href="#top" aria-label="Admiral Post International Express"><img src="logo-admiral-post.png" alt="Admiral Post logo" width="58" height="58"><span>ADMIRAL POST<small>INTERNATIONAL EXPRESS</small></span></a><nav><a href="#services">Services</a><a href="#how">How it works</a><a href="#rates">Rates</a><a href="#quote">Get a quote</a><a href="#contacts">Contact</a></nav><div class="langs"><a href="index.html">RU</a><a class="active" href="index-en.html">EN</a><a href="index-he.html">HE</a></div></div></header>
 <main id="top"><section class="hero" id="top"><div class="container"><div><h1>International parcel delivery from Israel</h1><p>Reliable. Fast. To your loved ones. Send parcels, personal belongings, gifts and documents to supported destinations, with help at every step.</p><div class="hero-actions"><a class="btn" href="#quote">Request a delivery →</a><a class="btn alt" href="#rates">Calculate price</a><a class="btn whatsapp-hero" href="https://wa.me/972522323554" target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a></div><form class="hero-tracking" id="trackForm" onsubmit="event.preventDefault(); return runTracking('trackingNumber', 'trackMessage', 'en', event.submitter || event.currentTarget.querySelector('button[type=submit]'));" role="search" aria-label="Quick parcel tracking">
