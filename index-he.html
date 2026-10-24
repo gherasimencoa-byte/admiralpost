@@ -1063,6 +1063,10 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
 .hero-tracking-result{min-width:0;max-width:100%;overflow-wrap:anywhere}
 @media(max-width:480px){.hero-tracking{gap:8px;padding:10px 12px}.hero-tracking input{flex:1 1 calc(100% - 50px);font-size:16px}.hero-tracking button{flex:1 0 100%;width:100%;min-height:44px;font-size:15px;padding:10px 13px}.hero-tracking-hint,.hero-tracking-result{margin-inline-start:0}}
 @media(min-width:481px) and (max-width:600px){.hero-tracking{gap:5px;padding:6px 7px 9px 11px}.hero-tracking button{padding:10px 13px;min-height:44px;font-size:15px}.hero-tracking-hint,.hero-tracking-result{margin-inline-start:30px}}
+
+/* Keep tracking help and API messages within the card on narrow screens */
+.hero-tracking{box-sizing:border-box;max-width:100%;min-width:0}
+.hero-tracking-hint,.hero-tracking-result{box-sizing:border-box;flex:1 1 100%;width:100%;min-width:0;max-width:100%;margin-inline-start:0!important;margin-inline-end:0;white-space:normal;overflow-wrap:anywhere;word-break:normal;line-height:1.45}
 </style>
 </head>
 <body>
