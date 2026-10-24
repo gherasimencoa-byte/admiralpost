@@ -848,6 +848,41 @@
 .destination-network{margin-top:18px;padding:14px;border-radius:14px;background:linear-gradient(135deg,#f4f6f9,#fff);border:1px solid #e5ebf2;text-align:center}.origin-node{display:inline-block;background:#0d2b52;color:#fff;border-radius:99px;padding:8px 16px;font-weight:750;font-size:13px}.network-lines{color:#ff8a00;font-size:24px;line-height:1.4;letter-spacing:2px}.destination-nodes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.destination-nodes span{background:#fff;border:1px solid #e7edf3;border-radius:9px;padding:8px 4px;font-size:11px;font-weight:650;color:#0d2b52}@media(max-width:600px){.destination-nodes{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 /* WhatsApp contact buttons */
+/* Gentle WhatsApp attention cue: brief pulse followed by a quiet pause. */
+.whatsapp-float::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border: 2px solid #20b95a;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  animation: whatsapp-attention 6s ease-out infinite;
+}
+@keyframes whatsapp-attention {
+  0% { transform: scale(1); opacity: 0; }
+  4% { transform: scale(1); opacity: .5; }
+  24% { transform: scale(1.12, 1.3); opacity: 0; }
+  100% { transform: scale(1.12, 1.3); opacity: 0; }
+}
+.whatsapp-float:hover::before,
+.whatsapp-float:focus-visible::before {
+  animation: none;
+  opacity: 0;
+}
+@media (max-width: 600px) {
+  @keyframes whatsapp-attention {
+    0% { transform: scale(1); opacity: 0; }
+    4% { transform: scale(1); opacity: .5; }
+    24%, 100% { transform: scale(1.3); opacity: 0; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .whatsapp-float::before { animation: none; }
+  .whatsapp-float { transition: none; }
+  .whatsapp-float:hover { transform: none; }
+}
+
 .whatsapp-float{position:fixed;right:22px;bottom:22px;z-index:9999;display:flex;align-items:center;gap:10px;padding:13px 18px;border-radius:999px;background:#20b95a;color:#fff!important;text-decoration:none!important;font-weight:750;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.22);border:2px solid #fff;transition:transform .18s ease,box-shadow .18s ease}
 .whatsapp-float:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.25)}
 .whatsapp-float svg{width:25px;height:25px;flex:0 0 25px;fill:currentColor}
