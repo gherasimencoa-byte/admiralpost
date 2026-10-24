@@ -1027,14 +1027,18 @@ body { color:#25364b; line-height:1.65; }
 <style>
 .hero-tracking{display:flex;align-items:center;gap:8px;position:relative;width:min(100%,560px);margin:18px 0 14px;padding:7px 8px 7px 15px;border:1px solid #dce3ec;border-radius:15px;background:rgba(255,255,255,.96);box-shadow:0 8px 24px rgba(13,43,82,.08);color:#14243a;flex-wrap:wrap}
 .hero-tracking-icon{font-size:24px;line-height:1;color:#ff8a00;flex:0 0 auto}
-.hero-tracking input{flex:1 1 180px;min-width:0;width:100%;border:0!important;outline:none!important;box-shadow:none!important;background:transparent!important;padding:10px 4px;color:#14243a;font:inherit;font-size:15px}
+.hero-tracking input{flex:1 1 180px;direction:ltr;text-align:start;min-width:0;width:100%;border:0!important;outline:none!important;box-shadow:none!important;background:transparent!important;padding:10px 4px;color:#14243a;font:inherit;font-size:15px}
 .hero-tracking input::placeholder{color:#7b8796;opacity:1}
 .hero-tracking button{flex:0 0 auto;border:1px solid #ff8a00;border-radius:10px;background:#ff8a00;color:#fff;font:inherit;font-size:16px;font-weight:500;padding:12px 20px;min-height:46px;cursor:pointer;transition:background .15s ease}
 .hero-tracking button:hover{background:#e97800}
 .hero-tracking button:disabled{opacity:.65;cursor:wait}
-.hero-tracking-hint{flex:1 0 100%;margin:0 0 0 32px;font-size:12px;line-height:1.4;color:#64748b}
-.hero-tracking-result{flex:1 0 100%;margin:0 0 0 32px;font-size:13px;color:#14243a;overflow-wrap:anywhere}
-@media(max-width:600px){.hero-tracking{gap:5px;padding:6px 7px 9px 11px}.hero-tracking button{padding:10px 13px;min-height:44px;font-size:15px}.hero-tracking-hint,.hero-tracking-result{margin-left:30px}}
+.hero-tracking-hint{flex:1 0 100%;margin:0;margin-inline-start:32px;font-size:12px;line-height:1.4;color:#64748b}
+.hero-tracking-result{flex:1 0 100%;margin:0;margin-inline-start:32px;font-size:13px;color:#14243a;overflow-wrap:anywhere}
+.hero-tracking:focus-within{border-color:#ff8a00;box-shadow:0 0 0 3px rgba(255,138,0,.18)}
+.hero-tracking button:focus-visible{outline:3px solid #0d2b52;outline-offset:2px}
+.hero-tracking-result{min-width:0;max-width:100%;overflow-wrap:anywhere}
+@media(max-width:480px){.hero-tracking{gap:8px;padding:10px 12px}.hero-tracking input{flex:1 1 calc(100% - 50px);font-size:16px}.hero-tracking button{flex:1 0 100%;width:100%;min-height:44px;font-size:15px;padding:10px 13px}.hero-tracking-hint,.hero-tracking-result{margin-inline-start:0}}
+@media(min-width:481px) and (max-width:600px){.hero-tracking{gap:5px;padding:6px 7px 9px 11px}.hero-tracking button{padding:10px 13px;min-height:44px;font-size:15px}.hero-tracking-hint,.hero-tracking-result{margin-inline-start:30px}}
 </style>
 </head>
 <body>
@@ -1074,7 +1078,7 @@ body { color:#25364b; line-height:1.65; }
           <a href="#tariffs" class="btn btn-outline">Рассчитать стоимость</a>
           <a class="btn whatsapp-hero" href="https://wa.me/972522323554" target="_blank" rel="noopener noreferrer">WhatsApp</a>
         </div>
-        <form class="hero-tracking" id="heroTrackForm" onsubmit="event.preventDefault(); return runTracking('tracking-number', 'tracking-result', 'ru', event.submitter || event.currentTarget.querySelector('button[type=submit]'));" role="search" aria-label="Быстрый поиск посылки">
+        <form class="hero-tracking" id="tracking" onsubmit="event.preventDefault(); return runTracking('tracking-number', 'tracking-result', 'ru', event.submitter || event.currentTarget.querySelector('button[type=submit]'));" role="search" aria-label="Быстрый поиск посылки">
           <span class="hero-tracking-icon" aria-hidden="true">⌕</span>
           <input type="text" id="tracking-number" placeholder="Введите трек-номер" aria-label="Введите трек-номер" autocomplete="off" required>
           <button type="submit">Отследить</button>
