@@ -1769,6 +1769,7 @@ body { color:#25364b; line-height:1.65; }
         const button = form.querySelector('button[type="submit"]');
         if (button) button.disabled = true;
         try {
+          const session=customerDb?(await customerDb.auth.getSession()).data.session:null;
           const response = await fetch(cfg.url.replace(/\/$/, "") + "/functions/v1/submit-quote", {
             method: "POST",
             headers: { "Content-Type": "application/json", "apikey": cfg.publishableKey, ...(session?.access_token?{"Authorization":"Bearer "+session.access_token}:{}) },
