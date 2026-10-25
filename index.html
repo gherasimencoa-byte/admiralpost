@@ -1726,6 +1726,19 @@ body { color:#25364b; line-height:1.65; }
       const form = document.getElementById("orderForm");
       const statusEl = document.getElementById("formStatus");
       if (!form || !statusEl) return;
+      // Prefill contact details from the signed-in customer's own profile.
+      const customerCfg=window.ADMIRAL_SUPABASE_CONFIG||{};
+      let customerDb=null;
+      if(window.supabase&&customerCfg.url&&customerCfg.publishableKey){
+        customerDb=window.supabase.createClient(customerCfg.url,customerCfg.publishableKey);
+        customerDb.auth.getUser().then(async ({data:{user}})=>{
+          if(!user)return;
+          if(user.email)form.email.value=user.email;
+          const {data:profile}=await customerDb.from('customer_profiles').select('full_name,phone').eq('user_id',user.id).maybeSingle();
+          if(profile?.full_name)form.name.value=profile.full_name;
+          if(profile?.phone)form.phone.value=profile.phone;
+        }).catch(()=>{});
+      }
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         statusEl.textContent = "";
@@ -1758,7 +1771,7 @@ body { color:#25364b; line-height:1.65; }
         try {
           const response = await fetch(cfg.url.replace(/\/$/, "") + "/functions/v1/submit-quote", {
             method: "POST",
-            headers: { "Content-Type": "application/json", "apikey": cfg.publishableKey },
+            headers: { "Content-Type": "application/json", "apikey": cfg.publishableKey, ...(session?.access_token?{"Authorization":"Bearer "+session.access_token}:{}) },
             body: JSON.stringify(payload)
           });
           const result = await response.json().catch(() => ({}));
