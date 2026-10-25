@@ -1473,6 +1473,11 @@ body { color:#25364b; line-height:1.65; }
             </p>
 
             <form id="orderForm" class="form">
+              <div class="form-group" id="savedAddressGroup" hidden>
+                <label for="savedPickupAddress">Адрес забора посылки</label>
+                <select id="savedPickupAddress"><option value="">Не выбирать сохранённый адрес</option></select>
+                <small>Адрес из личного кабинета будет передан оператору вместе с заявкой.</small>
+              </div>
               <div class="form-group">
                 <label for="country">Страна назначения *</label>
                 <select id="country" name="country" required>
@@ -1738,6 +1743,18 @@ body { color:#25364b; line-height:1.65; }
           const {data:profile}=await customerDb.from('customer_profiles').select('full_name,phone').eq('user_id',user.id).maybeSingle();
           if(profile?.full_name)form.name.value=profile.full_name;
           if(profile?.phone)form.phone.value=profile.phone;
+          const {data:addresses,error:addressError}=await customerDb.from('customer_addresses').select('id,label,address_text,country,region,city,street,house_number').eq('user_id',user.id).order('created_at',{ascending:false});
+          if(!addressError&&addresses?.length){
+            const select=document.getElementById('savedPickupAddress');
+            for(const address of addresses){
+              const option=document.createElement('option');
+              const structured=[address.country,address.region,address.city,[address.street,address.house_number].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+              option.value=structured||address.address_text||'';
+              option.textContent=(address.label||'Адрес')+' — '+option.value;
+              if(option.value)select.appendChild(option);
+            }
+            if(select.options.length>1)document.getElementById('savedAddressGroup').hidden=false;
+          }
         }).catch(()=>{});
       }
       form.addEventListener("submit", async (e) => {
@@ -1757,7 +1774,7 @@ body { color:#25364b; line-height:1.65; }
           name: form.name.value.trim(),
           phone: form.phone.value.trim(),
           email: form.email.value.trim(),
-          message: form.message.value.trim(),
+          message: [form.message.value.trim(),document.getElementById('savedPickupAddress')?.value?('Адрес забора: '+document.getElementById('savedPickupAddress').value):''].filter(Boolean).join('\n'),
           agree: form.agree.checked,
           website: (form.website?.value || ""),
           language: "ru"
