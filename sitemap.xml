@@ -3,22 +3,22 @@
   <url>
     <loc>https://www.admiral-post.com/</loc>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.admiral-post.com/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.admiral-post.com/index-en.html" />
-    <xhtml:link rel="alternate" hreflang="he" href="https://www.admiral-post.com/index-he.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.admiral-post.com/en/" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://www.admiral-post.com/he/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.admiral-post.com/" />
   </url>
   <url>
-    <loc>https://www.admiral-post.com/index-en.html</loc>
+    <loc>https://www.admiral-post.com/en/</loc>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.admiral-post.com/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.admiral-post.com/index-en.html" />
-    <xhtml:link rel="alternate" hreflang="he" href="https://www.admiral-post.com/index-he.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.admiral-post.com/en/" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://www.admiral-post.com/he/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.admiral-post.com/" />
   </url>
   <url>
-    <loc>https://www.admiral-post.com/index-he.html</loc>
+    <loc>https://www.admiral-post.com/he/</loc>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.admiral-post.com/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.admiral-post.com/index-en.html" />
-    <xhtml:link rel="alternate" hreflang="he" href="https://www.admiral-post.com/index-he.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.admiral-post.com/en/" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://www.admiral-post.com/he/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.admiral-post.com/" />
   </url>
   <url>
