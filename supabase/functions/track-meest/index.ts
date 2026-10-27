@@ -123,6 +123,13 @@ Deno.serve(async (req: Request) => {
       eventDetailDescr: item.eventDetailDescr && typeof item.eventDetailDescr === "object" ? item.eventDetailDescr : {},
     })).sort((a: { eventDateTime: string }, b: { eventDateTime: string }) => b.eventDateTime.localeCompare(a.eventDateTime));
 
+    // Diagnostic metadata only: do not log tracking IDs, event descriptions or personal details.
+    const firstItem = trackingBody.result[0];
+    const firstEventFields = firstItem && typeof firstItem === "object" && !Array.isArray(firstItem)
+      ? Object.keys(firstItem).slice(0, 24) : [];
+    console.info("Meest tracking summary", JSON.stringify({ eventCount: events.length, firstEventFields }));
+    if (!events.length) return reply({ error: "No tracking events were found for this number." }, 404, origin);
+
     return reply({ status: "ok", parcelNumber: events[0]?.parcelNumber || trackNumber, barCode: events[0]?.barCode || "", result: events }, 200, origin);
   } catch (error) {
     console.error("Meest tracking integration error", error instanceof Error ? error.message : "unknown error");
