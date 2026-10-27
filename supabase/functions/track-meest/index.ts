@@ -106,6 +106,19 @@ Deno.serve(async (req: Request) => {
       console.error("Meest tracking request failed", trackingResponse.status);
       return reply({ error: trackingResponse.status === 404 ? "Shipment not found." : "Tracking service is temporarily unavailable." }, trackingResponse.status === 404 ? 404 : 502, origin);
     }
+    // Report structural metadata only. Never log tracking numbers, token values or event contents.
+    const resultValue = trackingBody?.result;
+    const firstRawEvent = Array.isArray(resultValue) ? resultValue[0] : null;
+    const shape = {
+      responseStatus: typeof trackingBody?.status === "string" ? trackingBody.status.slice(0, 20) : null,
+      topLevelFields: trackingBody && typeof trackingBody === "object" ? Object.keys(trackingBody).slice(0, 24) : [],
+      resultType: Array.isArray(resultValue) ? "array" : typeof resultValue,
+      resultFields: resultValue && typeof resultValue === "object" && !Array.isArray(resultValue) ? Object.keys(resultValue).slice(0, 24) : [],
+      resultCount: Array.isArray(resultValue) ? resultValue.length : null,
+      firstEventFields: firstRawEvent && typeof firstRawEvent === "object" ? Object.keys(firstRawEvent).slice(0, 24) : [],
+      descriptionsType: firstRawEvent && typeof firstRawEvent === "object" ? typeof firstRawEvent.eventDescr : null,
+    };
+    console.info("Meest tracking response shape", JSON.stringify(shape));
     if (!trackingBody || String(trackingBody.status ?? "").toLowerCase() !== "ok" || !Array.isArray(trackingBody.result)) {
       return reply({ error: "No tracking information was found for this number." }, 404, origin);
     }
@@ -122,6 +135,13 @@ Deno.serve(async (req: Request) => {
       eventDescr: item.eventDescr && typeof item.eventDescr === "object" ? item.eventDescr : {},
       eventDetailDescr: item.eventDetailDescr && typeof item.eventDetailDescr === "object" ? item.eventDetailDescr : {},
     })).sort((a: { eventDateTime: string }, b: { eventDateTime: string }) => b.eventDateTime.localeCompare(a.eventDateTime));
+
+    // Diagnostic metadata only: do not log tracking IDs, event descriptions or personal details.
+    const firstItem = trackingBody.result[0];
+    const firstEventFields = firstItem && typeof firstItem === "object" && !Array.isArray(firstItem)
+      ? Object.keys(firstItem).slice(0, 24) : [];
+    console.info("Meest tracking summary", JSON.stringify({ eventCount: events.length, firstEventFields }));
+    if (!events.length) return reply({ error: "No tracking events were found for this number." }, 404, origin);
 
     return reply({ status: "ok", parcelNumber: events[0]?.parcelNumber || trackNumber, barCode: events[0]?.barCode || "", result: events }, 200, origin);
   } catch (error) {

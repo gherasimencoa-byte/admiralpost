@@ -1094,6 +1094,17 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
 .hero-tracking button:disabled{opacity:.65;cursor:wait}
 .hero-tracking-hint{flex:1 0 100%;margin:0 0 0 32px;font-size:12px;line-height:1.4;color:#64748b}
 .hero-tracking-result{flex:1 0 100%;margin:0 0 0 32px;font-size:13px;color:#14243a;overflow-wrap:anywhere}
+/* Tracking results live on the light hero surface, not the dark tracking panel. */
+.hero-tracking-result .tracking-current { color:#0d2b52; }
+.hero-tracking-result .tracking-history-title { color:#0d2b52; }
+.hero-tracking-result .tracking-parcel { color:#41546c; }
+.hero-tracking-result .tracking-event { background:#f6f9fd; border:1px solid #dce5f0; color:#1d314e; }
+.hero-tracking-result .tracking-event strong { color:#0d2b52; }
+.hero-tracking-result .tracking-event p { color:#41546c; }
+.hero-tracking-result .tracking-event time { color:#53657a; display:block; margin-bottom:4px; }
+.hero-tracking-result .tracking-events { max-height:420px; overflow-y:auto; scrollbar-width:thin; padding-inline-end:3px; }
+.hero-tracking-result .tracking-event { overflow-wrap:anywhere; }
+
 @media(max-width:600px){.hero-tracking{gap:5px;padding:6px 7px 9px 11px}.hero-tracking button{padding:10px 13px;min-height:44px;font-size:15px}.hero-tracking-hint,.hero-tracking-result{margin-left:30px}}
 </style>
 
