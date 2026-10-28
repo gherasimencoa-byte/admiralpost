@@ -1058,10 +1058,6 @@ body { color:#25364b; line-height:1.65; }
 #orderForm #savedAddressGroup {display:none!important}
 @media(max-width:760px){#orderForm .form-row{display:grid;grid-template-columns:1fr;gap:0}#orderForm .form-group{margin-bottom:9px}#orderForm label{font-size:14px}#orderForm input:not([type="checkbox"]),#orderForm select{padding:10px 12px}#orderForm textarea{padding:10px 12px}}
 
-/* Floating contact controls: pinned to viewport, not document footer */
-html body > a.whatsapp-float {position:fixed!important;right:18px!important;left:auto!important;bottom:calc(18px + env(safe-area-inset-bottom, 0px))!important;top:auto!important;z-index:100001!important;transform:none;visibility:visible}
-html body > #ap-cookie-reopen {position:fixed!important;left:12px!important;right:auto!important;bottom:calc(12px + env(safe-area-inset-bottom, 0px))!important;z-index:100000!important}
-@media(max-width:600px){html body > a.whatsapp-float{right:14px!important;bottom:calc(16px + env(safe-area-inset-bottom, 0px))!important;width:56px;height:56px}}
 </style>
 <link rel="alternate" hreflang="ru" href="https://www.admiral-post.com/" /><link rel="alternate" hreflang="en" href="https://www.admiral-post.com/en/" /><link rel="alternate" hreflang="he" href="https://www.admiral-post.com/he/" /><link rel="alternate" hreflang="x-default" href="https://www.admiral-post.com/" />
 <style>.destination-detail{display:block;color:#ff8a00;font-size:12px;font-weight:700;text-decoration:none;margin-top:8px}.destination-detail:hover{text-decoration:underline}.destination-page{max-width:900px;margin:0 auto}.destination-page h1{color:#0d2b52;font-size:clamp(30px,4vw,44px);line-height:1.15}.destination-page h2{color:#0d2b52;margin-top:32px}.destination-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.breadcrumb{font-size:13px;color:#5b6b7a;margin-bottom:18px}.breadcrumb a{color:#0d2b52}</style>
@@ -1139,7 +1135,7 @@ html body > #ap-cookie-reopen {position:fixed!important;left:12px!important;righ
 #orderForm { scroll-margin-top: 140px; }
 </style>
 <style>.account-nav-link{display:inline-flex;align-items:center;gap:7px;padding:10px 12px;border:1px solid #d6dfea;border-radius:12px;text-decoration:none;color:#102b51;font-weight:700;white-space:nowrap}.account-nav-link:hover{background:#eef3f9}@media(max-width:900px){.account-nav-link{padding:9px;font-size:13px}}</style><style id="ap-cookie-style">#ap-cookie{position:fixed;bottom:16px;left:16px;right:16px;max-width:620px;margin:auto;background:#fff;color:#132944;border:1px solid #d7e1ed;border-radius:14px;box-shadow:0 12px 40px #0d2b5240;padding:18px;z-index:99999;font:14px/1.5 Arial,sans-serif}#ap-cookie[hidden]{display:none}#ap-cookie button,#ap-cookie-reopen{cursor:pointer;border-radius:8px;border:1px solid #0d2b52;padding:9px 13px;font:inherit}#ap-cookie .ap-accept{background:#0d2b52;color:white}#ap-cookie .ap-reject{background:white;color:#0d2b52}#ap-cookie .ap-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}#ap-cookie-reopen{position:fixed;bottom:10px;left:10px;z-index:9998;background:#fff;color:#0d2b52;font-size:12px;padding:5px 8px}@media(max-width:640px){#ap-cookie{bottom:8px;left:8px;right:8px;padding:13px}#ap-cookie-reopen{bottom:4px}}</style>
-<link rel="stylesheet" href="/quote-form.css">
+<link rel="stylesheet" href="/quote-form.css?v=2">
 </head>
 <body>
   <!-- Хедер -->
