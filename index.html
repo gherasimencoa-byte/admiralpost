@@ -31,164 +31,138 @@
         content="Международная доставка посылок из Израиля в Россию, Украину, СНГ, Европу, США и Канаду." />
 
   <!-- Структурированные данные -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        "@id": "https://www.admiral-post.com/#org",
-        "name": "Admiral Post",
-        "url": "https://www.admiral-post.com/",
-        "description": "Admiral Post — сервис международной доставки посылок из Израиля. Отправка посылок, бандеролей и личных вещей из Израиля в Россию, Украину, Молдову, Грузию, Европу, США и Канаду с полным трекингом.",
-        "logo": "https://www.admiral-post.com/logo.png",
-        "sameAs": [],
-        "areaServed": [
-          "Israel",
-          "Russia",
-          "Ukraine",
-          "Moldova",
-          "Georgia",
-          "Europe",
-          "Asia",
-          "United States",
-          "Canada"
-        ],
-        "contactPoint": [
-          {
-            "@type": "ContactPoint",
-            "contactType": "customer support",
-            "telephone": "+972522323554",
-            "email": "info@admiral-express.com",
-            "areaServed": [
-              "Israel",
-              "Russia",
-              "Ukraine",
-              "Moldova",
-              "Georgia",
-              "Europe",
-              "Asia",
-              "United States",
-              "Canada"
-            ],
-            "availableLanguage": ["ru", "en", "he"]
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://www.admiral-post.com/#org",
+      "name": "Admiral Post",
+      "url": "https://www.admiral-post.com/",
+      "description": "Admiral Post — сервис международной доставки посылок из Израиля. Отправка посылок, бандеролей и личных вещей из Израиля в Россию, Украину, Молдову, Грузию, Европу, США и Канаду с полным трекингом.",
+      "logo": "https://www.admiral-post.com/logo-admiral-post.png",
+      "sameAs": [],
+      "areaServed": [
+        "Israel",
+        "Russia",
+        "Ukraine",
+        "Moldova",
+        "Georgia",
+        "Europe",
+        "Asia",
+        "United States",
+        "Canada"
+      ],
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "telephone": "+972522323554",
+          "email": "info@admiral-express.com",
+          "availableLanguage": [
+            "ru",
+            "en",
+            "he"
+          ]
+        }
+      ],
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Hativ-8 str, Overseas Building, Room 507",
+        "addressLocality": "Lod",
+        "postalCode": "7010000",
+        "addressCountry": "IL",
+        "name": "Ben-Gurion Airport"
+      },
+      "telephone": "+972522323554",
+      "email": "info@admiral-express.com"
+    },
+    {
+      "@type": "Service",
+      "@id": "https://www.admiral-post.com/#service-il-ru-cis",
+      "name": "Отправка посылок из Израиля в Россию и страны СНГ",
+      "description": "Международная доставка посылок, бандеролей и личных вещей из Израиля в Россию, Молдову, Грузию и другие страны СНГ с полным трекингом.",
+      "provider": {
+        "@id": "https://www.admiral-post.com/#org"
+      },
+      "areaServed": [
+        "Israel",
+        "Russia",
+        "Moldova",
+        "Georgia"
+      ],
+      "serviceType": "Международная доставка посылок из Израиля"
+    },
+    {
+      "@type": "Service",
+      "@id": "https://www.admiral-post.com/#service-il-ua",
+      "name": "Отправка посылок из Израиля в Украину",
+      "description": "Отправка посылок, почты и личных вещей из Израиля в Украину с прозрачными тарифами и отслеживанием каждого этапа.",
+      "provider": {
+        "@id": "https://www.admiral-post.com/#org"
+      },
+      "areaServed": [
+        "Israel",
+        "Ukraine"
+      ],
+      "serviceType": "Международная доставка посылок из Израиля в Украину"
+    },
+    {
+      "@type": "Service",
+      "@id": "https://www.admiral-post.com/#service-il-eu-us-ca",
+      "name": "Отправка посылок из Израиля в Европу, США и Канаду",
+      "description": "Международная доставка посылок и личных вещей из Израиля в страны Европы, США и Канаду для частных отправителей и небольшого e-commerce.",
+      "provider": {
+        "@id": "https://www.admiral-post.com/#org"
+      },
+      "areaServed": [
+        "Israel",
+        "Europe",
+        "United States",
+        "Canada"
+      ],
+      "serviceType": "Международная доставка посылок из Израиля"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://www.admiral-post.com/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "В какие страны Admiral Post доставляет посылки из Израиля?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Admiral Post организует отправку посылок и почты из Израиля в Россию, Украину, Молдову, Грузию, страны Европы, Азию, США и Канаду. География направлений для посылок из Израиля постоянно расширяется."
           }
-        ],
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "Hativ-8 str, Overseas Building, Room 507",
-          "addressLocality": "Lod",
-          "postalCode": "7010000",
-          "addressCountry": "IL",
-          "name": "Ben-Gurion Airport"
-        }
-      },
-
-      {
-        "@type": "Service",
-        "@id": "https://www.admiral-post.com/#service-il-ru-cis",
-        "name": "Отправка посылок из Израиля в Россию и страны СНГ",
-        "description": "Международная доставка посылок, бандеролей и личных вещей из Израиля в Россию, Молдову, Грузию и другие страны СНГ с полным трекингом.",
-        "provider": { "@id": "https://www.admiral-post.com/#org" },
-        "areaServed": [
-          "Israel",
-          "Russia",
-          "Moldova",
-          "Georgia"
-        ],
-        "serviceType": "Международная доставка посылок из Израиля",
-        "offers": {
-          "@type": "Offer",
-          "priceCurrency": "USD",
-          "price": "35",
-          "url": "https://www.admiral-post.com/#tariffs",
-          "description": "Тариф на отправку посылок из Израиля в Россию и страны СНГ от 35 долларов США."
-        }
-      },
-
-      {
-        "@type": "Service",
-        "@id": "https://www.admiral-post.com/#service-il-ua",
-        "name": "Отправка посылок из Израиля в Украину",
-        "description": "Отправка посылок, почты и личных вещей из Израиля в Украину с прозрачными тарифами и отслеживанием каждого этапа.",
-        "provider": { "@id": "https://www.admiral-post.com/#org" },
-        "areaServed": [
-          "Israel",
-          "Ukraine"
-        ],
-        "serviceType": "Международная доставка посылок из Израиля в Украину",
-        "offers": {
-          "@type": "Offer",
-          "priceCurrency": "USD",
-          "price": "39",
-          "url": "https://www.admiral-post.com/#tariffs",
-          "description": "Тариф на отправку посылок и бандеролей из Израиля в Украину от 39 долларов США."
-        }
-      },
-
-      {
-        "@type": "Service",
-        "@id": "https://www.admiral-post.com/#service-il-eu-us-ca",
-        "name": "Отправка посылок из Израиля в Европу, США и Канаду",
-        "description": "Международная доставка посылок и личных вещей из Израиля в страны Европы, США и Канаду для частных отправителей и небольшого e-commerce.",
-        "provider": { "@id": "https://www.admiral-post.com/#org" },
-        "areaServed": [
-          "Israel",
-          "Europe",
-          "United States",
-          "Canada"
-        ],
-        "serviceType": "Международная доставка посылок из Израиля",
-        "offers": {
-          "@type": "Offer",
-          "priceCurrency": "USD",
-          "price": "45",
-          "url": "https://www.admiral-post.com/#tariffs",
-          "description": "Тариф на отправку посылок из Израиля в Европу, США и Канаду от 45 долларов США."
-        }
-      },
-
-      {
-        "@type": "FAQPage",
-        "@id": "https://www.admiral-post.com/#faq",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "В какие страны Admiral Post доставляет посылки из Израиля?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Admiral Post организует отправку посылок и почты из Израиля в Россию, Украину, Молдову, Грузию, страны Европы, Азию, США и Канаду. География направлений для посылок из Израиля постоянно расширяется."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Сколько времени занимает доставка посылки из Израиля?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Ориентировочный срок морской доставки посылок из Израиля — в среднем 21–35 дней. Фактический срок зависит от направления, расписания отправок, таможенного оформления и доставки внутри страны назначения."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Можно ли отправить бандероль или личные вещи из Израиля?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Да, Admiral Post специализируется на отправке бандеролей и личных вещей из Израиля. Вы можете отправить посылку родным и друзьям в Россию, Украину, Молдову, Грузию, Европу, США и Канаду с прозрачными тарифами и трекингом."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Как отследить посылку из Израиля по трек-номеру?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Чтобы отследить посылку из Израиля, достаточно ввести трек-номер Admiral Post на странице отслеживания. Вы увидите все этапы маршрута: приём в Израиле, сортировку, международную пересылку, работу таможни и доставку получателю."
-            }
+        },
+        {
+          "@type": "Question",
+          "name": "Сколько времени занимает доставка посылки из Израиля?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ориентировочный срок морской доставки посылок из Израиля — в среднем 21–35 дней. Фактический срок зависит от направления, расписания отправок, таможенного оформления и доставки внутри страны назначения."
           }
-        ]
-      }
-    ]
-  }
-  </script>
+        },
+        {
+          "@type": "Question",
+          "name": "Можно ли отправить бандероль или личные вещи из Израиля?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Да, Admiral Post специализируется на отправке бандеролей и личных вещей из Израиля. Вы можете отправить посылку родным и друзьям в Россию, Украину, Молдову, Грузию, Европу, США и Канаду с прозрачными тарифами и трекингом."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Как отследить посылку из Израиля по трек-номеру?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Чтобы отследить посылку из Израиля, достаточно ввести трек-номер Admiral Post на странице отслеживания. Вы увидите все этапы маршрута: приём в Израиле, сортировку, международную пересылку, работу таможни и доставку получателю."
+          }
+        }
+      ]
+    }
+  ]
+}</script>
 
   <style>
     :root {
@@ -1072,7 +1046,7 @@ body { color:#25364b; line-height:1.65; }
     .hero-actions { flex-direction: column; align-items: stretch; }
     .hero-actions .btn { width: 100%; }
   }
-</style>
+.shipping-price-scroll{overflow-x:auto;margin:20px 0}.shipping-price-table{border-collapse:collapse;width:100%;min-width:360px;font-size:15px}.shipping-price-table caption{text-align:start;font-weight:700;padding:10px 0;color:#0d2b52}.shipping-price-table th,.shipping-price-table td{padding:10px 12px;text-align:start;border-bottom:1px solid #dce4ee}.shipping-price-table thead{background:#f4f7fb}.shipping-price-table tbody th{font-weight:600}.shipping-price-note{font-size:14px;line-height:1.7;color:#455971}</style>
 <link rel="alternate" hreflang="ru" href="https://www.admiral-post.com/" /><link rel="alternate" hreflang="en" href="https://www.admiral-post.com/en/" /><link rel="alternate" hreflang="he" href="https://www.admiral-post.com/he/" /><link rel="alternate" hreflang="x-default" href="https://www.admiral-post.com/" />
 <style>.destination-detail{display:block;color:#ff8a00;font-size:12px;font-weight:700;text-decoration:none;margin-top:8px}.destination-detail:hover{text-decoration:underline}.destination-page{max-width:900px;margin:0 auto}.destination-page h1{color:#0d2b52;font-size:clamp(30px,4vw,44px);line-height:1.15}.destination-page h2{color:#0d2b52;margin-top:32px}.destination-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.breadcrumb{font-size:13px;color:#5b6b7a;margin-bottom:18px}.breadcrumb a{color:#0d2b52}</style>
 
@@ -1308,7 +1282,7 @@ body { color:#25364b; line-height:1.65; }
           <a class="calc-cta" id="seaQuoteButton" href="#restrictions">Оформить заявку</a>
         </div>
       </div>
-    </div>
+    <div class="shipping-price-scroll" tabindex="0" role="region" aria-label="Примеры стоимости морской доставки"><table class="shipping-price-table"><caption>Примеры стоимости морской доставки</caption><thead><tr><th scope="col">Направление</th><th scope="col">2 кг</th><th scope="col">5 кг</th><th scope="col">10 кг</th><th scope="col">Лимит веса</th></tr></thead><tbody><tr><th scope="row">Россия</th><td><bdi>₪154</bdi></td><td><bdi>₪241</bdi></td><td><bdi>₪386</bdi></td><td>20 кг</td></tr><tr><th scope="row">Беларусь</th><td><bdi>₪154</bdi></td><td><bdi>₪241</bdi></td><td><bdi>₪386</bdi></td><td>30 кг</td></tr><tr><th scope="row">США</th><td><bdi>₪239</bdi></td><td><bdi>₪359</bdi></td><td><bdi>₪559</bdi></td><td>20 кг</td></tr><tr><th scope="row">Канада</th><td><bdi>₪229</bdi></td><td><bdi>₪319</bdi></td><td><bdi>₪469</bdi></td><td>30 кг</td></tr><tr><th scope="row">Украина</th><td><bdi>₪156</bdi></td><td><bdi>₪182</bdi></td><td><bdi>₪247</bdi></td><td>50 кг</td></tr><tr><th scope="row">Молдова</th><td><bdi>₪129</bdi></td><td><bdi>₪153</bdi></td><td><bdi>₪193</bdi></td><td>30 кг</td></tr><tr><th scope="row">Грузия</th><td><bdi>₪200</bdi></td><td><bdi>₪200</bdi></td><td><bdi>₪200</bdi></td><td>30 кг</td></tr><tr><th scope="row">Европа — тариф Европа 1</th><td><bdi>₪149</bdi></td><td><bdi>₪224</bdi></td><td><bdi>₪349</bdi></td><td>30 кг</td></tr></tbody></table></div><p class="shipping-price-note">Предварительные суммы в шекелях (₪) рассчитаны по тарифам калькулятора. Вес округляется вверх до полного килограмма. Для Европы указан тариф «Европа 1»: применимость к конкретной стране уточняется отдельно. Итоговую стоимость, доступность маршрута и дополнительные платежи подтвердите до передачи посылки.</p></div>
   </section>
 
   <!-- Parcel tracking immediately below the shipping calculator -->
