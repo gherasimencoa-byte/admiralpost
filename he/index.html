@@ -31,164 +31,138 @@
         content="משלוח חבילות בינלאומי מישראל עם מעקב ובקשת הצעת מחיר." />
 
   <!-- Структурированные данные -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        "@id": "https://www.admiral-post.com/#org",
-        "name": "Admiral Post",
-        "url": "https://www.admiral-post.com/",
-        "description": "Admiral Post מציעה שירות משלוח חבילות, מתנות וחפצים אישיים מישראל ליעדים בינלאומיים.",
-        "logo": "https://www.admiral-post.com/logo.png",
-        "sameAs": [],
-        "areaServed": [
-          "Israel",
-          "Russia",
-          "Ukraine",
-          "Moldova",
-          "Georgia",
-          "Europe",
-          "Asia",
-          "United States",
-          "Canada"
-        ],
-        "contactPoint": [
-          {
-            "@type": "ContactPoint",
-            "contactType": "customer support",
-            "telephone": "+972522323554",
-            "email": "info@admiral-express.com",
-            "areaServed": [
-              "Israel",
-              "Russia",
-              "Ukraine",
-              "Moldova",
-              "Georgia",
-              "Europe",
-              "Asia",
-              "United States",
-              "Canada"
-            ],
-            "availableLanguage": ["ru", "en", "he"]
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://www.admiral-post.com/#org",
+      "name": "Admiral Post",
+      "url": "https://www.admiral-post.com/",
+      "description": "Admiral Post מציעה שירות משלוח חבילות, מתנות וחפצים אישיים מישראל ליעדים בינלאומיים.",
+      "logo": "https://www.admiral-post.com/logo-admiral-post.png",
+      "sameAs": [],
+      "areaServed": [
+        "Israel",
+        "Russia",
+        "Ukraine",
+        "Moldova",
+        "Georgia",
+        "Europe",
+        "Asia",
+        "United States",
+        "Canada"
+      ],
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "telephone": "+972522323554",
+          "email": "info@admiral-express.com",
+          "availableLanguage": [
+            "ru",
+            "en",
+            "he"
+          ]
+        }
+      ],
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Hativ-8 str, Overseas Building, Room 507",
+        "addressLocality": "Lod",
+        "postalCode": "7010000",
+        "addressCountry": "IL",
+        "name": "Ben-Gurion Airport"
+      },
+      "telephone": "+972522323554",
+      "email": "info@admiral-express.com"
+    },
+    {
+      "@type": "Service",
+      "@id": "https://www.admiral-post.com/#service-il-ru-cis",
+      "name": "משלוח חבילות מישראל לרוסיה ולמדינות חבר העמים",
+      "description": "משלוח חבילות וחפצים אישיים מישראל לרוסיה, מולדובה, גאורגיה ויעדים נוספים.",
+      "provider": {
+        "@id": "https://www.admiral-post.com/#org"
+      },
+      "areaServed": [
+        "Israel",
+        "Russia",
+        "Moldova",
+        "Georgia"
+      ],
+      "serviceType": "משלוח חבילות בינלאומי מישראל"
+    },
+    {
+      "@type": "Service",
+      "@id": "https://www.admiral-post.com/#service-il-ua",
+      "name": "משלוח חבילות מישראל לאוקראינה",
+      "description": "משלוח חבילות וחפצים אישיים מישראל לאוקראינה עם מידע ברור על התהליך.",
+      "provider": {
+        "@id": "https://www.admiral-post.com/#org"
+      },
+      "areaServed": [
+        "Israel",
+        "Ukraine"
+      ],
+      "serviceType": "משלוח חבילות בינלאומי מישראל לאוקראינה"
+    },
+    {
+      "@type": "Service",
+      "@id": "https://www.admiral-post.com/#service-il-eu-us-ca",
+      "name": "משלוח חבילות מישראל לאירופה, לארה״ב ולקנדה",
+      "description": "משלוח חבילות וחפצים אישיים מישראל לאירופה, לארה״ב ולקנדה.",
+      "provider": {
+        "@id": "https://www.admiral-post.com/#org"
+      },
+      "areaServed": [
+        "Israel",
+        "Europe",
+        "United States",
+        "Canada"
+      ],
+      "serviceType": "משלוח חבילות בינלאומי מישראל"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://www.admiral-post.com/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "לאילו מדינות Admiral Post שולחת חבילות מישראל?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Admiral Post מארגנת משלוח חבילות מישראל לרוסיה, אוקראינה, מולדובה, גאורגיה, אירופה, ארה״ב וקנדה. זמינות היעדים עשויה להשתנות."
           }
-        ],
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "Hativ-8 str, Overseas Building, Room 507",
-          "addressLocality": "Lod",
-          "postalCode": "7010000",
-          "addressCountry": "IL",
-          "name": "Ben-Gurion Airport"
-        }
-      },
-
-      {
-        "@type": "Service",
-        "@id": "https://www.admiral-post.com/#service-il-ru-cis",
-        "name": "משלוח חבילות מישראל לרוסיה ולמדינות חבר העמים",
-        "description": "משלוח חבילות וחפצים אישיים מישראל לרוסיה, מולדובה, גאורגיה ויעדים נוספים.",
-        "provider": { "@id": "https://www.admiral-post.com/#org" },
-        "areaServed": [
-          "Israel",
-          "Russia",
-          "Moldova",
-          "Georgia"
-        ],
-        "serviceType": "משלוח חבילות בינלאומי מישראל",
-        "offers": {
-          "@type": "Offer",
-          "priceCurrency": "USD",
-          "price": "35",
-          "url": "https://www.admiral-post.com/#tariffs",
-          "description": "משלוח חבילות מישראל לרוסיה ולמדינות נוספות."
-        }
-      },
-
-      {
-        "@type": "Service",
-        "@id": "https://www.admiral-post.com/#service-il-ua",
-        "name": "משלוח חבילות מישראל לאוקראינה",
-        "description": "משלוח חבילות וחפצים אישיים מישראל לאוקראינה עם מידע ברור על התהליך.",
-        "provider": { "@id": "https://www.admiral-post.com/#org" },
-        "areaServed": [
-          "Israel",
-          "Ukraine"
-        ],
-        "serviceType": "משלוח חבילות בינלאומי מישראל לאוקראינה",
-        "offers": {
-          "@type": "Offer",
-          "priceCurrency": "USD",
-          "price": "39",
-          "url": "https://www.admiral-post.com/#tariffs",
-          "description": "משלוח חבילות מישראל לאוקראינה."
-        }
-      },
-
-      {
-        "@type": "Service",
-        "@id": "https://www.admiral-post.com/#service-il-eu-us-ca",
-        "name": "משלוח חבילות מישראל לאירופה, לארה״ב ולקנדה",
-        "description": "משלוח חבילות וחפצים אישיים מישראל לאירופה, לארה״ב ולקנדה.",
-        "provider": { "@id": "https://www.admiral-post.com/#org" },
-        "areaServed": [
-          "Israel",
-          "Europe",
-          "United States",
-          "Canada"
-        ],
-        "serviceType": "משלוח חבילות בינלאומי מישראל",
-        "offers": {
-          "@type": "Offer",
-          "priceCurrency": "USD",
-          "price": "45",
-          "url": "https://www.admiral-post.com/#tariffs",
-          "description": "משלוח חבילות מישראל לאירופה, לארה״ב ולקנדה."
-        }
-      },
-
-      {
-        "@type": "FAQPage",
-        "@id": "https://www.admiral-post.com/#faq",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "לאילו מדינות Admiral Post שולחת חבילות מישראל?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Admiral Post מארגנת משלוח חבילות מישראל לרוסיה, אוקראינה, מולדובה, גאורגיה, אירופה, ארה״ב וקנדה. זמינות היעדים עשויה להשתנות."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "כמה זמן נמשך משלוח מישראל?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "זמן המשלוח הימי המשוער הוא 21–35 ימים. משך המשלוח בפועל תלוי ביעד, בלוח המשלוחים, בשחרור מהמכס ובמסירה במדינת היעד."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "האם אפשר לשלוח חפצים אישיים ומתנות מישראל?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "כן, ניתן לשלוח חבילות, מתנות וחפצים אישיים למשפחה ולחברים ביעדים הזמינים. יש לבדוק את התעריף וההגבלות לפני השליחה."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "איך עוקבים אחר חבילה לפי מספר מעקב?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "אפשר להזין את מספר המעקב בטופס באתר. שימו לב: מערכת המעקב עדיין אינה מחוברת, ולכן פרטי סטטוס בזמן אמת אינם זמינים כרגע."
-            }
+        },
+        {
+          "@type": "Question",
+          "name": "כמה זמן נמשך משלוח מישראל?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "זמן המשלוח הימי המשוער הוא 21–35 ימים. משך המשלוח בפועל תלוי ביעד, בלוח המשלוחים, בשחרור מהמכס ובמסירה במדינת היעד."
           }
-        ]
-      }
-    ]
-  }
-  </script>
+        },
+        {
+          "@type": "Question",
+          "name": "האם אפשר לשלוח חפצים אישיים ומתנות מישראל?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "כן, ניתן לשלוח חבילות, מתנות וחפצים אישיים למשפחה ולחברים ביעדים הזמינים. יש לבדוק את התעריף וההגבלות לפני השליחה."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "איך עוקבים אחר חבילה לפי מספר מעקב?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "הזינו את מספר המעקב בטופס באתר כדי לראות את עדכוני המשלוח הזמינים. אם לא נמצאו עדכונים, פנו לשירות הלקוחות עם מספר המעקב."
+          }
+        }
+      ]
+    }
+  ]
+}</script>
 
   <style>
     :root {
@@ -1054,7 +1028,7 @@ body { color:#25364b; line-height:1.65; }
     .tracking-event strong { display:block; color:#fff; font-size:13px; }
     .tracking-event p { color:#d1d5db; font-size:12px; margin:5px 0 0; }
     .tracking-form button:disabled, #trackForm button:disabled { opacity:.65; cursor:wait; }
-</style>
+.shipping-price-scroll{overflow-x:auto;margin:20px 0}.shipping-price-table{border-collapse:collapse;width:100%;min-width:360px;font-size:15px}.shipping-price-table caption{text-align:start;font-weight:700;padding:10px 0;color:#0d2b52}.shipping-price-table th,.shipping-price-table td{padding:10px 12px;text-align:start;border-bottom:1px solid #dce4ee}.shipping-price-table thead{background:#f4f7fb}.shipping-price-table tbody th{font-weight:600}.shipping-price-note{font-size:14px;line-height:1.7;color:#455971}</style>
 <link rel="alternate" hreflang="ru" href="https://www.admiral-post.com/" /><link rel="alternate" hreflang="en" href="https://www.admiral-post.com/en/" /><link rel="alternate" hreflang="he" href="https://www.admiral-post.com/he/" /><link rel="alternate" hreflang="x-default" href="https://www.admiral-post.com/" />
 <style>.destination-detail{display:block;color:#ff8a00;font-size:12px;font-weight:700;text-decoration:none;margin-top:8px}.destination-detail:hover{text-decoration:underline}.destination-page{max-width:900px;margin:0 auto}.destination-page h1{color:#0d2b52;font-size:clamp(30px,4vw,44px);line-height:1.15}.destination-page h2{color:#0d2b52;margin-top:32px}.destination-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.breadcrumb{font-size:13px;color:#5b6b7a;margin-bottom:18px}.breadcrumb a{color:#0d2b52}</style>
 
@@ -1310,7 +1284,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
           <a class="calc-cta" id="seaQuoteButton" href="/he/#restrictions">שליחת בקשה</a>
         </div>
       </div>
-    </div>
+    <div class="shipping-price-scroll" tabindex="0" role="region" aria-label="דוגמאות למחיר משלוח ימי"><table class="shipping-price-table"><caption>דוגמאות למחיר משלוח ימי</caption><thead><tr><th scope="col">יעד</th><th scope="col">2 ק״ג</th><th scope="col">5 ק״ג</th><th scope="col">10 ק״ג</th><th scope="col">משקל מרבי</th></tr></thead><tbody><tr><th scope="row">רוסיה</th><td><bdi>₪154</bdi></td><td><bdi>₪241</bdi></td><td><bdi>₪386</bdi></td><td>20 ק״ג</td></tr><tr><th scope="row">בלארוס</th><td><bdi>₪154</bdi></td><td><bdi>₪241</bdi></td><td><bdi>₪386</bdi></td><td>30 ק״ג</td></tr><tr><th scope="row">ארה״ב</th><td><bdi>₪239</bdi></td><td><bdi>₪359</bdi></td><td><bdi>₪559</bdi></td><td>20 ק״ג</td></tr><tr><th scope="row">קנדה</th><td><bdi>₪229</bdi></td><td><bdi>₪319</bdi></td><td><bdi>₪469</bdi></td><td>30 ק״ג</td></tr><tr><th scope="row">אוקראינה</th><td><bdi>₪156</bdi></td><td><bdi>₪182</bdi></td><td><bdi>₪247</bdi></td><td>50 ק״ג</td></tr><tr><th scope="row">מולדובה</th><td><bdi>₪129</bdi></td><td><bdi>₪153</bdi></td><td><bdi>₪193</bdi></td><td>30 ק״ג</td></tr><tr><th scope="row">גאורגיה</th><td><bdi>₪200</bdi></td><td><bdi>₪200</bdi></td><td><bdi>₪200</bdi></td><td>30 ק״ג</td></tr><tr><th scope="row">אירופה — תעריף 1</th><td><bdi>₪149</bdi></td><td><bdi>₪224</bdi></td><td><bdi>₪349</bdi></td><td>30 ק״ג</td></tr></tbody></table></div><p class="shipping-price-note">הסכומים בשקלים חדשים (₪) הם הערכה לפי תעריפי המחשבון באתר. המשקל מעוגל כלפי מעלה לקילוגרם שלם. באירופה מוצג תעריף אירופה 1; יש לבדוק אם הוא חל על מדינת היעד. יש לאשר את המחיר הסופי, זמינות המסלול ותשלומים נוספים לפני מסירת החבילה.</p></div>
   </section>
 
   <!-- Parcel tracking immediately below the shipping calculator -->
