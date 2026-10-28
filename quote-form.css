@@ -1,0 +1,66 @@
+/* Shared quote form styling for RU, HE and EN. */
+.quote-form-card {
+  background: #f3f7fc;
+  border: 1px solid #d6e2f0;
+  box-shadow: none;
+}
+
+.quote-form-card input:not([type="checkbox"]):not([type="hidden"]),
+.quote-form-card select,
+.quote-form-card textarea {
+  background: #fff;
+  border: 1px solid #bdccdd;
+  color: #17365b;
+}
+
+.quote-form-card input::placeholder,
+.quote-form-card textarea::placeholder {
+  color: #65758a;
+  opacity: 1;
+}
+
+.quote-form-card input:not([type="checkbox"]):focus,
+.quote-form-card select:focus,
+.quote-form-card textarea:focus {
+  border-color: #315f95;
+  outline: 2px solid #315f95;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px rgba(49, 95, 149, 0.12);
+}
+
+/* The RU page has existing ID-level input styles. */
+#orderForm input:not([type="checkbox"]):focus,
+#orderForm select:focus,
+#orderForm textarea:focus {
+  border-color: #315f95;
+  outline: 2px solid #315f95;
+  outline-offset: 1px;
+}
+
+/* Keep support and cookie settings in the document flow on phones. */
+@media (max-width: 760px) {
+  .whatsapp-float {
+    position: static;
+    inset: auto;
+    width: fit-content;
+    height: auto;
+    max-width: calc(100% - 32px);
+    margin: 20px auto 12px;
+    padding: 12px 18px;
+    border-radius: 999px;
+    box-shadow: none;
+    transform: none;
+  }
+  .whatsapp-float .wa-label { display: inline; }
+  .whatsapp-float::before { display: none; }
+  .whatsapp-float:hover { transform: none; box-shadow: none; }
+  #ap-cookie-reopen {
+    position: static;
+    inset: auto;
+    display: block;
+    width: fit-content;
+    margin: 12px auto calc(20px + env(safe-area-inset-bottom, 0px));
+    min-height: 44px;
+    padding: 10px 14px;
+  }
+}
