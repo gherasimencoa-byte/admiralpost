@@ -1502,6 +1502,7 @@ body { color:#25364b; line-height:1.65; }
                     type="number"
                     id="weight"
                     name="weight"
+                    inputmode="decimal"
                     step="0.1"
                     min="0.1"
                     required
@@ -1528,6 +1529,7 @@ body { color:#25364b; line-height:1.65; }
                     type="text"
                     id="name"
                     name="name"
+                    autocomplete="name"
                     required
                     placeholder="Как к вам обращаться"
                   />
@@ -1539,6 +1541,8 @@ body { color:#25364b; line-height:1.65; }
                     type="tel"
                     id="phone"
                     name="phone"
+                    autocomplete="tel"
+                    inputmode="tel"
                     required
                     placeholder="+972..."
                   />
@@ -1552,6 +1556,7 @@ body { color:#25364b; line-height:1.65; }
                   type="email"
                   id="email"
                   name="email"
+                  autocomplete="email"
                   required
                   placeholder="name@example.com"
                 />
@@ -1577,7 +1582,7 @@ body { color:#25364b; line-height:1.65; }
 
               <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden"><label>Leave blank<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
               <button type="submit" class="btn btn-primary">Отправить запрос</button>
-              <div id="formStatus" class="form-status"></div>
+              <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
             </form>
           </div>
         </div>
