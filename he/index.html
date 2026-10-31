@@ -1491,7 +1491,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
                     min="0.1"
                     required
                     placeholder="לדוגמה, 5"
-                  />
+                  / inputmode="decimal">
                   <small>ציינו את משקל החבילה המשוער. נציג יאשר את המגבלות המדויקות.</small>
                 </div>
                 <div class="form-group">
@@ -1515,7 +1515,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
                     name="name"
                     required
                     placeholder="איך לפנות אליכם"
-                  />
+                  / autocomplete="name">
                   <small>השם שבו נשתמש בעת יצירת קשר.</small>
                 </div>
                 <div class="form-group">
@@ -1526,7 +1526,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
                     name="phone"
                     required
                     placeholder="+972..."
-                  />
+                  / autocomplete="tel" inputmode="tel">
                   <small>מספר נייד לשיחה או להודעה.</small>
                 </div>
               </div>
@@ -1539,7 +1539,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
                   name="email"
                   required
                   placeholder="name@example.com"
-                />
+                / autocomplete="email">
                 <small>לשליחת הצעת המחיר ושאלות נוספות.</small>
               </div>
 
@@ -1562,7 +1562,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
 
               <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden"><label>Leave blank<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
               <button type="submit" class="btn btn-primary">שליחת בקשה</button>
-              <div id="formStatus" class="form-status"></div>
+              <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
             </form>
           </div>
         </div>
