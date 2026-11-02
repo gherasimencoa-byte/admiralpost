@@ -1126,6 +1126,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
 
 <style>.account-nav-link{display:inline-flex;align-items:center;gap:7px;padding:10px 12px;border:1px solid #d6dfea;border-radius:12px;text-decoration:none;color:#102b51;font-weight:700;white-space:nowrap}.account-nav-link:hover{background:#eef3f9}@media(max-width:900px){.account-nav-link{padding:9px;font-size:13px}}</style><style id="ap-cookie-style">#ap-cookie{position:fixed;bottom:16px;left:16px;right:16px;max-width:620px;margin:auto;background:#fff;color:#132944;border:1px solid #d7e1ed;border-radius:14px;box-shadow:0 12px 40px #0d2b5240;padding:18px;z-index:99999;font:14px/1.5 Arial,sans-serif}#ap-cookie[hidden]{display:none}#ap-cookie button,#ap-cookie-reopen{cursor:pointer;border-radius:8px;border:1px solid #0d2b52;padding:9px 13px;font:inherit}#ap-cookie .ap-accept{background:#0d2b52;color:white}#ap-cookie .ap-reject{background:white;color:#0d2b52}#ap-cookie .ap-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}#ap-cookie-reopen{position:fixed;bottom:10px;left:10px;z-index:9998;background:#fff;color:#0d2b52;font-size:12px;padding:5px 8px}@media(max-width:640px){#ap-cookie{bottom:8px;left:8px;right:8px;padding:13px}#ap-cookie-reopen{bottom:4px}}</style>
 <link rel="stylesheet" href="/quote-form.css?v=2">
+<script src="../shipping-pricing.js"></script>
 </head>
 <body>
   <!-- כותרת האתר -->
@@ -1780,16 +1781,8 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
   const error = document.getElementById('seaError');
   const quoteButton = document.getElementById('seaQuoteButton');
   if (!country || !weight || !price) return;
-  const tariffs = {
-    russia:  {name:'רוסיה', formName:'Россия', limit:20, base:154, included:2, extra:29},
-    belarus: {name:'בלארוס', formName:'Беларусь', limit:30, base:154, included:2, extra:29},
-    usa:     {name:'ארה״ב', formName:'США', limit:20, base:199, included:1, extra:40},
-    canada:  {name:'קנדה', formName:'Канада', limit:30, base:199, included:1, extra:30},
-    ukraine: {name:'אוקראינה', formName:'Украина', limit:50, base:156, included:3, extra:13},
-    moldova: {name:'מולדובה', formName:'Молдова', limit:30, base:129, included:2, extra:8},
-    georgia: {name:'גאורגיה', formName:'Грузия', limit:30, base:200, included:15, extra:10},
-    europe:  {name:'אירופה — תעריף 1', formName:'Европа', limit:30, base:149, included:2, extra:25}
-  };
+  const labels = {"russia": ["רוסיה", "Россия"], "belarus": ["בלארוס", "Беларусь"], "usa": ["ארה״ב", "США"], "canada": ["קנדה", "Канада"], "ukraine": ["אוקראינה", "Украина"], "moldova": ["מולדובה", "Молдова"], "georgia": ["גאורגיה", "Грузия"], "europe": ["אירופה — תעריף 1", "Европа"]};
+  const tariffs = Object.fromEntries(Object.entries(AdmiralPricing.tariffs).map(([key,t])=>[key,{...t,name:labels[key][0],formName:labels[key][1]}]));
   const money = n => '₪' + Math.round(n).toLocaleString('ru-RU');
   function calculate(){
     const t = tariffs[country.value];
@@ -1816,8 +1809,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
       quoteButton.style.opacity = '.5';
       return;
     }
-    const billed = Math.ceil(raw);
-    const total = t.base + Math.max(0, billed - t.included) * t.extra;
+    const {billed, total} = AdmiralPricing.quote(country.value, raw);
     price.textContent = money(total);
     formula.textContent = t.name + ': ' + (billed <= t.included
       ? 'עד ' + t.included + ' ק״ג — ' + money(t.base)
