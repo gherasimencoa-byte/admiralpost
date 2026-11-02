@@ -56,6 +56,8 @@
   $('new').disabled=true;if(!cfg?.url||!window.supabase)throw Error('Конфигурация недоступна.');db=window.supabase.createClient(cfg.url,cfg.publishableKey);
   const {data,error}=await db.auth.getUser();if(error||!data.user||data.user.app_metadata?.is_admin!==true){say('Для доступа войдите в админ-панель по ссылке сверху.',true);return;}user=data.user;$('workspace').hidden=false;$('new').disabled=false;
   db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){loadVersion++;rows=[];selected=null;$('detail').close();$('rows').replaceChildren();$('messages').replaceChildren();$('workspace').hidden=true;$('new').disabled=true;say('Сессия завершена. Войдите в админ-панель.');}});await load();
+  const requested=new URLSearchParams(location.search).get("conversation");
+  if(requested&&/^[0-9a-f-]{36}$/i.test(requested)){const c=await checked(db.from("conversations").select("*").eq("id",requested).maybeSingle());if(c){if(!rows.some(r=>r.id===c.id))rows.push(c);await open(c.id);}}
  }
  init().catch(e=>say(e.message,true));
 })();
