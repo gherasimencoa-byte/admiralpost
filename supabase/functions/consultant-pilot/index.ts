@@ -1,3 +1,4 @@
+import { providerError } from './provider-errors.js';
 import knowledge from './knowledge.json' with { type: 'json' };
 import '../../../shipping-pricing.js';
 const headers={'Content-Type':'application/json','Access-Control-Allow-Origin':'https://www.admiral-post.com','Access-Control-Allow-Headers':'authorization,apikey,content-type','Access-Control-Allow-Methods':'POST,GET,OPTIONS'};
@@ -20,7 +21,13 @@ Deno.serve(async req=>{
  const input:any[]=[...data.messages];const quotes:any[]=[];
  for(let i=0;i<4;i++){
  const response=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},signal:AbortSignal.timeout(45000),body:JSON.stringify({model:Deno.env.get('OPENAI_MODEL')||'gpt-4.1-mini',store:false,instructions,input,max_output_tokens:1400,tools:[{type:'function',name:'shipping_quote',description:'Окончательная цена калькулятора сайта для стандартной посылки из Израиля, без допуслуг.',strict:true,parameters:{type:'object',properties:{country:{type:'string',enum:Object.keys(pricing.tariffs)},weight:{type:'number'}},required:['country','weight'],additionalProperties:false}}]})});
- if(!response.ok)return reply({error:'Модель недоступна. Проверьте API-ключ, баланс и доступ к модели.'},502);
+ if(!response.ok){
+  const failure=await response.json().catch(()=>({}));
+  const diagnostic=providerError(response.status,failure.error?.code);
+  // Never log provider messages: they may contain credentials or customer data.
+  console.error(JSON.stringify({event:'consultant_provider_error',status:response.status,code:diagnostic.code}));
+  return reply({error:diagnostic.message+' [Код: '+diagnostic.code+']',code:diagnostic.code},502);
+ }
  const result=await response.json();input.push(...(result.output||[]));
  const calls=(result.output||[]).filter((o:any)=>o.type==='function_call');
  if(!calls.length){const text=(result.output||[]).flatMap((o:any)=>o.content||[]).filter((c:any)=>c.type==='output_text').map((c:any)=>c.text).join('\n');if(!text)throw Error('empty');return reply({text,quotes,knowledge_version:knowledge.version});}
