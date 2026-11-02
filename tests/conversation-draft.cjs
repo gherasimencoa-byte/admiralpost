@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict');require('../conversation-draft.js');
+const {snapshot,merge}=globalThis.AdmiralDraft;
+const c={customer_name:'Александр',draft:{destination:'Россия',weight_kg:10,consent:true,confirmed:true}};
+const base=snapshot(c);
+const edit={...base,phone:'123'};
+const patch=merge(base,edit,{...c,draft:{...c.draft,contents:'Одежда'}});
+assert.equal(patch.phone,'123');assert.equal(patch.draft.contents,'Одежда');assert.equal(patch.draft.consent,undefined);assert.equal(patch.draft.confirmed,undefined);
+assert.throws(()=>merge(base,{...base,customer_name:'Иван'},{...c,customer_name:'Пётр'}),/изменено/);
+assert.throws(()=>merge(base,edit,{...c,quote_request_id:'linked'}),/уже создана/);
+assert.deepEqual(merge(base,base,c),{});
+console.log('PASS: draft merge, concurrent edits, confirmation reset, converted lock');
