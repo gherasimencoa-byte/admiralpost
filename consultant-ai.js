@@ -1,0 +1,13 @@
+'use strict';
+(async()=>{
+ const $=id=>document.getElementById(id),cfg=window.ADMIRAL_SUPABASE_CONFIG,db=window.supabase.createClient(cfg.url,cfg.publishableKey);let history=[],busy=false,authorized=false;
+ const say=s=>$('status').textContent=s;
+ const controls=()=>{for(const id of ['send','reset'])$(id).disabled=busy||!authorized;};
+ function line(label,text){const el=document.createElement('article');el.className='bubble';el.textContent=label+': '+text;$('messages').append(el);}
+ try{const {data,error}=await db.auth.getUser();if(error||data.user?.app_metadata?.is_admin!==true)throw Error('Сначала войдите в админку.');authorized=true;say('Готов к тестированию. Начните с вопроса: «Сколько стоит отправить 10 кг в Украину?»');controls();}catch(e){say(e.message);}
+ db.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){authorized=false;history=[];$('messages').replaceChildren();controls();say('Сессия завершена.');}});
+ $('reset').onclick=()=>{if(busy)return;history=[];$('messages').replaceChildren();$('question').value='';say('Новый диалог.');};
+ $('chat').onsubmit=async e=>{e.preventDefault();if(busy||!authorized)return;const content=$('question').value.trim();if(!content)return;if(history.length>=28){say('Начните новый диалог: достигнут предел теста.');return;}busy=true;controls();say('ИИ готовит ответ…');
+ try{const {data}=await db.auth.getSession();if(!data.session)throw Error('Войдите заново.');const response=await fetch(cfg.url+'/functions/v1/consultant-pilot',{method:'POST',headers:{Authorization:'Bearer '+data.session.access_token,apikey:cfg.publishableKey,'Content-Type':'application/json'},body:JSON.stringify({messages:[...history,{role:'user',content}]}),signal:AbortSignal.timeout(180000)});const result=await response.json();if(!response.ok)throw Error(result.error||'Ошибка сервера');if(!authorized)return;history.push({role:'user',content},{role:'assistant',content:result.text});line('Клиент',content);line('ИИ',result.text);for(const q of result.quotes||[])line('Калькулятор',`${q.total} ₪ · расчётный вес ${q.billed} кг`);$('question').value='';say('Ответ получен. Проверьте его по правилам компании.');}catch(e){say(e.name==='TimeoutError'?'Ответ не получен вовремя. Повторите попытку.':e.message);}finally{busy=false;controls();}
+ };
+})();
