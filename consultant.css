@@ -10,3 +10,12 @@ body:has(#typing:not([hidden])) .assistant-avatar{animation:eva-thinking 2.8s ea
 @keyframes eva-thinking{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-2px) rotate(2deg)}}
 @media(prefers-reduced-motion:reduce){.assistant-avatar,body:has(#typing:not([hidden])) .assistant-avatar{animation:none}}
 @media(max-width:380px){.assistant-avatar{width:48px;height:48px}}
+
+.assistant-portrait{position:relative;display:block;flex:0 0 96px;width:96px;height:96px;overflow:hidden;border-radius:50%;background:#f3f8fa}
+.assistant-portrait .assistant-avatar{position:absolute;width:168%;height:auto;max-width:none;left:-34%;top:-3%;border-radius:0;transform-origin:50% 25%}
+.assistant-identity>div{min-width:0}
+header h1{font-size:21px;line-height:1.2;margin:0 0 6px}
+header{align-items:center;padding-bottom:12px}
+#close{flex-shrink:0}
+@media(max-width:520px){.assistant-portrait{flex-basis:84px;width:84px;height:84px}.assistant-identity{gap:10px}header{gap:8px}header h1{font-size:18px}header p{font-size:12px;line-height:1.35}}
+@media(max-width:350px){.assistant-portrait{flex-basis:76px;width:76px;height:76px}header h1{font-size:16px}}

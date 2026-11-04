@@ -1,4 +1,4 @@
-import {translations} from './consultant-i18n.js';
+import {translations} from './consultant-i18n.js?v=eva2';
 'use strict';
 (()=>{
  const $=id=>document.getElementById(id),lang=['en','he'].includes(new URLSearchParams(location.search).get('lang'))?new URLSearchParams(location.search).get('lang'):'ru',t=translations[lang],storage='admiral-public-chat-v1-'+lang,cfg=window.ADMIRAL_SUPABASE_CONFIG;
