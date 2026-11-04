@@ -13,11 +13,13 @@ body .whatsapp-float .wa-label{display:none}
 #ap-cookie-reopen{left:10px;bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:85px;min-height:40px}
 #admiral-ai-panel{right:0;bottom:0;width:100%;height:100dvh;border:0;border-radius:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 } @media(min-width:601px){#admiral-ai-launch .eva-short{display:none}}`;style.textContent+=`
-#admiral-ai-launch[aria-expanded="false"]{animation:eva-nudge 6s ease-in-out 2s infinite}
-@media(hover:hover) and (pointer:fine){#admiral-ai-launch:hover{animation:none}}
-#admiral-ai-launch:focus-visible{animation:none}
-@keyframes eva-nudge{0%,22%,100%{transform:translateX(0) rotate(0)}4%,12%{transform:translateX(-2px) rotate(-1deg)}8%,16%{transform:translateX(2px) rotate(1deg)}20%{transform:translateX(-1px) rotate(-0.5deg)}}
-@media(prefers-reduced-motion:reduce){#admiral-ai-launch[aria-expanded="false"]{animation:none}}
+#admiral-ai-launch img{animation:none}
+#admiral-ai-launch::before{content:"";position:absolute;inset:-2px;border:2px solid #547fa9;border-radius:inherit;pointer-events:none;opacity:0}
+#admiral-ai-launch[aria-expanded="false"]::before{animation:eva-pulse 6s ease-out infinite}
+@keyframes eva-pulse{0%{transform:scale(1);opacity:0}4%{transform:scale(1);opacity:.5}24%,100%{transform:scale(1.12,1.3);opacity:0}}
+@media(hover:hover) and (pointer:fine){#admiral-ai-launch:hover::before{animation:none}}
+#admiral-ai-launch:focus-visible::before{animation:none}
+@media(prefers-reduced-motion:reduce){#admiral-ai-launch[aria-expanded="false"]::before{animation:none}}
 `;document.head.append(style);
  const name=document.documentElement.lang==='he'?'אווה · עוזרת וירטואלית':document.documentElement.lang==='en'?'Eva · Virtual assistant':'Ева · Виртуальный помощник';
  const button=document.createElement('button');button.id='admiral-ai-launch';button.type='button';const avatar=document.createElement('img');avatar.src='/consultant-eva.jpeg';avatar.alt='';avatar.width=40;avatar.height=40;const label=document.createElement('span');label.textContent=name;label.className='eva-long';const short=document.createElement('span');short.className='eva-short';short.textContent=document.documentElement.lang==='he'?'אווה':document.documentElement.lang==='en'?'Eva':'Ева';button.setAttribute('aria-label',name);button.append(avatar,label,short);button.setAttribute('aria-expanded','false');button.setAttribute('aria-controls','admiral-ai-panel');
