@@ -3,3 +3,10 @@
 .typing{display:flex;gap:10px;align-items:center;color:#60748a;font-size:14px;padding:10px 4px}.dots{display:inline-flex;gap:4px}.dots i{width:6px;height:6px;border-radius:50%;background:#6889a4;animation:chat-dot 1.2s infinite}.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}@keyframes chat-dot{0%,60%,100%{opacity:.35;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}[dir=rtl] .bubble.customer{margin-left:0;margin-right:30px}[dir=rtl] .bubble.assistant{margin-right:0;margin-left:20px}input[type=tel],input[type=email],a[href^="tel:"]{direction:ltr;unicode-bidi:isolate}@media(prefers-reduced-motion:reduce){.dots i{animation:none}}
 
 .assistant-identity{display:flex;align-items:center;gap:12px;min-width:0}.assistant-avatar{flex-shrink:0;border-radius:50%}@media(max-width:380px){.assistant-identity{gap:8px}.assistant-avatar{width:42px;height:42px}header{gap:8px}h1{font-size:19px}}
+
+.assistant-avatar{width:64px;height:64px;object-fit:cover;object-position:50% 12%;animation:eva-greeting 1.8s ease-in-out 1}
+@keyframes eva-greeting{0%,100%{transform:rotate(0)}35%{transform:rotate(-4deg)}70%{transform:rotate(3deg)}}
+body:has(#typing:not([hidden])) .assistant-avatar{animation:eva-thinking 2.8s ease-in-out infinite}
+@keyframes eva-thinking{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-2px) rotate(2deg)}}
+@media(prefers-reduced-motion:reduce){.assistant-avatar,body:has(#typing:not([hidden])) .assistant-avatar{animation:none}}
+@media(max-width:380px){.assistant-avatar{width:48px;height:48px}}
