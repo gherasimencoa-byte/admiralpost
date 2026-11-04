@@ -12,7 +12,12 @@ body .whatsapp-float{right:14px!important;left:auto!important;bottom:calc(10px +
 body .whatsapp-float .wa-label{display:none}
 #ap-cookie-reopen{left:10px;bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:85px;min-height:40px}
 #admiral-ai-panel{right:0;bottom:0;width:100%;height:100dvh;border:0;border-radius:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-} @media(min-width:601px){#admiral-ai-launch .eva-short{display:none}}`;document.head.append(style);
+} @media(min-width:601px){#admiral-ai-launch .eva-short{display:none}}`;style.textContent+=`
+#admiral-ai-launch[aria-expanded="false"]{animation:eva-nudge 7s ease-in-out 3s infinite}
+#admiral-ai-launch:hover,#admiral-ai-launch:focus-visible{animation:none}
+@keyframes eva-nudge{0%,9%,100%{transform:translateX(0) rotate(0)}2%,6%{transform:translateX(-1.5px) rotate(-1deg)}4%,8%{transform:translateX(1.5px) rotate(1deg)}}
+@media(prefers-reduced-motion:reduce){#admiral-ai-launch[aria-expanded="false"]{animation:none}}
+`;document.head.append(style);
  const name=document.documentElement.lang==='he'?'אווה · עוזרת וירטואלית':document.documentElement.lang==='en'?'Eva · Virtual assistant':'Ева · Виртуальный помощник';
  const button=document.createElement('button');button.id='admiral-ai-launch';button.type='button';const avatar=document.createElement('img');avatar.src='/consultant-eva.jpeg';avatar.alt='';avatar.width=40;avatar.height=40;const label=document.createElement('span');label.textContent=name;label.className='eva-long';const short=document.createElement('span');short.className='eva-short';short.textContent=document.documentElement.lang==='he'?'אווה':document.documentElement.lang==='en'?'Eva':'Ева';button.setAttribute('aria-label',name);button.append(avatar,label,short);button.setAttribute('aria-expanded','false');button.setAttribute('aria-controls','admiral-ai-panel');
  const panel=document.createElement('section');panel.id='admiral-ai-panel';panel.hidden=true;panel.setAttribute('aria-label',name+' · Admiral Post');let frame;
