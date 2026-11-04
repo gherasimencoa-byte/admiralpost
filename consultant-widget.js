@@ -4,6 +4,6 @@
  const button=document.createElement('button');button.id='admiral-ai-launch';button.type='button';button.textContent=document.documentElement.lang==='he'?'יועץ AI':document.documentElement.lang==='en'?'Ask AI':'ИИ-консультант';button.setAttribute('aria-expanded','false');button.setAttribute('aria-controls','admiral-ai-panel');
  const panel=document.createElement('section');panel.id='admiral-ai-panel';panel.hidden=true;panel.setAttribute('aria-label','ИИ-консультант Admiral Post');let frame;
  const close=()=>{panel.hidden=true;button.setAttribute('aria-expanded','false');button.focus();};
- button.onclick=()=>{if(!panel.hidden){close();return;}if(!frame){frame=document.createElement('iframe');frame.src='/consultant.html';frame.title='Чат с ИИ-консультантом Admiral Post';panel.append(frame);}panel.hidden=false;button.setAttribute('aria-expanded','true');frame.focus();};
+ button.onclick=()=>{if(!panel.hidden){close();return;}if(!frame){frame=document.createElement('iframe');frame.src='/consultant.html?lang='+(['ru','en','he'].includes(document.documentElement.lang)?document.documentElement.lang:'ru');frame.title='Чат с ИИ-консультантом Admiral Post';panel.append(frame);}panel.hidden=false;button.setAttribute('aria-expanded','true');frame.focus();};
  window.addEventListener('message',e=>{if(e.origin===location.origin&&e.source===frame?.contentWindow&&e.data?.type==='admiral-chat-close')close();});window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden)close();});document.body.append(button,panel);
 })();
