@@ -13,10 +13,10 @@ body .whatsapp-float .wa-label{display:none}
 #ap-cookie-reopen{left:10px;bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:85px;min-height:40px}
 #admiral-ai-panel{right:0;bottom:0;width:100%;height:100dvh;border:0;border-radius:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 } @media(min-width:601px){#admiral-ai-launch .eva-short{display:none}}`;style.textContent+=`
-#admiral-ai-launch[aria-expanded="false"]{animation:eva-nudge 4s ease-in-out 2s infinite}
+#admiral-ai-launch[aria-expanded="false"]{animation:eva-nudge 6s ease-in-out 2s infinite}
 @media(hover:hover) and (pointer:fine){#admiral-ai-launch:hover{animation:none}}
 #admiral-ai-launch:focus-visible{animation:none}
-@keyframes eva-nudge{0%,22%,100%{transform:translateX(0) rotate(0)}4%,12%{transform:translateX(-4px) rotate(-3deg)}8%,16%{transform:translateX(4px) rotate(3deg)}20%{transform:translateX(-2px) rotate(-1deg)}}
+@keyframes eva-nudge{0%,22%,100%{transform:translateX(0) rotate(0)}4%,12%{transform:translateX(-2px) rotate(-1deg)}8%,16%{transform:translateX(2px) rotate(1deg)}20%{transform:translateX(-1px) rotate(-0.5deg)}}
 @media(prefers-reduced-motion:reduce){#admiral-ai-launch[aria-expanded="false"]{animation:none}}
 `;document.head.append(style);
  const name=document.documentElement.lang==='he'?'אווה · עוזרת וירטואלית':document.documentElement.lang==='en'?'Eva · Virtual assistant':'Ева · Виртуальный помощник';
