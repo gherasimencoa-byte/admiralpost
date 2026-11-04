@@ -3,7 +3,7 @@
  const $=id=>document.getElementById(id),cfg=window.ADMIRAL_SUPABASE_CONFIG,db=window.supabase.createClient(cfg.url,cfg.publishableKey);let history=[],busy=false,authorized=false;
  const say=s=>$('status').textContent=s;
  const controls=()=>{for(const id of ['send','reset'])$(id).disabled=busy||!authorized;};
- function line(label,text){const el=document.createElement('article');el.className='bubble';el.textContent=label+': '+text;$('messages').append(el);}
+ function line(label,text){const el=document.createElement('article');el.className='bubble';el.textContent=label+': ';const url='https://www.admiral-post.com/documents/declaration.pdf';const parts=text.split(url);parts.forEach((part,i)=>{el.append(document.createTextNode(part));if(i<parts.length-1){const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Открыть бланк декларации (PDF)';el.append(link);}});$('messages').append(el);}
  try{const {data,error}=await db.auth.getUser();if(error||data.user?.app_metadata?.is_admin!==true)throw Error('Сначала войдите в админку.');authorized=true;say('Готов к тестированию. Начните с вопроса: «Сколько стоит отправить 10 кг в Украину?»');controls();}catch(e){say(e.message);}
  db.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){authorized=false;history=[];$('messages').replaceChildren();controls();say('Сессия завершена.');}});
  $('reset').onclick=()=>{if(busy)return;history=[];$('messages').replaceChildren();$('question').value='';say('Новый диалог.');};
