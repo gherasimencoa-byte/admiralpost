@@ -15,6 +15,10 @@
 <div id="notice" class="message">Проверка конфигурации…</div>
 <section id="loginPanel" class="panel hidden"><h2>Вход администратора</h2><p class="muted">Используйте учётную запись, заранее созданную в Supabase Auth и отмеченную как администратор.</p><form id="loginForm" class="fields"><label>Email<input id="loginEmail" type="email" autocomplete="username" required></label><label>Пароль<input id="loginPassword" type="password" autocomplete="current-password" required></label><div style="align-self:end"><button>Войти</button></div></form></section>
 <section id="appPanel" class="hidden">
+<section id="ownerAccess" class="panel hidden"><h2>Права администратора</h2>
+<form id="adminAccessForm" class="fields"><label>Email сотрудника<input name="email" type="email" required></label>
+<label>Действие<select name="action"><option value="grant">Назначить администратором</option><option value="remove">Снять права администратора</option></select></label>
+<button>Применить</button></form><p role="status" id="accessStatus"></p></section>
 <div class="stats"><div class="stat"><span class="muted">Новые заявки</span><strong id="newQuotes">0</strong></div><div class="stat"><span class="muted">Всего заявок</span><strong id="totalQuotes">0</strong></div><div class="stat"><span class="muted">Отправления</span><strong id="totalShipments">0</strong></div><div class="stat"><span class="muted">В пути</span><strong id="inTransit">0</strong></div></div>
 <div class="panel"><div class="tabs"><a href="admin-dialogues.html" class="contact-link" style="padding:10px 14px">Диалоги</a><button class="tab active" data-tab="quotes">Заявки с сайта</button><button class="tab secondary" data-tab="shipments">Реестр отправлений</button><button class="tab secondary" data-tab="newShipment">+ Зарегистрировать отправление</button></div>
 <div id="quotesView"><div class="toolbar"><input id="quoteSearch" placeholder="Номер, имя, телефон, email"><select id="quoteStatus"><option value="">Все статусы</option><option value="new">Новая</option><option value="in_progress">В обработке</option><option value="waiting_customer">Ждём клиента</option><option value="quoted">Расчёт отправлен</option><option value="converted">Оформлена</option><option value="closed">Закрыта</option><option value="spam">Спам</option></select><button id="refreshQuotes" class="secondary">Обновить</button></div><div class="table-wrap"><table><thead><tr><th>Номер / дата</th><th>Клиент</th><th>Направление / вес</th><th>Комментарий</th><th>Статус / заметка</th><th>Действия</th></tr></thead><tbody id="quotesBody"></tbody></table></div></div>
@@ -37,11 +41,22 @@
  const shipmentLabels={registered:'Зарегистрировано',received:'Принято',sorting:'Сортировка',in_transit:'В пути',customs:'Таможня',out_for_delivery:'Курьерская доставка',delivered:'Доставлено',exception:'Проблема',cancelled:'Отменено'};
  let quotes=[], shipments=[], activeQuoteId=null;
  function say(text,error=false){notice.textContent=text;notice.className='message'+(error?' error':'');}
+ el('adminAccessForm').addEventListener('submit', async event => {
+   event.preventDefault();
+   const form = event.currentTarget;
+   const {error} = await db.rpc('admiral_change_admin', {
+     account_email: form.elements.email.value.trim(),
+     enabled: form.elements.action.value === 'grant'
+   });
+   el('accessStatus').textContent = error ? error.message : 'Права обновлены.';
+ });
  async function sessionCheck(){
+   el('ownerAccess').classList.add('hidden');
    const {data:{session}}=await db.auth.getSession();
    if(!session){loginPanel.classList.remove('hidden');appPanel.classList.add('hidden');logoutBtn.classList.add('hidden');say('Войдите с учётной записью администратора.');return;}
    const {data:{user}}=await db.auth.getUser();
    if(user?.app_metadata?.is_admin!==true){await db.auth.signOut();loginPanel.classList.remove('hidden');appPanel.classList.add('hidden');say('Доступ запрещён: для пользователя не установлен признак администратора в app_metadata.',true);return;}
+   el('ownerAccess').classList.toggle('hidden', user.app_metadata.is_owner !== true);
    loginPanel.classList.add('hidden');appPanel.classList.remove('hidden');logoutBtn.classList.remove('hidden');el('userLabel').textContent=user.email||'';say('Вход выполнен. Данные загружаются…');await refreshAll();
  }
  async function refreshAll(){await Promise.all([loadQuotes(),loadShipments()]);}
