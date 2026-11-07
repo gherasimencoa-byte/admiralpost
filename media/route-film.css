@@ -14,3 +14,18 @@
 @media (max-width: 900px) {
   .hero .route-film { justify-self: center; margin-inline: auto; }
 }
+
+.journey-mobile { display: none; }
+@media (max-width: 900px) {
+  .hero .route-film { display: none; }
+  .journey-mobile { display: block; max-width: 360px; margin: 20px auto 0; }
+  .journey-play {
+    display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px;
+    background: white; color: #123650; border: 1px solid #dce4eb; border-radius: 14px;
+    text-decoration: none; font-weight: 700; line-height: 1.35;
+  }
+  .journey-play img { width: 56px; height: 72px; border-radius: 8px; }
+  .journey-icon { margin-inline-start: auto; color: #123650; }
+  .journey-mobile video { display: block; width: 100%; height: auto; aspect-ratio: 7/9; border-radius: 14px; }
+  .journey-mobile [hidden] { display: none; }
+}
