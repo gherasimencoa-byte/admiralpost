@@ -1,0 +1,16 @@
+.hero .route-film {
+  display: block;
+  width: min(100%, 360px);
+  min-width: 0;
+  height: auto;
+  aspect-ratio: 7 / 9;
+  object-fit: contain;
+  align-self: center;
+  justify-self: end;
+  border-radius: 18px;
+  background: #123650;
+  box-shadow: 0 12px 32px rgba(13,43,82,.18);
+}
+@media (max-width: 900px) {
+  .hero .route-film { justify-self: center; margin-inline: auto; }
+}
