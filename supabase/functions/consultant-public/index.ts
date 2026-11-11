@@ -97,7 +97,11 @@ Deno.serve(async req=>{
    const calls=(result.output||[]).filter((o:any)=>o.type==='function_call');
    if(turn===0){
     if(calls.length!==1||calls[0].name!=='identify_destination')throw Error('destination check');
-    code=String(JSON.parse(calls[0].arguments).code).trim().toUpperCase();
+    const reported=String(JSON.parse(calls[0].arguments).code).trim();
+    code=countryNames.get(normalizeCountry(reported))??reported.toUpperCase();
+    // Prefer an explicitly named new destination over a previous turn.
+    const explicit=b.text.trim().match(/(?:\b(?:ship(?:ping)?|send|deliver(?:y)?)\s+to\s+|\bto\s+)([a-z]+(?: [a-z]+){0,3}?)(?=\s+(?:for|from|with|weighing|instead)\b|[,?.!]|$)/i);
+    if(explicit && !/\b(?:not|except|or|via)\b/i.test(b.text))code=countryNames.get(normalizeCountry(explicit[1]))??code;
     if(code==='?'){
      answer={ru:'В какую страну хотите отправить посылку? Проверю направление отдельно.',en:'Which country would you like to ship to? I’ll check that destination.',he:'לאיזו מדינה תרצו לשלוח את החבילה? אבדוק את היעד.'}[lang];break;
     }
