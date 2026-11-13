@@ -87,7 +87,7 @@
   const languages = ['ru','en','he','uk'].map(l=>new Intl.DisplayNames([l],{type:'region',fallback:'none'}));
   for(const a of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') for(const b of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'){
     const code=a+b;
-    if(code==='IL')continue;
+    if(code==='IL' || new Intl.Locale('und-'+code).region!==code)continue;
     for(const display of languages){
       const name=display.of(code);
       if(!name)continue;
