@@ -76,6 +76,74 @@
   // Hide old floating controls only after the replacement is mounted.
   const pageStyle=el('style');pageStyle.textContent='#admiral-ai-launch,#admiral-ai-panel{display:none!important}';document.head.append(pageStyle);
   function api(action,data={}){return fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,key:KEY,token:S.token,lang,client:"admiral-unified-v1",page_url:location.href,page_title:document.title,...data}),signal:AbortSignal.timeout(160000)}).then(async r=>{const d=await r.json();if(!r.ok||d.error){const e=Error(d.error||t.error);e.status=r.status;throw e;}return d;});}
+  const routeText = {
+    ru: { no: name => 'К сожалению, ' + name + ' не входит в список стран, куда Admiral Post доставляет посылки из Израиля.', ask: 'В какую страну хотите отправить посылку? Укажите название страны, и я сверю его со списком направлений Admiral Post.', unavailable: 'Сейчас не удаётся проверить список направлений. Пожалуйста, попробуйте ещё раз или позовите консультанта.' },
+    en: { no: name => 'Unfortunately, ' + name + ' is not among the countries Admiral Post delivers parcels to from Israel.', ask: 'Which country are you sending the parcel to? I’ll check our published destinations.', unavailable: 'I can’t check our destinations right now. Please try again or ask for a consultant.' },
+    he: { no: name => 'לצערנו, ' + name + ' אינה ברשימת המדינות שאליהן Admiral Post שולחת חבילות מישראל.', ask: 'לאיזו מדינה תרצו לשלוח את החבילה? אבדוק ברשימת היעדים שלנו.', unavailable: 'כרגע אין אפשרות לבדוק את רשימת היעדים. אפשר לנסות שוב או לבקש נציג.' }
+  }[lang];
+  const normalizeCountry = text => String(text).toLowerCase().normalize('NFKC').replace(/[״"'׳]/g,'').replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+  const countryNames = new Intl.DisplayNames([lang],{type:'region'});
+  const labels = new Map();
+  const languages = ['ru','en','he','uk'].map(l=>new Intl.DisplayNames([l],{type:'region',fallback:'none'}));
+  for(const a of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') for(const b of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'){
+    const code=a+b;
+    if(code==='IL')continue;
+    for(const display of languages){
+      const name=display.of(code);
+      if(!name)continue;
+      const label=normalizeCountry(name);
+      labels.set(label,code);
+      if(/[ая]$/u.test(label))labels.set(label.slice(0,-1)+(label.endsWith('я')?'ю':'у'),code);
+      if(display.resolvedOptions().locale==='he')labels.set('ל'+label,code);
+    }
+  }
+  for(const [code,aliases] of Object.entries({KR:['южную корею','южная корея','южную короею','south okrea','south corea','корею','сеул','דרום קוריאה','לדרום קוריאה'],KP:['северную корею','северная корея','north okrea','пхеньян','צפון קוריאה','לצפון קוריאה'],US:['сша','америка','америку','usa'],BY:['белоруссию'],KG:['киргизию'],GB:['англию','uk']})){
+    for(const alias of aliases)labels.set(alias,code);
+  }
+  const sortedLabels=[...labels].sort((a,b)=>b[0].length-a[0].length);
+  function countryCodes(text){
+    let phrase=' '+normalizeCountry(text)+' ';
+    const found=[];
+    for(const [label,code] of sortedLabels){
+      const word=' '+label+' ';
+      if(phrase.includes(word)){found.push(code);phrase=phrase.split(word).join(' ');}
+    }
+    return found;
+  }
+  let registry;
+  async function destinations(){
+    if(!registry)registry=fetch(new URL('delivery-destinations.json',base)).then(async r=>{
+      if(!r.ok)throw Error();
+      const data=await r.json();
+      if(!Array.isArray(data.destinations)||!data.destinations.length)throw Error();
+      return new Set(data.destinations);
+    }).catch(e=>{registry=null;throw e;});
+    return registry;
+  }
+  const shippingQuestion = /(?:отправ|достав|пересла|посылк|курьер|расч[её]т|ship|deliver|send|parcel|משלוח|לשלוח)/iu;
+  function decision(text,allowed){
+    const codes=countryCodes(text);
+    const missing=codes.find(code=>!allowed.has(code));
+    return missing ? routeText.no(countryNames.of(missing)) : null;
+  }
+  let turns=[];
+  try{turns=JSON.parse(sessionStorage.getItem(ns+'routeTurns')||'[]');}catch{}
+  function transcript(){
+    const local=turns.filter(x=>x.token===S.token && (!x.chat||x.chat===S.chat?.id)).flatMap(x=>[{author:'visitor',body:x.text,at:x.at},{author:'bot',name:copy.ai,body:x.answer,at:x.at}]);
+    return [...S.messages,...local].sort((a,b)=>Date.parse(a.at)-Date.parse(b.at));
+  }
+  function saveRouteTurn(text,answer){
+    turns.push({token:S.token,chat:S.chat?.id,text,answer,at:new Date().toISOString()});turns=turns.slice(-30);
+    try{sessionStorage.setItem(ns+'routeTurns',JSON.stringify(turns));}catch{}
+  }
+  async function guardReply(text){
+    const allowed=await destinations();
+    if(countryCodes(text).length)return decision(text,allowed);
+    const prior=transcript().reverse().find(m=>m.author==='visitor'&&countryCodes(m.body).length);
+    if((shippingQuestion.test(text) && !prior && /(?:цен|стои|сколько|куда|хочу отправ|заказать достав|рассчит|сколько|price|quote|how much|ship to|עלות|מחיר)/iu.test(text)) || (shippingQuestion.test(text) && /(?:достав|отправ|посылк).{0,28}\sв\s+\p{L}|(?:ship|deliver|send).{0,25}\bto\s+\p{L}/iu.test(text)))return routeText.ask;
+    if(prior && (shippingQuestion.test(text)||/\d\s*(?:кг|kg|קג)|^(?:да|yes|כן)$/i.test(text)))return decision(prior.body,allowed);
+    return null;
+  }
   function merge(d){
     if(d.token){S.token=d.token;storage.set('t',d.token);}
     if(d.visitor)S.visitor=d.visitor;
@@ -106,7 +174,7 @@
     if(!body)return;body.replaceChildren();actionsEl.replaceChildren();composer.hidden=S.view!=='chat';composer.style.display=S.view==='chat'?'':'none';
     if(S.view!=='chat'){body.append(button('← '+copy.back,()=>{S.view='chat';renderView();},'chip back'));if(S.view==='order')return orderForm();if(S.view==='contact')return contactForm();if(S.view==='track')return trackingForm();}
     const log=el('div');log.style.display='contents';log.setAttribute('role','log');log.setAttribute('aria-live','polite');log.setAttribute('aria-label',copy.back);
-    if(!S.messages.length)log.append(bubble({author:'bot',body:copy.hello,name:copy.ai}));for(const m of S.messages){if(m.author==='system'&&/Сообщение получено вне рабочего времени/.test(m.body))continue;log.append(bubble(m));}body.append(log);if(S.ready && returning)showReturn(log);
+    if(!S.messages.length)log.append(bubble({author:'bot',body:copy.hello,name:copy.ai}));for(const m of transcript()){if(m.author==='system'&&/Сообщение получено вне рабочего времени/.test(m.body))continue;log.append(bubble(m));}body.append(log);if(S.ready && returning)showReturn(log);
     if(!S.ready)body.append(el('p','notice',copy.loading));
     if(!S.consent&&S.chat?.mode!=='human'&&S.chat?.mode!=='waiting'){const card=el('div','card');card.append(el('p','notice',copy.consent),button(copy.accept,()=>{S.consent=true;storage.set('consent','1');renderView();composer.querySelector('textarea').focus();},'primary'));body.append(card);}
     if(S.busy||S.chat?.typing)body.append(el('div','typing',t.typing+'…'));
@@ -124,7 +192,11 @@
     markVisit();returning=false;
     if(!S.pending||S.pending.text!==text)S.pending={text,id:crypto.randomUUID()};
     S.busy=true;S.aiError=false;S.view='chat';renderView();
-    try{const d=await api('send',{body:text,request_id:S.pending.id,after:S.last});merge(d);S.aiError=!!d.ai_error;if(d.draft&&Object.values(d.draft).some(Boolean)&&S.chat?.mode==='ai')S.view='order';S.draft='';storage.set('draft','');if(!S.aiError)S.pending=null;}
+    try{if(!['human','waiting'].includes(S.chat?.mode) || S.chat?.status==='closed'){
+      let answer;try{answer=await guardReply(text);}catch{answer=routeText.unavailable;}
+      if(answer){saveRouteTurn(text,answer);S.draft='';storage.set('draft','');S.pending=null;S.busy=false;render();schedule();return;}
+    }
+    const d=await api('send',{body:text,request_id:S.pending.id,after:S.last});if(!['waiting','human'].includes(d.chat?.mode) && d.messages?.some(m=>m.author==='bot')){const allowed=await destinations();for(const m of d.messages){if(m.author==='bot'){const denied=decision(m.body,allowed);if(denied){m.body=denied;delete d.draft;}}}}merge(d);S.aiError=!!d.ai_error;if(d.draft&&Object.values(d.draft).some(Boolean)&&S.chat?.mode==='ai')S.view='order';S.draft='';storage.set('draft','');if(!S.aiError)S.pending=null;}
     catch(e){showError(e.status?e.message:copy.network);S.busy=false;body?.querySelector('.typing')?.remove();syncDisabled();return;}
     finally{S.busy=false;}
     if(composer)composer.querySelector('textarea').value=S.draft;renderView();schedule();
@@ -146,7 +218,7 @@
     const consent=el('label','consent'),check=el('input');check.type='checkbox';check.required=true;consent.append(check,el('span','',t.consent));form.append(consent);
     const submit=el('button','primary',t.submit);submit.type='submit';form.append(submit);const err=el('div','error');err.setAttribute('role','alert');form.append(err);
     form.onsubmit=async e=>{e.preventDefault();if(submit.disabled)return;submit.disabled=true;err.textContent='';const draft=Object.fromEntries(new FormData(form));draft.weight_kg=Number(draft.weight_kg);draft.consent=check.checked;
-      try{const d=await api('submit',{draft,after:S.last});merge(d);S.view='chat';renderView();}catch(e){err.textContent=e.status?e.message:copy.submitError;submit.disabled=false;}};
+      try{const allowed=await destinations();const denied=decision(draft.destination,allowed);if(denied||!countryCodes(draft.destination).length){err.textContent=denied||routeText.ask;submit.disabled=false;return;}const d=await api('submit',{draft,after:S.last});merge(d);S.view='chat';renderView();}catch(e){err.textContent=e.status?e.message:copy.submitError;submit.disabled=false;}};
   }
   function contactForm(){const c=el('div','card');c.append(el('h2','',copy.contact),el('p','notice',copy.contactNote));const form=el('form');const name=field(form,'name',t.customer_name);name.value=S.visitor.name||'';name.maxLength=120;const phone=field(form,'phone',t.phone,'tel');phone.value=S.visitor.phone||'';phone.maxLength=40;const submit=el('button','primary',t.send);submit.type='submit';const err=el('div','error');form.append(submit,err);c.append(form);body.append(c);form.onsubmit=async e=>{e.preventDefault();if(!/^\+?[\d\s()-]{9,25}$/.test(phone.value)||phone.value.replace(/\D/g,'').length<9){err.textContent=t.phoneError;return;}submit.disabled=true;try{await api('introduce',{name:name.value,phone:phone.value});S.visitor={name:name.value,phone:phone.value};S.view='chat';renderView();body.append(el('p','notice',copy.saved));}catch(e){err.textContent=e.message;submit.disabled=false;}};}
   function trackingForm(){const c=el('div','card');c.append(el('h2','',copy.track));const form=el('form');const number=field(form,'trackNumber',copy.trackNumber);number.maxLength=80;number.pattern='[A-Za-z0-9-]+';const submit=el('button','primary',copy.track);submit.type='submit';form.append(submit);const result=el('div');c.append(form,result);body.append(c);form.onsubmit=async e=>{e.preventDefault();submit.disabled=true;result.replaceChildren(el('p','notice',copy.loading));try{const r=await fetch('https://supabase.alilpost.ge/functions/v1/track-meest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({trackNumber:number.value.trim()}),signal:AbortSignal.timeout(45000)});const d=await r.json();if(r.status===404){result.replaceChildren(el('p','notice',copy.trackEmpty));return;}if(!r.ok||d.error)throw Error();result.replaceChildren();const desc=v=>typeof v==='string'?v:v?.[lang]||v?.en||v?.ru||Object.values(v||{})[0]||'';for(const event of d.result||[]){const item=el('div','track-event');item.append(el('strong','',desc(event.eventDescr)),el('span','',event.eventDateTime+'\n'+[desc(event.eventCountryDescr),desc(event.eventCityDescr)].filter(Boolean).join(', ')));result.append(item);}if(!d.result?.length)result.append(el('p','notice',copy.trackEmpty));}catch{result.replaceChildren(el('p','error',copy.trackError));}finally{submit.disabled=false;}};}
