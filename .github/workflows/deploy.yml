@@ -70,8 +70,8 @@ jobs:
           mkdir -p "$HOME/.ssh"
           chmod 700 "$HOME/.ssh"
 
-          printf '%s\\n' "$DEPLOY_SSH_KEY" > "$HOME/.ssh/id_ed25519"
-          printf '%s\\n' "$DEPLOY_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
 
           chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
 
@@ -96,7 +96,7 @@ jobs:
 
           echo "========== TEST FILE TRANSFER =========="
 
-          printf 'AdmiralPost SSH test\\n' > "$RUNNER_TEMP/$TEST_FILE"
+          printf 'AdmiralPost SSH test\n' > "$RUNNER_TEMP/$TEST_FILE"
 
           scp "${SSH_OPTS[@]}" "$RUNNER_TEMP/$TEST_FILE"             "$REMOTE:$INCOMING/$TEST_FILE"
 
