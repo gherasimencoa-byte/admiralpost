@@ -1,0 +1,113 @@
+name: AdmiralPost CI and Production Deploy
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_production:
+        description: Deploy current main to Production
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admiralpost-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Build and verify release
+        run: |
+          set -euo pipefail
+          python3 scripts/release.py
+          cd dist
+          sha256sum -c AdmiralPost-*.zip.sha256
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: admiralpost-release-${{ github.sha }}
+          path: |
+            dist/AdmiralPost-*.zip
+            dist/AdmiralPost-*.zip.sha256
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload and deploy to Production
+        if: ${{ vars.PRODUCTION_DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy_production)) }}
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+
+          : "${DEPLOY_HOST:?Missing DEPLOY_HOST}"
+          : "${DEPLOY_USER:?Missing DEPLOY_USER}"
+          : "${DEPLOY_SSH_KEY:?Missing DEPLOY_SSH_KEY}"
+          : "${DEPLOY_KNOWN_HOSTS:?Missing DEPLOY_KNOWN_HOSTS}"
+
+          mkdir -p "$HOME/.ssh"
+          chmod 700 "$HOME/.ssh"
+
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+
+          chmod 600 "$HOME/.ssh/id_ed25519"
+          chmod 600 "$HOME/.ssh/known_hosts"
+
+          ssh-keygen -F "$DEPLOY_HOST" \
+            -f "$HOME/.ssh/known_hosts" >/dev/null
+
+          ZIP="$(find dist -maxdepth 1 -type f \
+            -name 'AdmiralPost-*.zip' -print -quit)"
+
+          test -n "$ZIP"
+          SHA="${ZIP}.sha256"
+          test -s "$SHA"
+
+          (cd dist && sha256sum -c "$(basename "$SHA")")
+
+          SSH_OPTS=(
+            -i "$HOME/.ssh/id_ed25519"
+            -o IdentitiesOnly=yes
+            -o BatchMode=yes
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts"
+            -o ConnectTimeout=15
+          )
+
+          REMOTE="$DEPLOY_USER@$DEPLOY_HOST"
+          INCOMING="/var/lib/admiralpost-deploy/incoming"
+
+          ssh "${SSH_OPTS[@]}" "$REMOTE" \
+            "test -d '$INCOMING' && test -w '$INCOMING'"
+
+          scp "${SSH_OPTS[@]}" "$ZIP" \
+            "$REMOTE:$INCOMING/release.zip"
+
+          scp "${SSH_OPTS[@]}" "$SHA" \
+            "$REMOTE:$INCOMING/release.sha256"
+
+          ssh "${SSH_OPTS[@]}" "$REMOTE" \
+            'sudo /usr/local/sbin/admiralpost-deploy'
