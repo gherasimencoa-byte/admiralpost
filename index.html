@@ -1869,7 +1869,7 @@ body { color:#25364b; line-height:1.65; }
     formula.textContent = t.name + ': ' + (billed <= t.included
       ? 'до ' + t.included + ' кг — ' + money(t.base)
       : money(t.base) + ' за первые ' + t.included + ' кг + ' + (billed-t.included) + ' кг × ' + money(t.extra)) + '.';
-    quoteButton.href = '#order';
+    quoteButton.href = '#orderForm';
     quoteButton.dataset.country = t.name;
     quoteButton.dataset.weight = String(raw);
     quoteButton.dataset.price = String(total);
