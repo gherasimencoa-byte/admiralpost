@@ -52,6 +52,58 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Test Production SSH connection (no deployment)
+        if: ${{ github.ref == 'refs/heads/setup-admiralpost-autodeploy-20261113' }}
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+
+          : "${DEPLOY_HOST:?Missing DEPLOY_HOST}"
+          : "${DEPLOY_USER:?Missing DEPLOY_USER}"
+          : "${DEPLOY_SSH_KEY:?Missing DEPLOY_SSH_KEY}"
+          : "${DEPLOY_KNOWN_HOSTS:?Missing DEPLOY_KNOWN_HOSTS}"
+
+          mkdir -p "$HOME/.ssh"
+          chmod 700 "$HOME/.ssh"
+
+          printf '%s\\n' "$DEPLOY_SSH_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\\n' "$DEPLOY_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+
+          chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+
+          ssh-keygen -F "$DEPLOY_HOST" -f "$HOME/.ssh/known_hosts" >/dev/null
+
+          SSH_OPTS=(
+            -i "$HOME/.ssh/id_ed25519"
+            -o IdentitiesOnly=yes
+            -o BatchMode=yes
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts"
+            -o ConnectTimeout=15
+          )
+
+          REMOTE="$DEPLOY_USER@$DEPLOY_HOST"
+          INCOMING="/var/lib/admiralpost-deploy/incoming"
+          TEST_FILE=".github-ssh-test-${GITHUB_RUN_ID}"
+
+          echo "========== TEST SSH AND SUDO =========="
+
+          ssh "${SSH_OPTS[@]}" "$REMOTE"             "set -eu; test -d '$INCOMING'; test -w '$INCOMING'; sudo -n -l /usr/local/sbin/admiralpost-deploy >/dev/null; test -L /srv/admiralpost/current; echo 'SSH, incoming and sudo: OK'; readlink -f /srv/admiralpost/current"
+
+          echo "========== TEST FILE TRANSFER =========="
+
+          printf 'AdmiralPost SSH test\\n' > "$RUNNER_TEMP/$TEST_FILE"
+
+          scp "${SSH_OPTS[@]}" "$RUNNER_TEMP/$TEST_FILE"             "$REMOTE:$INCOMING/$TEST_FILE"
+
+          ssh "${SSH_OPTS[@]}" "$REMOTE"             "test -s '$INCOMING/$TEST_FILE' && rm -f '$INCOMING/$TEST_FILE'"
+
+          echo "SSH AND FILE TRANSFER TEST: SUCCESS"
+
       - name: Upload and deploy to Production
         if: ${{ vars.PRODUCTION_DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy_production)) }}
         env:
