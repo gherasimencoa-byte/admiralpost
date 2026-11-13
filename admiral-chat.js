@@ -19,6 +19,48 @@
   const ns = 'apchat_' + KEY;
   const storage = {get(k){try{return localStorage.getItem(ns+k);}catch{return null;}},set(k,v){try{v===null?localStorage.removeItem(ns+k):localStorage.setItem(ns+k,v);}catch{}}};
   const S={token:storage.get('t'),open:script.dataset.open==='true'||storage.get('o')==='1',consent:storage.get('consent')==='1',chat:null,messages:[],last:0,visitor:{},online:false,busy:false,ready:false,draft:storage.get('draft')||'',view:'chat',unread:0,pending:null,aiError:false,orderDraft:{},orderTouched:{},number:null};
+  const returnCopy = {
+    ru: ['С возвращением! Продолжим с Евой или дождёмся консультанта?', 'Продолжить с Евой', 'Дождаться консультанта', 'Консультанты работают с воскресенья по пятницу с 09:00 до 18:00 по Израилю. Ваш запрос обработают в ближайшие рабочие часы.', 'С возвращением! Ваш диалог с консультантом открыт.', 'С возвращением! Ваш запрос в очереди к консультанту.'],
+    en: ['Welcome back! Continue with Eva or wait for a consultant?', 'Continue with Eva', 'Wait for a consultant', 'Our consultants work Sunday to Friday, 09:00–18:00 Israel time. Your request will be handled during the next business hours.', 'Welcome back! Your conversation with the consultant is open.', 'Welcome back! Your request is in the queue for a consultant.'],
+    he: ['ברוכים השבים! להמשיך עם אווה או להמתין לנציג?', 'להמשיך עם אווה', 'להמתין לנציג', 'הנציגים זמינים בימים ראשון עד שישי, 09:00–18:00 לפי שעון ישראל. נטפל בפנייה בשעות הפעילות הקרובות.', 'ברוכים השבים! השיחה עם הנציג פתוחה.', 'ברוכים השבים! הפנייה ממתינה לנציג.']
+  }[lang];
+  const visitKey = ns + '_visit';
+  const idleTime = 30 * 60 * 1000;
+  let lastVisit = 0, returning = false, canResume = false, choosing = false;
+  try { lastVisit = Number(sessionStorage.getItem(visitKey)); } catch {}
+  function markVisit() {
+    const now = Date.now();
+    if (S.messages.some(m=>m.author==='visitor') && (lastVisit === 0 || now - lastVisit >= idleTime)) returning = true;
+    lastVisit = now;
+    try { sessionStorage.setItem(visitKey, String(now)); } catch {}
+  }
+  function outsideHours(date = new Date()) {
+    const parts = new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Jerusalem',weekday:'short',hour:'2-digit',hourCycle:'h23'}).formatToParts(date);
+    const hour = Number(parts.find(p=>p.type==='hour').value);
+    return parts.find(p=>p.type==='weekday').value === 'Sat' || hour < 9 || hour >= 18;
+  }
+  function showReturn(log) {
+    const waiting = S.chat?.mode === 'waiting' && S.chat.status !== 'closed';
+    const human = S.chat?.mode === 'human' && S.chat.status !== 'closed';
+    const prompt = human ? returnCopy[4] : waiting && !canResume ? returnCopy[5] : returnCopy[0];
+    log.append(bubble({author:'bot',name:copy.ai,body:prompt + (outsideHours() ? '\n\n' + returnCopy[3] : '')}));
+    if (human) return;
+    const card=el('div','card');
+    async function choose(eva) {
+      if (choosing) return;
+      choosing=true;
+      try {
+        if (eva && waiting) merge(await api('resume_ai',{chat_id:S.chat.id,after:S.last}));
+        if (!eva && !waiting) merge(await api('handoff',{body:copy.handoffText,request_id:crypto.randomUUID(),after:S.last}));
+        returning=false;
+        renderView(); schedule();
+        if (eva) composer.querySelector('textarea').focus();
+      } catch { showError(copy.network); }
+      finally { choosing=false; }
+    }
+    if (!waiting || canResume) card.append(button(returnCopy[1],()=>choose(true),'chip'));
+    card.append(button(returnCopy[2],()=>choose(false),'chip'));body.append(card);
+  }
   let timer,body,composer,statusEl,actionsEl,panel,launcher,previousFocus;
   const host=document.createElement('div');host.id='admiral-chat-root';
   const root=host.attachShadow({mode:'open'});
@@ -64,7 +106,7 @@
     if(!body)return;body.replaceChildren();actionsEl.replaceChildren();composer.hidden=S.view!=='chat';composer.style.display=S.view==='chat'?'':'none';
     if(S.view!=='chat'){body.append(button('← '+copy.back,()=>{S.view='chat';renderView();},'chip back'));if(S.view==='order')return orderForm();if(S.view==='contact')return contactForm();if(S.view==='track')return trackingForm();}
     const log=el('div');log.style.display='contents';log.setAttribute('role','log');log.setAttribute('aria-live','polite');log.setAttribute('aria-label',copy.back);
-    if(!S.messages.length)log.append(bubble({author:'bot',body:copy.hello,name:copy.ai}));for(const m of S.messages){if(m.author==='system'&&/Сообщение получено вне рабочего времени/.test(m.body))continue;log.append(bubble(m));}body.append(log);
+    if(!S.messages.length)log.append(bubble({author:'bot',body:copy.hello,name:copy.ai}));for(const m of S.messages){if(m.author==='system'&&/Сообщение получено вне рабочего времени/.test(m.body))continue;log.append(bubble(m));}body.append(log);if(S.ready && returning)showReturn(log);
     if(!S.ready)body.append(el('p','notice',copy.loading));
     if(!S.consent&&S.chat?.mode!=='human'&&S.chat?.mode!=='waiting'){const card=el('div','card');card.append(el('p','notice',copy.consent),button(copy.accept,()=>{S.consent=true;storage.set('consent','1');renderView();composer.querySelector('textarea').focus();},'primary'));body.append(card);}
     if(S.busy||S.chat?.typing)body.append(el('div','typing',t.typing+'…'));
@@ -79,6 +121,7 @@
   function quick(text){if(!S.consent){S.draft=text;storage.set('draft',text);render();return;}send(text);}
   async function send(text,retry=false){
     text=(text??S.draft).trim();if(!text||S.busy||!S.ready)return;if(!S.consent&&!['human','waiting'].includes(S.chat?.mode)){renderView();return;}
+    markVisit();returning=false;
     if(!S.pending||S.pending.text!==text)S.pending={text,id:crypto.randomUUID()};
     S.busy=true;S.aiError=false;S.view='chat';renderView();
     try{const d=await api('send',{body:text,request_id:S.pending.id,after:S.last});merge(d);S.aiError=!!d.ai_error;if(d.draft&&Object.values(d.draft).some(Boolean)&&S.chat?.mode==='ai')S.view='order';S.draft='';storage.set('draft','');if(!S.aiError)S.pending=null;}
@@ -107,7 +150,7 @@
   }
   function contactForm(){const c=el('div','card');c.append(el('h2','',copy.contact),el('p','notice',copy.contactNote));const form=el('form');const name=field(form,'name',t.customer_name);name.value=S.visitor.name||'';name.maxLength=120;const phone=field(form,'phone',t.phone,'tel');phone.value=S.visitor.phone||'';phone.maxLength=40;const submit=el('button','primary',t.send);submit.type='submit';const err=el('div','error');form.append(submit,err);c.append(form);body.append(c);form.onsubmit=async e=>{e.preventDefault();if(!/^\+?[\d\s()-]{9,25}$/.test(phone.value)||phone.value.replace(/\D/g,'').length<9){err.textContent=t.phoneError;return;}submit.disabled=true;try{await api('introduce',{name:name.value,phone:phone.value});S.visitor={name:name.value,phone:phone.value};S.view='chat';renderView();body.append(el('p','notice',copy.saved));}catch(e){err.textContent=e.message;submit.disabled=false;}};}
   function trackingForm(){const c=el('div','card');c.append(el('h2','',copy.track));const form=el('form');const number=field(form,'trackNumber',copy.trackNumber);number.maxLength=80;number.pattern='[A-Za-z0-9-]+';const submit=el('button','primary',copy.track);submit.type='submit';form.append(submit);const result=el('div');c.append(form,result);body.append(c);form.onsubmit=async e=>{e.preventDefault();submit.disabled=true;result.replaceChildren(el('p','notice',copy.loading));try{const r=await fetch('https://supabase.alilpost.ge/functions/v1/track-meest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({trackNumber:number.value.trim()}),signal:AbortSignal.timeout(45000)});const d=await r.json();if(r.status===404){result.replaceChildren(el('p','notice',copy.trackEmpty));return;}if(!r.ok||d.error)throw Error();result.replaceChildren();const desc=v=>typeof v==='string'?v:v?.[lang]||v?.en||v?.ru||Object.values(v||{})[0]||'';for(const event of d.result||[]){const item=el('div','track-event');item.append(el('strong','',desc(event.eventDescr)),el('span','',event.eventDateTime+'\n'+[desc(event.eventCountryDescr),desc(event.eventCityDescr)].filter(Boolean).join(', ')));result.append(item);}if(!d.result?.length)result.append(el('p','notice',copy.trackEmpty));}catch{result.replaceChildren(el('p','error',copy.trackError));}finally{submit.disabled=false;}};}
-  function open(){previousFocus=document.activeElement;S.open=true;S.unread=0;storage.set('o','1');render();panel.querySelector('.close').focus();schedule();}
+  function open(){if(S.ready)markVisit();previousFocus=document.activeElement;S.open=true;S.unread=0;storage.set('o','1');render();panel.querySelector('.close').focus();schedule();}
   function close(){S.open=false;storage.set('o',null);render();launcher?.focus();schedule();}
   root.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.open){e.preventDefault();close();}if(e.key==='Tab'&&S.open){const items=[...panel.querySelectorAll('button:not(:disabled),a,input:not(:disabled),textarea:not(:disabled)')].filter(n=>n.getClientRects().length);const first=items[0],last=items[items.length-1];if(e.shiftKey&&root.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&root.activeElement===last){e.preventDefault();first.focus();}}});
   function viewport(){if(!panel||!window.visualViewport)return;panel.style.setProperty('--viewport-height',window.visualViewport.height+'px');panel.style.setProperty('--viewport-top',window.visualViewport.offsetTop+'px');}
@@ -115,7 +158,7 @@
   window.addEventListener('admiral-chat-open',open);
   function schedule(){clearTimeout(timer);if(document.hidden)return;timer=setTimeout(poll,S.open||S.chat?.status==='active'?4000:30000);}
   async function poll(){try{const last=S.last,mode=S.chat?.mode,typing=S.chat?.typing;merge(await api('ping',{after:S.last}));if(S.open&&S.view==='chat'&&(last!==S.last||mode!==S.chat?.mode||typing!==S.chat?.typing))renderView();else if(!S.open)render();}catch{}schedule();}
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)clearTimeout(timer);else if(S.ready)poll();});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)clearTimeout(timer);else if(S.ready){markVisit();if(S.open)renderView();poll();}});
   render();
-  try{let d;try{d=await api('init',{referrer:document.referrer});}catch(e){if(e.status!==401)throw e;S.token=null;storage.set('t',null);d=await api('init',{referrer:document.referrer});}merge(d);S.ready=true;render();schedule();}catch{S.ready=false;if(body)showError(t.error);}
+  try{let d;try{d=await api('init',{referrer:document.referrer});}catch(e){if(e.status!==401)throw e;S.token=null;storage.set('t',null);d=await api('init',{referrer:document.referrer});}merge(d);canResume=d.settings?.resume_ai===true;S.ready=true;if(S.open)markVisit();render();schedule();}catch{S.ready=false;if(body)showError(t.error);}
 })();
