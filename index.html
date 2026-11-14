@@ -1055,7 +1055,24 @@ body { color:#25364b; line-height:1.65; }
 #orderForm textarea {min-height:76px}
 #orderForm .btn[type="submit"] {min-height:48px;font-size:16px;font-weight:700;width:100%;border-radius:12px}
 #orderForm .checkbox-row {font-size:12px;line-height:1.5}
-#orderForm #savedAddressGroup {display:none!important}
+#orderForm fieldset{border:0;padding:0;margin:0;min-width:0}
+#orderForm .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.pk-steps{display:flex;gap:6px;list-style:none;padding:0;margin:0 0 6px;font-size:13px;font-weight:700;color:#7b8798}
+.pk-steps li{flex:1;padding:8px 6px;border-radius:10px;background:#eef2f7;text-align:center}
+.pk-steps li.on{background:#0d2b52;color:#fff}.pk-steps li.done{background:#dcefe2;color:#1d6b3a}
+.pk-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.pk-chips button{min-height:44px;padding:8px 14px;border:1px solid #c9d4e2;border-radius:12px;background:#fff;color:#17365b;font:inherit;font-weight:600;cursor:pointer}
+.pk-chips button[aria-pressed="true"]{background:#0d2b52;border-color:#0d2b52;color:#fff}
+.pk-price{padding:12px 14px;border-radius:12px;background:#fff6e9;border:1px solid #ffd9a8;color:#17365b;font-weight:600}
+.pk-price b{font-size:20px}.pk-price.warn{background:#fef3f2;border-color:#f7c1bb}
+.pk-nav{display:flex;gap:10px;flex-wrap:wrap}.pk-nav .btn{flex:1;min-height:48px;font-size:16px;font-weight:700;border-radius:12px;text-align:center}
+.pk-nav .btn-outline{flex:0 0 auto}
+#orderForm .pk-nav .btn[type="submit"]{width:auto}
+#orderForm .checkbox-row input{width:20px;height:20px;flex:0 0 20px}
+#orderForm [hidden],.pk-done[hidden]{display:none!important}
+.pk-more{margin-bottom:10px}.pk-more summary{cursor:pointer;font-weight:600;color:#17365b;padding:8px 0}
+.pk-done{padding:6px 0;outline:0}.pk-done h3{color:#1d6b3a}
+#orderForm [aria-invalid="true"]{border-color:#d92d20;box-shadow:0 0 0 3px #d92d2022}
 @media(max-width:760px){#orderForm .form-row{display:grid;grid-template-columns:1fr;gap:0}#orderForm .form-group{margin-bottom:9px}#orderForm label{font-size:14px}#orderForm input:not([type="checkbox"]),#orderForm select{padding:10px 12px}#orderForm textarea{padding:10px 12px}}
 
 </style>
@@ -1175,7 +1192,7 @@ body { color:#25364b; line-height:1.65; }
         <h1>Международная доставка посылок из Израиля</h1>
         <p>Надёжно. Быстро. Вашим близким. Отправляйте посылки, личные вещи, подарки и документы в доступные направления — с поддержкой на каждом этапе.</p>
         <div class="hero-actions">
-          <a href="#orderForm" class="btn btn-primary">Оформить отправку →</a>
+          <a href="#orderForm" class="btn btn-primary">Вызвать курьера →</a>
           <a href="#tariffs" class="btn btn-outline">Рассчитать стоимость</a>
           <a class="btn whatsapp-hero" href="https://wa.me/972522323554" target="_blank" rel="noopener noreferrer">WhatsApp</a>
         </div>
@@ -1476,123 +1493,111 @@ body { color:#25364b; line-height:1.65; }
         <!-- Форма заявки -->
         <div>
           <div class="card quote-form-card">
-            <h3>Запрос на расчёт доставки</h3>
+            <h3>Вызвать курьера</h3>
             <p class="muted">
-              Укажите направление, примерный вес и контакты — мы свяжемся с вами и уточним стоимость доставки.
+              Три коротких шага, без регистрации. Курьер заберёт посылку по вашему адресу в Израиле.
             </p>
 
-            <form id="orderForm" class="form">
-              <div class="form-group" id="savedAddressGroup" hidden style="display:none">
-                <label for="savedPickupAddress">Адрес забора посылки</label>
-                <select id="savedPickupAddress"><option value="">Не выбирать сохранённый адрес</option></select>
-                
-              </div>
-              <div class="form-group">
-                <label for="country">Страна назначения *</label>
-                <select id="country" name="country" required>
-                  <option value="">Выберите направление</option>
-                  <option value="Россия">Россия</option>
-                  <option value="Беларусь">Беларусь</option>
-                  <option value="Украина">Украина</option>
-                  <option value="Молдова">Молдова</option>
-                  <option value="Грузия">Грузия</option>
-                  <option value="Европа">Европа (страны ЕС)</option>
-                  <option value="США">США</option>
-                  <option value="Канада">Канада</option>
-                  <option value="Другое">Другое направление</option>
-                </select>
-                
-              </div>
+            <form id="orderForm" class="form" novalidate>
+              <ol class="pk-steps" aria-hidden="true"><li class="on">1. Посылка</li><li>2. Адрес</li><li>3. Контакты</li></ol>
 
-              <div class="form-row">
+              <fieldset class="pk-step" data-step="1">
+                <legend class="sr-only">Шаг 1 из 3: посылка</legend>
                 <div class="form-group">
-                  <label for="weight">Вес посылки, кг *</label>
-                  <input
-                    type="number"
-                    id="weight"
-                    name="weight"
-                    inputmode="decimal"
-                    step="0.1"
-                    min="0.1"
-                    required
-                    placeholder="Например, 5"
-                  />
-                  
+                  <label for="country">Куда отправляем *</label>
+                  <select id="country" name="country" required>
+                    <option value="">Выберите направление</option>
+                    <option value="Россия">Россия</option>
+                    <option value="Беларусь">Беларусь</option>
+                    <option value="Украина">Украина</option>
+                    <option value="Молдова">Молдова</option>
+                    <option value="Грузия">Грузия</option>
+                    <option value="Европа">Европа (страны ЕС)</option>
+                    <option value="США">США</option>
+                    <option value="Канада">Канада</option>
+                    <option value="Другое">Другое направление</option>
+                  </select>
                 </div>
                 <div class="form-group">
-                  <label for="type">Тип отправления</label>
-                  <input
-                    type="text"
-                    id="type"
-                    name="type"
-                    placeholder="Личные вещи, подарки, документы..."
-                  />
-                  
+                  <label for="weight">Примерный вес, кг *</label>
+                  <div class="pk-chips" id="pkWeights">
+                    <button type="button" data-w="2">до 2</button><button type="button" data-w="5">до 5</button><button type="button" data-w="10">до 10</button><button type="button" data-w="20">до 20</button>
+                  </div>
+                  <input type="number" id="weight" name="weight" inputmode="decimal" step="0.1" min="0.1" required placeholder="или точный вес, например 7" />
+                  <small>Точный вес курьер определит при заборе.</small>
                 </div>
-              </div>
-
-              <div class="form-row">
+                <div class="pk-price" id="pkPrice" role="status" aria-live="polite" hidden></div>
                 <div class="form-group">
-                  <label for="name">Ваше имя *</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    autocomplete="name"
-                    required
-                    placeholder="Как к вам обращаться"
-                  />
-                  
+                  <label for="type">Что отправляете</label>
+                  <input type="text" id="type" name="type" placeholder="Личные вещи, подарки, документы (необязательно)" />
+                </div>
+                <div class="pk-nav"><button type="button" class="btn btn-primary" data-pk-next>Далее: адрес и день →</button></div>
+              </fieldset>
+
+              <fieldset class="pk-step" data-step="2" hidden>
+                <legend class="sr-only">Шаг 2 из 3: адрес и день забора</legend>
+                <div class="form-group" id="savedAddressGroup" hidden>
+                  <label for="savedPickupAddress">Сохранённый адрес</label>
+                  <select id="savedPickupAddress"><option value="">Ввести адрес вручную</option></select>
                 </div>
                 <div class="form-group">
-                  <label for="phone">Телефон для связи *</label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    autocomplete="tel"
-                    inputmode="tel"
-                    required
-                    placeholder="+972..."
-                  />
-                  
+                  <label for="pickupCity">Город в Израиле *</label>
+                  <input type="text" id="pickupCity" name="pickup_city" list="pkCities" autocomplete="address-level2" required placeholder="Начните вводить: Хайфа, Ашдод…" />
+                  <datalist id="pkCities"><option value="Азор"></option><option value="Акко"></option><option value="Арад"></option><option value="Ариэль"></option><option value="Афула"></option><option value="Ашдод"></option><option value="Ашкелон"></option><option value="Бат-Ям"></option><option value="Бейт-Шеан"></option><option value="Бейт-Шемеш"></option><option value="Бейтар-Илит"></option><option value="Беэр-Шева"></option><option value="Беэр-Яаков"></option><option value="Биньямина"></option><option value="Бней-Брак"></option><option value="Ган-Явне"></option><option value="Ганей-Тиква"></option><option value="Гедера"></option><option value="Герцлия"></option><option value="Гиват-Зеэв"></option><option value="Гиватаим"></option><option value="Дальят-эль-Кармель"></option><option value="Димона"></option><option value="Зихрон-Яаков"></option><option value="Иерусалим"></option><option value="Йерухам"></option><option value="Йехуд"></option><option value="Йокнеам"></option><option value="Кадима-Цоран"></option><option value="Калансуа"></option><option value="Кармиэль"></option><option value="Кацрин"></option><option value="Кесария"></option><option value="Кирьят-Ата"></option><option value="Кирьят-Бялик"></option><option value="Кирьят-Гат"></option><option value="Кирьят-Малахи"></option><option value="Кирьят-Моцкин"></option><option value="Кирьят-Оно"></option><option value="Кирьят-Хаим"></option><option value="Кирьят-Шмона"></option><option value="Кирьят-Экрон"></option><option value="Кирьят-Ям"></option><option value="Кфар-Йона"></option><option value="Кфар-Касем"></option><option value="Кфар-Саба"></option><option value="Лехавим"></option><option value="Лод"></option><option value="Маале-Адумим"></option><option value="Маалот-Таршиха"></option><option value="Мазкерет-Батья"></option><option value="Мевасерет-Цион"></option><option value="Мейтар"></option><option value="Мигдаль-ха-Эмек"></option><option value="Мицпе-Рамон"></option><option value="Модиин"></option><option value="Модиин-Илит"></option><option value="Нагария"></option><option value="Назарет"></option><option value="Нес-Циона"></option><option value="Нетания"></option><option value="Нетивот"></option><option value="Нешер"></option><option value="Ноф-ха-Галиль"></option><option value="Омер"></option><option value="Ор-Акива"></option><option value="Ор-Йехуда"></option><option value="Офаким"></option><option value="Пардес-Хана"></option><option value="Петах-Тиква"></option><option value="Раанана"></option><option value="Рамат-Ган"></option><option value="Рамат-Ишай"></option><option value="Рамат-ха-Шарон"></option><option value="Рамле"></option><option value="Рахат"></option><option value="Реховот"></option><option value="Ришон-ле-Цион"></option><option value="Рош-ха-Аин"></option><option value="Сахнин"></option><option value="Сдерот"></option><option value="Тайбе"></option><option value="Тверия"></option><option value="Тель-Авив"></option><option value="Тель-Монд"></option><option value="Тира"></option><option value="Тират-Кармель"></option><option value="Умм-эль-Фахм"></option><option value="Хадера"></option><option value="Хайфа"></option><option value="Хариш"></option><option value="Хацор-ха-Глилит"></option><option value="Ход-ха-Шарон"></option><option value="Холон"></option><option value="Цфат"></option><option value="Шломи"></option><option value="Шоам"></option><option value="Шфарам"></option><option value="Эвен-Йехуда"></option><option value="Эйлат"></option><option value="Эльад"></option><option value="Эфрат"></option><option value="Явне"></option></datalist>
                 </div>
-              </div>
+                <div class="form-group">
+                  <label for="pickupAddress">Улица, дом, квартира *</label>
+                  <input type="text" id="pickupAddress" name="pickup_address" autocomplete="street-address" required placeholder="Например, Герцль 15, кв. 4" />
+                </div>
+                <div class="form-group">
+                  <label id="pkDatesLabel">Когда удобно принять курьера</label>
+                  <div class="pk-chips" id="pkDates" role="group" aria-labelledby="pkDatesLabel"></div>
+                  <input type="hidden" id="pickupDate" name="pickup_date" />
+                  <small>День предварительный: оператор подтвердит его по телефону.</small>
+                </div>
+                <div class="pk-nav"><button type="button" class="btn btn-outline" data-pk-back>← Назад</button><button type="button" class="btn btn-primary" data-pk-next>Далее: контакты →</button></div>
+              </fieldset>
 
-              <div class="form-group">
-                <label for="email">Email для ответа *</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  autocomplete="email"
-                  required
-                  placeholder="name@example.com"
-                />
-                
-              </div>
-
-              <div class="form-group">
-                <label for="message">Дополнительная информация</label>
-                <textarea
-                  id="message"
-                  name="message"
-                  placeholder="Пожелания или вопросы (необязательно)"
-                ></textarea>
-                
-              </div>
-
-              <div class="checkbox-row">
-                <input type="checkbox" id="agree" name="agree" required />
-                <label for="agree">
-                  Я подтверждаю, что ознакомлен(а) с основными ограничениями на перевозку и согласен(а) на обработку моих данных для связи по заявке.
-                </label>
-              </div>
-
-              <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden"><label>Leave blank<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
-              <button type="submit" class="btn btn-primary">Отправить запрос</button>
+              <fieldset class="pk-step" data-step="3" hidden>
+                <legend class="sr-only">Шаг 3 из 3: контакты</legend>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="name">Ваше имя *</label>
+                    <input type="text" id="name" name="name" autocomplete="name" required placeholder="Как к вам обращаться" />
+                  </div>
+                  <div class="form-group">
+                    <label for="phone">Телефон *</label>
+                    <input type="tel" id="phone" name="phone" autocomplete="tel" inputmode="tel" required placeholder="+972..." />
+                  </div>
+                </div>
+                <details class="pk-more">
+                  <summary>Email и комментарий (необязательно)</summary>
+                  <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" autocomplete="email" placeholder="name@example.com" />
+                  </div>
+                  <div class="form-group">
+                    <label for="message">Комментарий</label>
+                    <textarea id="message" name="message" placeholder="Этаж, код подъезда, пожелания"></textarea>
+                  </div>
+                </details>
+                <div class="checkbox-row">
+                  <input type="checkbox" id="agree" name="agree" required />
+                  <label for="agree">
+                    Я подтверждаю, что ознакомлен(а) с основными ограничениями на перевозку и согласен(а) на обработку моих данных для связи по заявке.
+                  </label>
+                </div>
+                <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden"><label>Leave blank<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+                <div class="pk-nav"><button type="button" class="btn btn-outline" data-pk-back>← Назад</button><button type="submit" class="btn btn-primary">Вызвать курьера</button></div>
+              </fieldset>
               <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
             </form>
+            <div id="pkDone" class="pk-done" hidden tabindex="-1">
+              <h3>Заявка <span id="pkDoneNo"></span> принята</h3>
+              <p id="pkDoneText"></p>
+              <p class="muted">Оператор позвонит, чтобы подтвердить день и адрес. Упакуйте посылку и подготовьте данные получателя.</p>
+              <div class="pk-nav"><a class="btn btn-primary" id="pkDoneWa" target="_blank" rel="noopener noreferrer" href="https://wa.me/972522323554">Написать в WhatsApp</a><button type="button" class="btn btn-outline" id="pkDoneAgain">Ещё одна посылка</button></div>
+            </div>
           </div>
         </div>
       </div>
@@ -1741,6 +1746,85 @@ body { color:#25364b; line-height:1.65; }
       return false;
     }
 
+    // Вызов курьера: три шага, цена по тарифу сразу, ближайшие дни забора.
+    (function(){
+      const form = document.getElementById('orderForm'); if (!form) return;
+      const $ = (id) => document.getElementById(id);
+      const steps = [...form.querySelectorAll('.pk-step')], marks = [...form.querySelectorAll('.pk-steps li')];
+      const KEYS = {'Россия':'russia','Беларусь':'belarus','Украина':'ukraine','Молдова':'moldova','Грузия':'georgia','Европа':'europe','США':'usa','Канада':'canada'};
+      const WD = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+      let current = 1, price = null;
+      const press = (box, btn) => box.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      function go(n){
+        current = n;
+        steps.forEach((f) => { f.hidden = Number(f.dataset.step) !== n; });
+        marks.forEach((m, i) => { m.className = i + 1 === n ? 'on' : i + 1 < n ? 'done' : ''; });
+        $('formStatus').textContent = ''; $('formStatus').className = 'form-status';
+      }
+      function validate(n){
+        const fields = [...steps[n - 1].querySelectorAll('input[required],select[required]')];
+        let first = null;
+        fields.forEach((el) => {
+          const ok = el.type === 'checkbox' ? el.checked : el.value.trim() !== '' && el.checkValidity();
+          el.setAttribute('aria-invalid', String(!ok)); if (!ok && !first) first = el;
+        });
+        if (n === 1 && !first && price && price.over) first = $('weight');
+        if (first) { first.setAttribute('aria-invalid', 'true'); first.focus(); }
+        return !first;
+      }
+      function refreshPrice(){
+        const box = $('pkPrice'), key = KEYS[$('country').value], w = Number($('weight').value);
+        price = null; box.className = 'pk-price';
+        if (!$('country').value || !(w > 0)) { box.hidden = true; return; }
+        box.hidden = false;
+        if (!key || !window.AdmiralPricing) { box.textContent = 'Стоимость для этого направления рассчитает оператор.'; return; }
+        const t = AdmiralPricing.tariffs[key];
+        if (w > t.limit) { price = { over: true }; box.className = 'pk-price warn'; box.textContent = 'Для этого направления одна посылка до ' + t.limit + ' кг. Разделите вещи на несколько посылок.'; return; }
+        const q = AdmiralPricing.quote(key, w); price = { total: q.total };
+        box.innerHTML = 'Ориентировочно <b>₪' + q.total + '</b> за ' + q.billed + ' кг, морская доставка 21–35 дней';
+      }
+      function buildDates(){
+        const box = $('pkDates'); box.textContent = '';
+        const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Jerusalem' }).format(new Date());
+        const add = (label, iso) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.dataset.iso = iso; b.setAttribute('aria-pressed', 'false'); box.appendChild(b); return b; };
+        let firstBtn = null;
+        for (let i = 1, n = 0; n < 5 && i < 14; i++) {
+          const d = new Date(Date.parse(today + 'T12:00:00Z') + i * 864e5), dow = d.getUTCDay();
+          if (dow === 5 || dow === 6) continue;
+          const iso = d.toISOString().slice(0, 10);
+          const b = add(WD[dow] + ' ' + iso.slice(8, 10) + '.' + iso.slice(5, 7), iso); if (!firstBtn) firstBtn = b; n++;
+        }
+        add('Не важно', '');
+        if (firstBtn) { press(box, firstBtn); $('pickupDate').value = firstBtn.dataset.iso; }
+      }
+      $('pkWeights').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; $('weight').value = b.dataset.w; press($('pkWeights'), b); refreshPrice(); });
+      $('weight').addEventListener('input', () => { press($('pkWeights'), null); refreshPrice(); });
+      $('country').addEventListener('change', refreshPrice);
+      $('pkDates').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; press($('pkDates'), b); $('pickupDate').value = b.dataset.iso; });
+      $('savedPickupAddress').addEventListener('change', (e) => { const o = e.target.selectedOptions[0]; if (!o || !o.value) return; $('pickupCity').value = o.dataset.city || ''; $('pickupAddress').value = o.dataset.street || o.value; });
+      form.addEventListener('click', (e) => {
+        if (e.target.closest('[data-pk-next]')) { if (validate(current)) { go(current + 1); const f = steps[current - 1].querySelector('input:not([type=hidden]),select'); if (f) f.focus({ preventScroll: true }); form.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }
+        else if (e.target.closest('[data-pk-back]')) go(current - 1);
+      });
+      form.addEventListener('input', (e) => { if (e.target.getAttribute && e.target.getAttribute('aria-invalid') === 'true') e.target.setAttribute('aria-invalid', 'false'); });
+      $('pkDoneAgain').addEventListener('click', () => { $('pkDone').hidden = true; form.hidden = false; go(1); });
+      buildDates();
+      window.AdmiralPickup = {
+        go(n){ go(n); refreshPrice(); },
+        collect(){ const b = $('pkDates').querySelector('[aria-pressed="true"]'); const iso = $('pickupDate').value;
+          return { city: $('pickupCity').value.trim(), address: $('pickupAddress').value.trim(), date: iso, dateLabel: iso && b ? b.textContent : '', price: price && price.total != null ? price.total : null }; },
+        validateAll(){ for (let n = 1; n <= 3; n++) { if (!validate(n)) { go(n); validate(n); return false; } } return true; },
+        reset(){ press($('pkWeights'), null); buildDates(); price = null; $('pkPrice').hidden = true; go(1); },
+        done(result, payload, pickup){
+          const no = result && result.request_number ? result.request_number : '';
+          $('pkDoneNo').textContent = no;
+          $('pkDoneText').textContent = [payload.country + ', ' + payload.weight + ' кг', pickup.price != null ? 'ориентировочно ₪' + pickup.price : '', [pickup.city, pickup.address].filter(Boolean).join(', '), pickup.dateLabel ? 'желаемый день: ' + pickup.dateLabel : ''].filter(Boolean).join(' · ');
+          $('pkDoneWa').href = 'https://wa.me/972522323554?text=' + encodeURIComponent('Здравствуйте! Я оставил(а) заявку ' + no + ' на забор посылки: ' + [pickup.city, pickup.dateLabel].filter(Boolean).join(', ') + '.');
+          form.hidden = true; $('pkDone').hidden = false; $('pkDone').focus(); $('pkDone').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      };
+    })();
+
     // Заявки отправляются в защищённую Supabase Edge Function. В localStorage PII не сохраняются.
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById("orderForm");
@@ -1763,7 +1847,7 @@ body { color:#25364b; line-height:1.65; }
             for(const address of addresses){
               const option=document.createElement('option');
               const structured=[address.country,address.region,address.city,[address.street,address.house_number].filter(Boolean).join(' ')].filter(Boolean).join(', ');
-              option.value=structured||address.address_text||'';
+              option.value=structured||address.address_text||'';option.dataset.city=address.city||'';option.dataset.street=[address.street,address.house_number].filter(Boolean).join(' ')||address.address_text||'';
               option.textContent=(address.label||'Адрес')+' — '+option.value;
               if(option.value)select.appendChild(option);
             }
@@ -1781,20 +1865,26 @@ body { color:#25364b; line-height:1.65; }
           statusEl.classList.add("error");
           return;
         }
+        const pickup = window.AdmiralPickup ? window.AdmiralPickup.collect() : {};
         const payload = {
+          kind: "pickup",
           country: form.country.value.trim(),
           weight: form.weight.value.trim(),
           type: form.type.value.trim(),
           name: form.name.value.trim(),
           phone: form.phone.value.trim(),
           email: form.email.value.trim(),
-          message: [form.message.value.trim(),document.getElementById('savedPickupAddress')?.value?('Адрес забора: '+document.getElementById('savedPickupAddress').value):''].filter(Boolean).join('\n'),
+          pickup_city: pickup.city || "",
+          pickup_address: pickup.address || "",
+          pickup_date: pickup.date || "",
+          estimated_price: pickup.price ?? null,
+          message: [form.message.value.trim(), pickup.city || pickup.address ? 'Адрес забора: ' + [pickup.city, pickup.address].filter(Boolean).join(', ') : '', pickup.date ? 'Желаемый день забора: ' + pickup.dateLabel : ''].filter(Boolean).join('\n'),
           agree: form.agree.checked,
           website: (form.website?.value || ""),
           language: "ru"
         };
-        if (!payload.country || !payload.weight || !payload.name || !payload.phone || !payload.email || !payload.agree) {
-          statusEl.textContent = "Проверьте, что все обязательные поля заполнены.";
+        if (window.AdmiralPickup && !window.AdmiralPickup.validateAll()) {
+          statusEl.textContent = "Проверьте выделенные поля.";
           statusEl.classList.add("error");
           return;
         }
@@ -1808,10 +1898,16 @@ body { color:#25364b; line-height:1.65; }
             body: JSON.stringify(payload)
           });
           const result = await response.json().catch(() => ({}));
+          if (response.status === 400 && !payload.email) {
+            const more = form.querySelector('.pk-more'); if (more) more.open = true;
+            form.email.focus();
+            throw new Error("Укажите, пожалуйста, email: он нужен для подтверждения заявки.");
+          }
           if (!response.ok) throw new Error(result.error || "Не удалось отправить заявку.");
-          statusEl.textContent = "Спасибо! Заявка отправлена. Оператор свяжется с вами.";
-          statusEl.classList.add("success");
+          if (window.AdmiralPickup) window.AdmiralPickup.done(result, payload, pickup);
+          else { statusEl.textContent = "Спасибо! Заявка отправлена. Оператор свяжется с вами."; statusEl.classList.add("success"); }
           form.reset();
+          if (window.AdmiralPickup) window.AdmiralPickup.reset();
         } catch (error) {
           statusEl.textContent = error.message || "Ошибка отправки. Пожалуйста, свяжитесь с нами через WhatsApp.";
           statusEl.classList.add("error");
@@ -1884,7 +1980,7 @@ body { color:#25364b; line-height:1.65; }
     const typeField = document.getElementById('type');
     const messageField = document.getElementById('message');
     const form = document.getElementById('orderForm');
-    if(countryField) countryField.value = tariffs[country.value].name;
+    if(countryField) countryField.value = country.value === 'europe' ? 'Европа' : tariffs[country.value].name;
     if(weightField) weightField.value = weight.value;
     if(typeField) typeField.value = 'Морская доставка';
     if(messageField) {
@@ -1893,6 +1989,7 @@ body { color:#25364b; line-height:1.65; }
       const cleanMessage = messageField.value.replace(previousQuote, '').trim();
       messageField.value = [cleanMessage, note].filter(Boolean).join('\u005c\u005cn');
     }
+    if (window.AdmiralPickup) window.AdmiralPickup.go(1);
     const target = form || document.getElementById('restrictions');
     if (target) {
       target.scrollIntoView({behavior:'smooth', block:'start'});
