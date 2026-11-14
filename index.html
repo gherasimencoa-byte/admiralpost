@@ -1800,21 +1800,38 @@ body { color:#25364b; line-height:1.65; }
         box.innerHTML = 'Ориентировочно <b>₪' + q.total + '</b> за ' + q.billed + ' кг, морская доставка 21–35 дней';
       }
       function buildDates(){
-        const box = $('pkDates'); box.textContent = '';
+        const box = $('pkDates');
+        const previousDate = $('pickupDate').value;
+        const weight = Number($('weight').value);
+        // Parcels up to and including 8 kg: daily pickup. Over 8 kg: Friday/Saturday only.
+        const heavy = Number.isFinite(weight) && weight > 8;
         const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Jerusalem' }).format(new Date());
+        box.textContent = '';
         const add = (label, iso) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.dataset.iso = iso; b.setAttribute('aria-pressed', 'false'); box.appendChild(b); return b; };
-        let firstBtn = null;
-        for (let i = 1, n = 0; n < 5 && i < 14; i++) {
+        let firstBtn = null, previousBtn = null;
+        for (let i = 1, n = 0; n < 5 && i <= 35; i++) {
           const d = new Date(Date.parse(today + 'T12:00:00Z') + i * 864e5), dow = d.getUTCDay();
-          if (dow === 5 || dow === 6) continue;
+          if (heavy && dow !== 5 && dow !== 6) continue;
           const iso = d.toISOString().slice(0, 10);
-          const b = add(WD[dow] + ' ' + iso.slice(8, 10) + '.' + iso.slice(5, 7), iso); if (!firstBtn) firstBtn = b; n++;
+          const b = add(WD[dow] + ' ' + iso.slice(8, 10) + '.' + iso.slice(5, 7), iso);
+          if (!firstBtn) firstBtn = b;
+          if (previousDate === iso) previousBtn = b;
+          n++;
         }
-        add('Не важно', '');
-        if (firstBtn) { press(box, firstBtn); $('pickupDate').value = firstBtn.dataset.iso; }
+        const anytime = add('Не важно', '');
+        const chosen = previousDate === '' && box.dataset.initialized === 'true'
+          ? anytime : (previousBtn || firstBtn);
+        press(box, chosen);
+        $('pickupDate').value = chosen ? chosen.dataset.iso : '';
+        box.dataset.initialized = 'true';
+        const hint = box.parentElement.querySelector('small');
+        if (hint) hint.textContent = (heavy
+          ? 'Для посылок свыше 8 кг забор по пятницам и субботам.'
+          : 'Для посылок до 8 кг включительно забор доступен ежедневно.')
+          + ' День и время подтвердит оператор.';
       }
-      $('pkWeights').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; $('weight').value = b.dataset.w; press($('pkWeights'), b); refreshPrice(); });
-      $('weight').addEventListener('input', () => { press($('pkWeights'), null); refreshPrice(); });
+      $('pkWeights').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; $('weight').value = b.dataset.w; press($('pkWeights'), b); refreshPrice(); buildDates(); });
+      $('weight').addEventListener('input', () => { press($('pkWeights'), null); refreshPrice(); buildDates(); });
       $('country').addEventListener('change', refreshPrice);
       $('pkDates').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; press($('pkDates'), b); $('pickupDate').value = b.dataset.iso; });
       $('savedPickupAddress').addEventListener('change', (e) => { const o = e.target.selectedOptions[0]; if (!o || !o.value) return; $('pickupCity').value = o.dataset.city || ''; $('pickupAddress').value = o.dataset.street || o.value; });
@@ -1830,7 +1847,7 @@ body { color:#25364b; line-height:1.65; }
         collect(){ const b = $('pkDates').querySelector('[aria-pressed="true"]'); const iso = $('pickupDate').value;
           return { city: $('pickupCity').value.trim(), address: $('pickupAddress').value.trim(), date: iso, dateLabel: iso && b ? b.textContent : '', price: price && price.total != null ? price.total : null }; },
         validateAll(){ for (let n = 1; n <= 3; n++) { if (!validate(n)) { go(n); validate(n); return false; } } return true; },
-        reset(){ press($('pkWeights'), null); buildDates(); price = null; $('pkPrice').hidden = true; go(1); },
+        reset(){ press($('pkWeights'), null); $('pkDates').dataset.initialized = 'false'; $('pickupDate').value = ''; buildDates(); price = null; $('pkPrice').hidden = true; go(1); },
         done(result, payload, pickup){
           const no = result && result.request_number ? result.request_number : '';
           $('pkDoneNo').textContent = no;
@@ -1998,7 +2015,10 @@ body { color:#25364b; line-height:1.65; }
     const messageField = document.getElementById('message');
     const form = document.getElementById('orderForm');
     if(countryField) countryField.value = country.value === 'europe' ? 'Европа' : tariffs[country.value].name;
-    if(weightField) weightField.value = weight.value;
+    if(weightField) {
+      weightField.value = weight.value;
+      weightField.dispatchEvent(new Event('input', { bubbles: true }));
+    }
     if(typeField) typeField.value = 'Морская доставка';
     if(messageField) {
       const note = 'Расчёт морской доставки: ' + tariffs[country.value].name + ', вес ' + weight.value + ' кг, ориентировочная стоимость ' + price.textContent + '.';
