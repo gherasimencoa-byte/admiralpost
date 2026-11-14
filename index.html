@@ -1935,6 +1935,30 @@ body { color:#25364b; line-height:1.65; }
           const result = await response.json().catch(() => ({}));
           // A 400 may indicate an invalid address, weight or other field; email is optional for pickup.
           if (response.status === 400) {
+            // The API returns identifiers only; never echo personal data in errors.
+            const names = {
+              name: "имя", phone: "телефон", country: "страну назначения",
+              weight: "вес", pickup_city: "город забора",
+              pickup_address: "улицу и дом", email: "email", agree: "согласие"
+            };
+            const fields = Array.isArray(result.invalid_fields)
+              ? result.invalid_fields.filter(key => Object.prototype.hasOwnProperty.call(names, key)) : [];
+            if (fields.length) {
+              const first = fields[0];
+              const targetId = {pickup_city:"pickupCity",pickup_address:"pickupAddress"}[first] || first;
+              const target = document.getElementById(targetId);
+              const step = ["country","weight"].includes(first) ? 1
+                : ["pickup_city","pickup_address"].includes(first) ? 2 : 3;
+              if (window.AdmiralPickup) window.AdmiralPickup.go(step);
+              fields.forEach(key => {
+                const id = {pickup_city:"pickupCity",pickup_address:"pickupAddress"}[key] || key;
+                document.getElementById(id)?.setAttribute("aria-invalid","true");
+              });
+              statusEl.textContent = "Проверьте: " + fields.map(key => names[key]).join(", ") + ".";
+              statusEl.classList.add("error");
+              target?.focus({preventScroll:false});
+              return;
+            }
             throw new Error(result.error || "Проверьте обязательные поля и попробуйте снова.");
           }
           if (!response.ok) throw new Error(result.error || "Не удалось отправить заявку.");
