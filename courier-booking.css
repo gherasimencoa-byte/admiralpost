@@ -1,0 +1,32 @@
+/* Courier booking mobile UX — isolated to the Russian form */
+#orderForm.courier-steps{display:block}
+#orderForm.courier-steps .courier-step[hidden],#orderForm.courier-steps .courier-success[hidden],#orderForm.courier-steps .courier-price[hidden]{display:none!important}
+#orderForm.courier-steps .courier-steps-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 20px}
+#orderForm.courier-steps .courier-steps-nav span{padding:10px 4px;text-align:center;font-size:12px;font-weight:700;background:#e8edf4;color:#748297;border-radius:10px;white-space:nowrap}
+#orderForm.courier-steps .courier-steps-nav span.current{background:#102b51;color:white}
+#orderForm.courier-steps .courier-steps-nav span.done{background:#def0e5;color:#17683a}
+#orderForm.courier-steps .form-group{margin-bottom:13px}
+#orderForm.courier-steps input:not([type=checkbox]),#orderForm.courier-steps select{width:100%;min-height:46px}
+#orderForm.courier-steps .weight-choices,#orderForm.courier-steps .date-choices{display:flex;gap:7px;flex-wrap:wrap;margin:7px 0 10px}
+#orderForm.courier-steps .weight-choices button,#orderForm.courier-steps .date-choices button{font-size:14px;min-height:44px;flex:1 1 auto;padding:8px 11px;border:1px solid #bed0e4;background:#fff;border-radius:12px;color:#102b51;font-weight:700}
+#orderForm.courier-steps .weight-choices button[aria-pressed=true],#orderForm.courier-steps .date-choices button[aria-pressed=true]{background:#102b51;color:white;border-color:#102b51}
+#orderForm.courier-steps .courier-price{background:white;border:1px solid #d5e1ef;border-radius:12px;padding:12px 14px;margin:12px 0;color:#17365b}
+#orderForm.courier-steps .courier-price strong{font-size:23px;color:#102b51}
+#orderForm.courier-steps .courier-price small{display:block;color:#5a6b80;line-height:1.5}
+#orderForm.courier-steps .courier-actions{display:flex;gap:10px;margin-top:18px}
+#orderForm.courier-steps .courier-actions button,#orderForm.courier-steps .courier-actions a{min-height:48px;border-radius:12px;flex:1;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;font-weight:700;padding:10px;font-size:15px;overflow-wrap:anywhere}
+#orderForm.courier-steps .courier-primary{border:0;color:#fff;background:#ff8900;cursor:pointer}
+#orderForm.courier-steps .courier-secondary{background:#fff;border:1px solid #d7e0eb;color:#102b51;cursor:pointer}
+#orderForm.courier-steps .courier-error{color:#b42318;font-size:13px;min-height:0;margin:6px 0}
+#orderForm.courier-steps [aria-invalid=true]{border-color:#b42318!important}
+#orderForm.courier-steps #savedAddressGroup[hidden]{display:none!important}
+#orderForm.courier-steps #savedAddressGroup:not([hidden]){display:block!important}
+#orderForm.courier-steps .courier-success{padding:8px 0 0}
+#orderForm.courier-steps .courier-success h3{color:#17683a;margin:6px 0 12px}
+#orderForm.courier-steps .courier-success p{line-height:1.65;overflow-wrap:anywhere}
+#orderForm.courier-steps details{margin-top:12px}
+#orderForm.courier-steps details summary{font-weight:700;cursor:pointer;color:#17365b}
+#orderForm.courier-steps .checkbox-row{display:flex;gap:10px;align-items:flex-start;margin-top:16px}
+#orderForm.courier-steps .checkbox-row input{flex:none;width:20px;height:20px;margin-top:3px}
+#orderForm.courier-steps .checkbox-row label{line-height:1.55;font-size:13px}
+@media(max-width:640px){#ap-cookie{max-width:380px;padding:11px 12px!important;font-size:12px!important;box-shadow:0 5px 16px #0d2b522b}#ap-cookie p{margin:6px 0!important;line-height:1.4}#ap-cookie .ap-actions{margin-top:8px;flex-wrap:nowrap}#ap-cookie button{font-size:12px!important;padding:8px 7px!important;flex:1}#orderForm.courier-steps .courier-date{font-size:12px!important}#orderForm.courier-steps .courier-actions{gap:8px}#orderForm.courier-steps .courier-actions button,#orderForm.courier-steps .courier-actions a{font-size:14px}}
