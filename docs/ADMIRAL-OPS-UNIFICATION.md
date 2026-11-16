@@ -115,3 +115,19 @@ There is no evidence from the pasted excerpt of a notification handler, pricing 
 Before coding direct intake, inspect live constraints/RLS/triggers of \`public.ops_orders\`, and the actual \`quote_to_ops\` definition and pending queue without exposing any customer rows or secrets.
 
 **Do not change production now**. User explicitly chooses no separate TEST environment, but preflight and full restorable backup are still required for a controlled production cutover.
+
+## Verified live Ops CHECK constraints/defaults/triggers (administrator metadata, 2026-11-16)
+
+Read-only production \`pg_constraint\`, \`information_schema.columns\`, \`pg_trigger\`:
+
+- \`brand\` allowed: \`alilpost\`, \`admiral\`, \`alilpost_ge\`; **default is \`alilpost\`**. Explicitly set \`admiral\` in a trusted server-side request.
+- \`source\` allowed: \`operator\`, \`site\`, \`ai\`, \`import\`, \`courier\`; **default \`operator\`**. Explicitly set \`site\`.
+- \`order_type\` default \`pickup\`, \`status\` default \`new\`, \`qty\` default \`1\`.
+- \`price_currency\` is NOT NULL; allowed \`ILS\`, \`GEL\`, \`EUR\`; default \`ILS\`. Determine actual Admiral currency contract and explicitly set it; no assumption that estimated price is final.
+- Ops insert triggers active (6): \`ops_lock_order_currency\` AFTER, \`ops_orders_a_subno\` BEFORE, \`ops_orders_bi\` BEFORE, \`ops_orders_log\` AFTER, \`ops_orders_photo\` BEFORE, \`ops_set_callback_owner\` BEFORE. All \`tgenabled='O'\`.
+- Ops repo source \`supabase/migrations/20261106083440_ops_intake_idempotency.sql\` states \`ops_orders_before_insert\` intentionally **skips auto-assignment** for brand \`admiral\`, source \`site\` or \`ai\`, and \`external_ref\` beginning \`admiral:\`. Follow the same external reference namespace if verified in live DB; otherwise a new order may be unexpectedly auto-assigned to a courier.
+- Ops repo source \`20261108071535_ops_deferred_pickup_callbacks.sql\` adds a guard requiring office confirmation for Admiral site/AI orders before moving beyond \`new\`. Preserve this workflow.
+
+**Repository function definitions are not proof of current Production function bodies.** Read \`pg_get_functiondef\` on the two small trusted Ops functions in live Docker PostgreSQL before deploying to verify the \`external_ref\` branch.
+
+No SQL changes made or authorized by the above read-only checks.
