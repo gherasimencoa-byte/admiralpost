@@ -158,3 +158,47 @@ The following relations exist in **Docker `supabase-db`, database `postgres`**, 
 Do **not** use `postgres` / database superuser as the production migration runner, and do not grant a project-specific migrator membership in `postgres`. PostgreSQL DDL often requires ownership, not merely CRUD grants; plan a separate, explicitly reviewed migration-owner role strategy for AdmiralPost objects after inspecting functions, triggers, RLS and dependencies. Any `ops_*` migrations need the corresponding Ops-owned migration path rather than broad AdmiralPost permissions. Site deployment and new SQL migration deployment are still NOT integrated in Production.
 
 Next read-only check should inventory routines and triggers, without exposing SQL bodies, customer data or secrets.
+
+## Confirmed live AdmiralPost functions and triggers (operator, 2026-11-16)
+
+Read-only metadata from Docker `supabase-db` / database `postgres`:
+
+- `admiral_integrations.deliver_ops()` — owner `postgres`.
+- `admiral_integrations.enqueue_ops()` — owner `postgres`.
+- Trigger `public.quote_requests.quote_requests_set_updated_at`.
+- Trigger `public.quote_requests.quote_to_ops`.
+
+This supports the current architectural chain **quote_requests -> outbox -> Ops**, but trigger name alone does not establish its called function, whether it is enabled, or how/when outbox delivery is scheduled. Confirm before modifying either function or the trigger. Migration changes must retain current functionality and must not replay cloud-era SQL on this self-hosted database.
+
+### Next strictly read-only metadata check
+
+```bash
+sudo docker exec -u postgres supabase-db \
+  psql -X -w -U postgres -d postgres -P pager=off \
+  -c "
+    SELECT n.nspname AS schema_name,
+           c.relname AS table_name,
+           t.tgname AS trigger_name,
+           t.tgenabled AS enabled_flag,
+           t.tgfoid::regprocedure AS calls_function,
+           pg_get_triggerdef(t.oid, true) AS definition
+    FROM pg_trigger AS t
+    JOIN pg_class AS c ON c.oid = t.tgrelid
+    JOIN pg_namespace AS n ON n.oid = c.relnamespace
+    WHERE NOT t.tgisinternal
+      AND n.nspname = 'public'
+      AND c.relname = 'quote_requests'
+    ORDER BY t.tgname;
+  " \
+  -c "
+    SELECT extname FROM pg_extension
+    WHERE extname IN ('pg_cron', 'pg_net')
+    ORDER BY extname;
+  " \
+  -c "
+    SELECT to_regclass('cron.job') AS cron_jobs_catalog,
+           to_regclass('admiral_integrations.ops_outbox') AS outbox_table;
+  "
+```
+
+The query reads trigger definitions and extension catalog only. Do not print function bodies, secrets, `cron.job.command`, or customer data. Once `pg_cron` is confirmed, inspect only matching scheduler metadata (job id, schedule, enabled flag), never the command body or credentials.
