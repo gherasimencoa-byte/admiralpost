@@ -1,41 +1,66 @@
-# AdmiralPost → unified AlilPost Ops model (migration plan, NOT deployed)
+# AdmiralPost → direct AlilPost Ops orders
 
-Status: design / pre-production. The public website, order data and existing Supabase Edge Functions are unchanged. This branch intentionally contains no runtime cutover.
+Status: **draft, not deployed**. Production remains unchanged until new order intake, customer history, admin access, and deployed Edge Function behavior pass testing.
 
-## Confirmed from code and server metadata (2026-11-16)
+## Decision (2026-11-16)
 
-- Both projects use the self-hosted PostgreSQL 17.6 in Docker \`supabase-db\`, database \`postgres\`, via \`https://supabase.alilpost.ge\`. No server/database copy is needed.
-- The current AdmiralPost form POSTs to the self-hosted Edge Function \`/functions/v1/submit-quote\`. Existing records are stored in \`public.quote_requests\`.
-- Trigger \`quote_to_ops\` exists on \`public.quote_requests\`, and \`admiral_integrations.enqueue_ops\`, \`deliver_ops\`, \`ops_outbox\` exist. Exact trigger/function behavior and production delivery state still require read-only verification.
-- \`public.ops_orders\` already has \`brand='admiral'\` support and \`source\`, \`external_ref\`. The Ops repo has \`ops-intake\` and a unique index on \`(brand,source,external_ref)\`.
-- AdmiralPost \`account.html\` reads \`quote_requests\` for customer order history and uses \`customer_profiles\`, \`customer_addresses\`. The site \`admin.html\` reads and updates \`quote_requests\`; it also manages other functions. These cannot be switched casually.
-- Chat \`admiral-chat.js\` already references the self-hosted \`ops-chat\` Edge Function.
-- There is a shared \`postgres\` DB but not yet one canonical order data model.
+The operator confirms **all existing AdmiralPost orders are already in AlilPost Ops**. **Do not import, backfill, merge, copy, or duplicate historical orders.** This project is a **connection/cutover**, not a database transfer.
 
-## Decision
+Both applications already use the same physical PostgreSQL 17.6 Docker service \`supabase-db\`, database \`postgres\`, through the self-hosted \`https://supabase.alilpost.ge\` endpoint.
 
-For **future orders**, make \`public.ops_orders\` the canonical order, while preserving AdmiralPost's existing account identities, addresses, UI, chat, and historical records. Do **not** simply make the browser insert into \`ops_orders\`. All writes go through a trusted server-side API/Edge Function with constrained credentials and explicit brand authorization. Avoid exposing API keys or service role in browser JavaScript.
+The goal is to write **new orders directly to \`public.ops_orders\`** with \`brand='admiral'\`, while keeping the customer-facing website and accounts. Retain legacy \`quote_requests\` and the outbox as a read-only archive until downstream dependencies are checked; no order history migration is authorized.
 
-**Old \`quote_requests\` rows must be preserved** until history reconciles and all dependent UIs stop requiring them. Handle a quote/lead versus accepted logistics order explicitly, rather than forcing every inquiry into an order.
+## Actual runtime dependencies verified from GitHub
 
-## Proposed safe cutover stages
+- The website currently submits to \`/functions/v1/submit-quote\`, which has not yet been recovered as deployed source code from the server. Do not overwrite this function blindly.
+- \`account.html\` reads \`public.quote_requests\` by \`customer_user_id\`.
+- \`admin.html\` reads and updates \`public.quote_requests\`; also uses \`shipments\` and \`admiral_change_admin\`. Do not break admin actions unintentionally.
+- \`admiral-chat.js\` already uses the self-hosted \`/functions/v1/ops-chat\`.
+- Existing database: \`public.quote_requests\`, \`admiral_integrations.ops_outbox\`, trigger \`quote_to_ops\` and \`admiral_integrations.enqueue_ops\` / \`deliver_ops\`.
+- Ops service \`ops-intake\` supports \`brand='admiral'\`, \`source='site'\` and external idempotency references, but accepts an **x-api-key which must never appear in browser files**.
 
-1. **Read-only audit** of live PostgreSQL column types, RLS, triggers, existing order counts by brand, constraints, and edge-function deployment. Identify actual \`submit-quote\` runtime code (not present in the current AdmiralPost repo).
-2. **Write canonical field mapping**: every form field, mandatory pickup address/date, weight/qty, consent, email, estimated price, request number, contact, account link, status, and operator notes. Decide optional/custom attributes before changing DB.
-3. **Ops-owned migrations**: add backward-compatible fields/relations/functions where justified, with documented constraints, permissions and journal. Run on TEST clone with backup.
-4. **Trusted intake**: \`submit-quote\` or its replacement validates all inputs, creates one \`ops_orders\` row with \`brand='admiral'\`, \`source='site'\`, a stable idempotency reference, and returns a safe public confirmation number. Reuse appropriate existing \`ops-intake\` internals only with server-side authorization. **Never** call \`ops-intake\` from client JS with an embedded API key.
-5. **Customer visibility**: add a brand-scoped, authenticated read endpoint/function using Supabase Auth JWT; never allow customers to read other customers' orders. Test account ownership and deletion.
-6. **AdmiralPost admin UI**: read/update order data via appropriately scoped Ops API/RPC; preserve access control, no admin privilege escalation.
-7. **Eva/chat**: verify its current Ops chat path and any order-creation interactions; ensure no second order is created for the same customer action.
-8. **Historical reconciliation**: compare \`quote_requests\` ↔ \`ops_orders\` via stable old/new references. Migrate only missing records, preserving original IDs/reference mapping and status; dry-run counts and mismatches first. Don't delete original records.
-9. **Controlled test**: backup/restore rehearsal; new order, repeat-click/retry, unauthenticated customer, signed-in customer, personal history, operator workflow, chatbot, and zero duplicate outbox entries.
-10. **Cutover** under a temporary feature flag. Disable the legacy \`quote_to_ops\`/outbox pathway **only after** the new route is independently proven and outstanding outbox items reconciled. Monitor failures; provide rollback plan.
-11. **After stabilization**, design shared automated GitHub SQL/code deploy with backup-before-migrations, ordered Ops + AdmiralPost migrations, a journal and explicit Edge Function deployment. This is a separate activation.
+## Exact field mapping for new website pickup requests
 
-## Critical boundaries
+| AdmiralPost form | Ops orders | Notes |
+| --- | --- | --- |
+| \`name\` | \`client_name\` | Required; validate server-side |
+| \`phone\` | \`client_phone\` | Required; validate server-side |
+| \`email\` | \`client_email\` | Optional in pickup form |
+| \`country\` | \`destination_country\` | Normalize country |
+| \`weight\` | \`weight\` | Decimal kilograms, positive |
+| \`pickup_city\` | \`city_text\` | Pickup city |
+| \`pickup_address\` | \`address\` | Pickup address |
+| \`pickup_date\` | \`planned_date\` | Date in local pickup timezone |
+| \`type\` / \`kind\` | \`order_type='pickup'\` | Review current enumerations |
+| \`message\` | \`client_comment\` or \`comment\` | Preserve client message; \`comment\` may include operational details |
+| \`estimated_price\` | **not yet mapped to final \`price\`** | Estimate vs final payable price differ; do not silently charge/lock a tariff |
+| \`agree\` | privacy/consent verification | Consent is validated on intake, not blindly trusted; record audit if required |
+| \`language\` | optional site-specific metadata | Not a known column; retain only if justified |
+| (server generated) | \`brand='admiral'\`, \`source='site'\`, \`status='new'\` | Never accept brand/privileged state from browser |
+| (stable request UUID) | \`external_ref\` | Idempotent retry; unique by \`brand,source,external_ref\` |
+| (server-generated) | \`ops_orders.id\` | Confirmation ID, not old \`quote_requests.request_number\` |
 
-- The migration and trigger code must not run with blanket \`postgres\` privileges in CI.
-- Existing \`ops_*\` tables belong to Ops; schema updates land in the Ops repo with coordinated compatibility checks.
-- Production order/account records and the existing admin site must stay functional during the transition.
-- Old cloud Supabase is outside scope.
-- Do not merge this branch or deploy until the real database/Edge Function contract is confirmed.
+User-provided schema inventory confirms \`public.ops_orders\` has all the main customer/address/destination/date fields needed for pickup; it has no \`customer_user_id\` column. Therefore **customer order visibility still needs an authenticated linkage**, even though orders are already in the same DB.
+
+## No historical order movement
+
+- Never INSERT historical \`quote_requests\` into \`ops_orders\`.
+- Never rewrite or delete existing \`ops_orders\`, \`quote_requests\` or \`ops_outbox\` merely because the new website route is enabled.
+- Existing orders can remain referenced by their Ops IDs. Any website account history view must use a verified authorization mapping, not infer identity from a phone number.
+- Old quote numbers and new Ops IDs are different types; do not claim they are identical.
+- If website needs to show pre-existing orders, audit existing account-to-order linkage. Create a **linking method only**, not a history import.
+
+## Cutover checklist (test first)
+
+1. Read-only audit the actual deployed \`submit-quote\` Edge Function, current trigger/outbox delivery activity and \`ops_orders\` RLS. Count duplicate target orders; do not manipulate rows.
+2. Add one server-side intake function, authenticated as server, that validates client fields, uses stable idempotency, and writes \`ops_orders\` once. No service role or integration key in client JS. Preserve security/spam protections and necessary notifications from existing function.
+3. Add authenticated customer history reader with an explicit user/order link and brand boundaries.
+4. Adapt AdmiralPost admin list/actions to the Ops order model, keeping the separate \`shipments\`/owner-access features working. Check status mappings; Ops statuses differ from quote statuses.
+5. Keep Eva chat integration; verify chat creates no duplicate order.
+6. Deploy intake and account-read functions to TEST, backup, test duplicate clicks, anonymous/authenticated customer, operator visibility, admin permissions and rollback.
+7. **Only then** switch website UI to the new intake and Ops account/admin endpoints. The old \`quote_requests\` trigger remains idle when no longer inserting there; disable legacy outbox delivery only after checking pending items.
+8. Validate real end-to-end intake and website/ops reads, monitor, retain rollback path.
+
+## After successful cutover
+
+Then implement coordinated Github website + Ops SQL/Edge Function deploy with DB backup, migration journal, tested rollbacks and pre-release compatibility. This is **not** done yet. New frontend commits must not deploy automatically until their dependent functions/DB changes are already deployed and tested.
