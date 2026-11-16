@@ -136,10 +136,18 @@
     turns.push({token:S.token,chat:S.chat?.id,text,answer,at:new Date().toISOString()});turns=turns.slice(-30);
     try{sessionStorage.setItem(ns+'routeTurns',JSON.stringify(turns));}catch{}
   }
+  const rateQuestion=/цен[ауые]?|стоимост|стоит|сколько (?:будет|стои|денег|обойд)|поч[её]м|тариф|рассчит|расч[её]т|обойд[её]тся|how much|price|cost|quote|shipping rate|כמה עולה|מחיר|עלות/iu;
+  const kg=/(\d+(?:[.,]\d+)?)\s*(?:кг|килограмм[а-я]*|kgs?|kilograms?|ק["״]?ג|קילו)(?!\p{L})/giu;
+  const quoteCopy={
+    ru:['Сколько весит одна упакованная посылка, в килограммах?', 'Для этого отправления стоимость нужно уточнить у консультанта.'],
+    en:['How much does one packed parcel weigh in kilograms?', 'Please ask a consultant to confirm the price for this shipment.'],
+    he:['מה משקלה של חבילה אחת אחרי האריזה, בקילוגרמים?', 'כדי לברר את מחיר המשלוח הזה יש לפנות לנציג.']
+  }[lang];
+  const europeanTariffs=new Set('AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE'.split(' '));
   async function parcelWeightReply(text,codes){
     if(codes.length!==1)return null;
-    const tariffKey={UA:'ukraine',RU:'russia',US:'usa',CA:'canada',MD:'moldova',BY:'belarus',GE:'georgia'}[codes[0]];
-    if(!tariffKey)return null;
+    const tariffKey={UA:'ukraine',RU:'russia',US:'usa',CA:'canada',MD:'moldova',BY:'belarus',GE:'georgia'}[codes[0]] || (europeanTariffs.has(codes[0])?'europe':null);
+    if(!tariffKey)return (rateQuestion.test(text)||Array.from(text.matchAll(kg)).length)?quoteCopy[1]:null;
     const weights=[...text.matchAll(/(\d+(?:[.,]\d+)?)\s*(?:кг|килограмм[а-я]*|kg(?:s)?|kilograms?|ק["״]?ג|קילו)(?!\p{L})/giu)];
     const limitQuestion=/максимальн|лимит.{0,12}вес|ограничени.{0,12}вес|до скольки кг|сколько (?:кг|килограмм[а-я]*) можно|max(?:imum)? (?:parcel |package )?weight|weight limit|משקל מרבי|משקל מקסימלי/iu.test(text);
     if(!limitQuestion && !weights.length)return null;
@@ -149,22 +157,41 @@
     const weight=weights.length?Number(weights[0][1].replace(',','.')):null;
     const name=countryNames.of(codes[0]);
     const header={ru:name+' — до '+limit+' кг на одну посылку.',en:name+': up to '+limit+' kg per parcel.',he:name+' — עד '+limit+' ק״ג לחבילה.'}[lang];
-    if(!weight)return header;
+    if(weight===null)return header;
+    if(weight<=0)return quoteCopy[0];
     if(weight>limit)return header+' '+{ru:'Посылка весом '+weight+' кг превышает этот лимит.',en:'A '+weight+' kg parcel exceeds this limit.',he:'חבילה במשקל '+weight+' ק״ג חורגת מהמגבלה.'}[lang];
-    const price=pricing.quote(tariffKey,weight).total;
-    return header+' '+{ru:'Посылку весом '+weight+' кг не нужно делить из-за веса. При расчётном весе '+weight+' кг доставка стоит '+price+' ₪.',en:'A '+weight+' kg parcel is within the limit. Shipping at a chargeable weight of '+weight+' kg costs ₪'+price+'.',he:'חבילה במשקל '+weight+' ק״ג עומדת במגבלה. עלות המשלוח למשקל חיוב של '+weight+' ק״ג היא '+price+' ₪.'}[lang];
+    const result=pricing.quote(tariffKey,weight), price=result.total;
+    return header+' '+{ru:'Посылку весом '+weight+' кг не нужно делить из-за веса. При расчётном весе '+result.billed+' кг доставка стоит '+price+' ₪.',en:'A '+weight+' kg parcel is within the limit. Shipping at a chargeable weight of '+result.billed+' kg costs ₪'+price+'.',he:'חבילה במשקל '+weight+' ק״ג עומדת במגבלה. עלות המשלוח למשקל חיוב של '+result.billed+' ק״ג היא '+price+' ₪.'}[lang];
   }
   async function guardReply(text){
     const allowed=await destinations();
+    const history=transcript().filter(m=>m.author==='visitor');
     const current=countryCodes(text);
-    if(current.length)return decision(text,allowed) || await parcelWeightReply(text,current);
-    const prior=transcript().reverse().find(m=>m.author==='visitor'&&countryCodes(m.body).length);
-    if(prior && !/(?:достав|отправ|посылк).{0,30}\sв\s+\p{L}|(?:ship|deliver|send).{0,25}\bto\s+\p{L}/iu.test(text)){
-      const previous=countryCodes(prior.body);
-      if(previous.every(code=>allowed.has(code))){const weightReply=await parcelWeightReply(text,previous);if(weightReply)return weightReply;}
+    const newRoute=/\s(?:в|во|из|to|into)\s+\p{L}/iu.test(text);
+    const prior=history.slice().reverse().find(m=>countryCodes(m.body).length || /\s(?:в|во|to)\s+\p{L}/iu.test(m.body));
+    const codes=current.length?current:!newRoute && prior?countryCodes(prior.body):[];
+    const previousTurn=history.at(-1)?.body||'';
+    let query=text;
+    if(/^\s*\d+(?:[.,]\d+)?\s*[?.!]?\s*$/u.test(text) && transcript().at(-1)?.body===quoteCopy[0])query=text.trim().replace(/[?!]$/u,'')+' kg';
+    const asking=rateQuestion.test(query) || !!Array.from(query.matchAll(kg)).length;
+    if(current.length || asking || shippingQuestion.test(text)){
+      const missing=codes.find(code=>!allowed.has(code));
+      if(missing)return routeText.no(countryNames.of(missing));
     }
-    if((shippingQuestion.test(text) && !prior && /(?:цен|стои|сколько|куда|хочу отправ|заказать достав|рассчит|сколько|price|quote|how much|ship to|עלות|מחיר)/iu.test(text)) || (shippingQuestion.test(text) && /(?:достав|отправ|посылк).{0,28}\sв\s+\p{L}|(?:ship|deliver|send).{0,25}\bto\s+\p{L}/iu.test(text)))return routeText.ask;
-    if(prior && (shippingQuestion.test(text)||/\d\s*(?:кг|kg|קג)|^(?:да|yes|כן)$/i.test(text)))return decision(prior.body,allowed);
+    if(!codes.length && (asking || shippingQuestion.test(text)&&newRoute))return routeText.ask;
+    if(codes.length>1 && asking)return routeText.ask;
+    if(codes.length===1){
+      if(current.length && (rateQuestion.test(previousTurn)||Array.from(previousTurn.matchAll(kg)).length) && !Array.from(query.matchAll(kg)).length && !countryCodes(previousTurn).length){
+        const previousWeights=Array.from(previousTurn.matchAll(kg));
+        if(previousWeights.length===1)query+=' '+previousWeights[0][0];
+      }
+      const answer=await parcelWeightReply(query,codes);
+      if(answer)return answer;
+      if(rateQuestion.test(query) || current.length && !countryCodes(previousTurn).length && rateQuestion.test(previousTurn)){
+        if(/документ|document|מסמכ|габарит|размер|dimensions?|пошлин|customs|\d\s*[xх×*]\s*\d/iu.test(query) || Array.from(query.matchAll(kg)).length)return quoteCopy[1];
+        return quoteCopy[0];
+      }
+    }
     return null;
   }
   function merge(d){
@@ -236,7 +263,7 @@
     const sendButton=el('button','send');sendButton.type='submit';sendButton.setAttribute('aria-label',t.send);sendButton.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>';composer.append(input);addMicrophone(input);composer.append(sendButton);composer.onsubmit=e=>{e.preventDefault();send();};panel.append(composer);
     const foot=el('footer','footer');foot.append(el('span','','Admiral-Post'));const wa=el('a','','WhatsApp ↗');wa.href='https://wa.me/972555171600';wa.target='_blank';wa.rel='noopener noreferrer';foot.append(wa);panel.append(foot);root.append(panel);renderView();viewport();
   }
-  function bubble(m){const n=el('article','message '+(m.author==='visitor'?'customer':m.author==='system'?'system':'assistant'));if(m.author!=='system'){n.append(el('strong','name',m.author==='visitor'?t.you:m.name||(m.author==='bot'?t.assistant:copy.human)));}const text=m.body||'';const url='https://www.admiral-post.com/documents/declaration.pdf';text.split(url).forEach((part,i)=>{if(i){const a=el('a','',t.pdf);a.href=url;a.target='_blank';a.rel='noopener';n.append(a);}n.append(document.createTextNode(part));});if(m.at)n.append(el('time','time',new Date(m.at).toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'})));return n;}
+  function bubble(m){const n=el('article','message '+(m.author==='visitor'?'customer':m.author==='system'?'system':'assistant'));if(m.author!=='system'){n.append(el('strong','name',m.author==='visitor'?t.you:m.name||(m.author==='bot'?t.assistant:copy.human)));}const raw=m.body||'';const unverified=m.author==='bot' && m.id!=null && /(?:\d[\d., ]*\s*(?:₪|шекел|ILS\b|NIS\b|shekel|שקל)|₪\s*\d)/iu.test(raw);const text=unverified?quoteCopy[1]:raw;const url='https://www.admiral-post.com/documents/declaration.pdf';text.split(url).forEach((part,i)=>{if(i){const a=el('a','',t.pdf);a.href=url;a.target='_blank';a.rel='noopener';n.append(a);}n.append(document.createTextNode(part));});if(m.at)n.append(el('time','time',new Date(m.at).toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'})));return n;}
   function renderView(){
     if(!body)return;if(S.view!=='chat'&&dictation){stopDictation();const input=composer.querySelector('textarea');input.readOnly=false;input.placeholder=copy.placeholder;const mic=composer.querySelector('.mic');mic.setAttribute('aria-pressed','false');mic.title=voiceCopy[0];mic.setAttribute('aria-label',mic.title);}body.replaceChildren();actionsEl.replaceChildren();composer.hidden=S.view!=='chat';composer.style.display=S.view==='chat'?'':'none';
     if(S.view!=='chat'){body.append(button('← '+copy.back,()=>{S.view='chat';renderView();},'chip back'));if(S.view==='order')return orderForm();if(S.view==='contact')return contactForm();if(S.view==='track')return trackingForm();}
