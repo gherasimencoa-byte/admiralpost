@@ -66,5 +66,36 @@ jobs:
             if command -v docker >/dev/null 2>&1; then
               docker ps --format "{{.Names}} {{.Image}}" 2>/dev/null || echo "docker ps denied or unavailable"
             fi
+            echo "===== POSTGRES SERVICE / CLUSTERS ====="
+            if command -v pg_lsclusters >/dev/null 2>&1; then pg_lsclusters -h || true; fi
+            systemctl is-active postgresql 2>/dev/null || true
+            echo "===== ENDPOINT DNS ADDRESSES ====="
+            getent ahostsv4 supabase.alilpost.ge 2>/dev/null | awk '{print $1}' | sort -u || true
+            echo "===== LOCAL INTERFACES (ADDRESS ONLY) ====="
+            if command -v ip >/dev/null 2>&1; then
+              ip -4 -o addr show scope global 2>/dev/null | awk '{print $4}' || true
+            fi
+            echo "===== POSTGRES CONNECTION READ ONLY / NO CREDENTIALS ====="
+            for mode in local tcp; do
+              if [ "$mode" = local ]; then
+                if PGCONNECT_TIMEOUT=3 psql -X -w -A -t -c "select current_database(), current_user" >/dev/null 2>&1; then
+                  echo "Unprivileged deploy-user can connect over local socket"
+                else
+                  echo "Unprivileged deploy-user cannot connect over local socket"
+                fi
+              else
+                if PGCONNECT_TIMEOUT=3 psql -X -w -h 127.0.0.1 -p 5432 -A -t -c "select current_database(), current_user" >/dev/null 2>&1; then
+                  echo "Unprivileged deploy-user can connect over localhost TCP"
+                else
+                  echo "Unprivileged deploy-user cannot connect over localhost TCP"
+                fi
+              fi
+            done
+            echo "===== DEPLOY SCRIPT READABILITY ====="
+            if [ -r /usr/local/sbin/admiralpost-deploy ]; then
+              echo "Existing root-owned deploy script is readable by deployment user"
+            else
+              echo "Existing root-owned deploy script is not readable by deployment user"
+            fi
             echo "===== COMPLETED (READ ONLY) ====="
           '
