@@ -103,7 +103,17 @@ def read_journal():
         result[pieces[0]] = pieces[1]
     return result
 
+def ensure_pg17_backup_tools():
+    # A PostgreSQL 16 client cannot dump a PostgreSQL 17 server.
+    version = run(["pg_dump", "--version"], capture=True).stdout.decode().strip()
+    m = re.search(r"\b(\d+)\.", version)
+    if not m or int(m.group(1)) != 17:
+        raise RuntimeError(
+            "PostgreSQL 17 pg_dump required; host PostgreSQL 16 client is incompatible"
+        )
+
 def take_backup(commit):
+    ensure_pg17_backup_tools()
     BACKUP_ROOT.mkdir(mode=0o700, parents=True, exist_ok=True)
     if BACKUP_ROOT.is_symlink():
         raise RuntimeError("Backup directory cannot be a symlink")
