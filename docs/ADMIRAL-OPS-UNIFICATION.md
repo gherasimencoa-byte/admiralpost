@@ -157,3 +157,14 @@ Separate read-only query of \`public.ops_orders\` with \`brand='admiral'\` retur
 The operator expressly instructs: **stop inspecting, counting, comparing or migrating past orders**. The historical outbox reconciliation was already completed; no further historical checks are requested. This project is limited to **new website orders after cutover** and authenticated access to new orders. Never import, backfill, re-create, recount or inspect pre-cutover orders as a prerequisite to this change. Preserve the existing tables and records without modification.
 
 Implementation should focus on: (1) a validated server-side `submit-quote` replacement writing immediately to `ops_orders` with `brand='admiral'`, `source='site'` and idempotent `admiral:` reference; (2) an isolated account-to-order link patterned after AlilPost.ge but using Supabase Auth UUIDs; (3) secure current-account order listing and correctly scoped admin actions; (4) feature-compatible interface and controlled Production switch after backup. The old queue is not part of new order creation. Do not disable the still-active old route before new code is ready and the website is switched.
+
+## Implementation checkpoint (2026-11-16)
+
+Draft code, **not deployed**:
+- Ops PR #4: `supabase/migrations/20261116163000_admiral_site_direct_orders.sql` creates `admiral_site.order_details` and `admiral_site.customer_order_links`, `public.admiral_create_site_order` (one transaction with stable idempotency key) and `public.admiral_my_orders()` (auth.uid()-scoped read).
+- Ops PR #4: `supabase/functions/admiral-submit-order/index.ts` validates pickup data, checks server-side identity, uses the existing rate limiter, and calls the protected canonical order RPC. This is a NEW endpoint; existing `submit-quote` stays untouched.
+- AdmiralPost PR #33: `index.html` prepares submissions to the NEW endpoint, supplying an idempotency UUID per form payload; `account.html` reads new authenticated Ops orders through the scoped RPC.
+- Existing historical rows are **not examined, migrated or changed**.
+- Existing `admin.html` still reads/writes `quote_requests` and therefore **will not display/edit new Ops orders**. This is a known **cutover blocker**; implement a narrowly scoped Ops admin read-only or authorized workflow before deploying the website.
+- Production-only rollout requested: first backup shared PostgreSQL 17 and Edge Function/site files, then apply Ops migration and deploy new endpoint, validate security, then switch site atomically. Keep rollback path and no destructive SQL. GitHub Actions site CI on the draft branch passed, but this does **not** validate the new Ops SQL nor the Edge Function runtime.
+- The legacy trigger/outbox and old `submit-quote` must NOT be disabled before new intake has been deployed and validated.
