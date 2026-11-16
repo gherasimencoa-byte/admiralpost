@@ -1894,9 +1894,7 @@ body { color:#25364b; line-height:1.65; }
         e.preventDefault();
         statusEl.textContent = "";
         statusEl.className = "form-status";
-        // Submit to the cloud Admiral Express backend; the customer portal has
-        // an independent Supabase connection at supabase.alilpost.ge.
-        const cfg = window.ADMIRAL_QUOTE_API_CONFIG || {};
+        const cfg = window.ADMIRAL_SUPABASE_CONFIG || {};
         if (!cfg.url || !cfg.publishableKey) {
           statusEl.textContent = "Онлайн-форма временно не подключена. Пожалуйста, отправьте запрос через WhatsApp или напишите info@admiral-express.com.";
           statusEl.classList.add("error");
@@ -1928,10 +1926,10 @@ body { color:#25364b; line-height:1.65; }
         const button = form.querySelector('button[type="submit"]');
         if (button) button.disabled = true;
         try {
-          // Do not send customer-portal JWTs to a different Supabase project.
+          const session=customerDb?(await customerDb.auth.getSession()).data.session:null;
           const response = await fetch(cfg.url.replace(/\/$/, "") + "/functions/v1/submit-quote", {
             method: "POST",
-            headers: { "Content-Type": "application/json", "apikey": cfg.publishableKey },
+            headers: { "Content-Type": "application/json", "apikey": cfg.publishableKey, ...(session?.access_token?{"Authorization":"Bearer "+session.access_token}:{}) },
             body: JSON.stringify(payload)
           });
           const result = await response.json().catch(() => ({}));

@@ -4,10 +4,3 @@ window.ADMIRAL_SUPABASE_CONFIG = {
   url: "https://supabase.alilpost.ge",
   publishableKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzkzOTU4MzkwLCJleHAiOjE5NTE2MzgzOTB9.Dzvy-hhAV1GKRyfNb3BlQIOUIOTZ6pWATOa7RNclRSk"
 };
-
-// Separate public endpoint for Admiral Express website order intake.
-// Customer accounts and other integrations continue using ADMIRAL_SUPABASE_CONFIG.
-window.ADMIRAL_QUOTE_API_CONFIG = {
-  url: "https://mohdpeyfiafmfubllbgg.supabase.co",
-  publishableKey: "sb_publishable_liWk9p2ZzdsX8lIvqWRp2A_rYm0iERW"
-};
