@@ -143,3 +143,18 @@ ORDER BY event_object_schema,event_object_table,trigger_name;
 ```
 
 No customer rows, passwords, key material, role grants, NGINX configuration, or table contents are requested.
+
+## Confirmed AdmiralPost object owners (administrator inventory, 2026-11-16)
+
+The following relations exist in **Docker `supabase-db`, database `postgres`**, and are currently owned by database role `postgres`:
+
+| Object | Owner |
+| --- | --- |
+| `public.quote_requests` | `postgres` |
+| `public.customer_profiles` | `postgres` |
+| `public.customer_addresses` | `postgres` |
+| `admiral_integrations.ops_outbox` | `postgres` |
+
+Do **not** use `postgres` / database superuser as the production migration runner, and do not grant a project-specific migrator membership in `postgres`. PostgreSQL DDL often requires ownership, not merely CRUD grants; plan a separate, explicitly reviewed migration-owner role strategy for AdmiralPost objects after inspecting functions, triggers, RLS and dependencies. Any `ops_*` migrations need the corresponding Ops-owned migration path rather than broad AdmiralPost permissions. Site deployment and new SQL migration deployment are still NOT integrated in Production.
+
+Next read-only check should inventory routines and triggers, without exposing SQL bodies, customer data or secrets.
