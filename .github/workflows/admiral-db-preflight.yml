@@ -1,0 +1,64 @@
+name: AdmiralPost database preflight (read-only)
+
+on:
+  push:
+    branches:
+      - setup-admiralpost-db-migrations-20261116
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect production host without touching database or website
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_HOST:?missing host}"
+          : "${DEPLOY_USER:?missing user}"
+          : "${DEPLOY_SSH_KEY:?missing key}"
+          : "${DEPLOY_KNOWN_HOSTS:?missing known hosts}"
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+          ssh-keygen -F "$DEPLOY_HOST" -f "$HOME/.ssh/known_hosts" >/dev/null
+          ssh -i "$HOME/.ssh/id_ed25519" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" "$DEPLOY_USER@$DEPLOY_HOST" '
+            set -eu
+            echo "===== OS ====="
+            uname -s -m
+            echo "===== DEPLOY USER ====="
+            id
+            echo "===== EXISTING DEPLOY ====="
+            test -L /srv/admiralpost/current && readlink -f /srv/admiralpost/current || true
+            test -d /var/lib/admiralpost-deploy/incoming && echo "incoming exists"
+            sudo -n -l /usr/local/sbin/admiralpost-deploy >/dev/null && echo "existing sudo deployment rule works"
+            echo "===== DATABASE CLIENT TOOLS ====="
+            for c in psql pg_dump pg_restore pg_isready docker podman; do
+              if command -v "$c" >/dev/null 2>&1; then
+                command -v "$c"
+                case "$c" in
+                  psql|pg_dump|pg_restore) "$c" --version ;;
+                esac
+              else
+                echo "$c: not in PATH"
+              fi
+            done
+            echo "===== LOCAL POSTGRES LISTENERS ====="
+            if command -v ss >/dev/null 2>&1; then
+              ss -ltn | grep -E "(:5432|:6543|:6432)[[:space:]]" || echo "none of the standard ports seen"
+            fi
+            if [ -S /var/run/postgresql/.s.PGSQL.5432 ]; then echo "PostgreSQL Unix socket exists"; fi
+            echo "===== CONTAINERS VISIBLE TO DEPLOY USER ====="
+            if command -v docker >/dev/null 2>&1; then
+              docker ps --format "{{.Names}} {{.Image}}" 2>/dev/null || echo "docker ps denied or unavailable"
+            fi
+            echo "===== COMPLETED (READ ONLY) ====="
+          '
