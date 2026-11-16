@@ -42,3 +42,30 @@ Before assigning privileges or running migrations, determine:
 ## Activation gate
 
 Do not merge an active migration trigger, alter the production installer, or create DB access secrets until the target DB, authorized migration role, restore-tested backups, and TEST rehearsal are confirmed. After that, a separate reviewed PR can enable automatic deployment of both site and SQL on every push to `main`.
+
+## Verified read-only host findings (2026-11-16)
+
+GitHub Actions read-only SSH probe completed successfully:
+
+- The local Ubuntu PostgreSQL cluster is `16/main` (online, port `5432`).
+- Also a localhost TCP listener at `127.0.0.1:6543`.
+- `psql`, `pg_dump`, `pg_restore` are version 16.15.
+- The `admiralpost-deploy` account can read `/srv/admiralpost/current` and invoke ONLY the existing sudo deployment script.
+- That account cannot log into PostgreSQL through a local socket or `127.0.0.1:5432` without credentials.
+- It cannot query Docker containers, and the root-owned installer is intentionally unreadable.
+- **No DB data, schema or role has been changed.**
+
+**Do not equate the localhost PostgreSQL with the Supabase endpoint without checking NGINX proxy and container/database wiring with administrator permissions.** The site URL alone is not sufficient evidence.
+
+### One-time administrator inspection, read only
+
+Run these commands on the server using an administrator account; review output for secrets before sharing:
+
+```bash
+sudo pg_lsclusters
+sudo -u postgres psql -X -A -t -c "SELECT datname FROM pg_database WHERE datistemplate = false ORDER BY datname;"
+sudo docker ps --format '{{.Names}} {{.Image}}'
+sudo nginx -T 2>/dev/null | grep -n -A 18 -B 4 'server_name supabase.alilpost.ge'
+```
+
+Check which PostgreSQL database serves the actual Supabase API, and how AdmiralPost-specific tables/functions map into it. Do not run any SQL DDL, DML, grant, or dump until reviewed.
