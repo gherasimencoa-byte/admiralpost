@@ -94,3 +94,24 @@ The operator explicitly chose **no separate TEST deployment**. Adapt the plan:
 7. After monitoring and verifying no duplicate outbox delivery, retire the legacy *write path*. Preserve old tables/data.
 
 **Skipping TEST is not the same as skipping validation.** If any prerequisite/backup/recoverability check fails, abort the live switch.
+
+## Deployed submit-quote source review (2026-11-16, read-only excerpt)
+
+Operator pasted the active source from \`/opt/supabase/volumes/functions/submit-quote/index.ts\` (as of 2026-11-16). Current code:
+
+- Imports \`@supabase/supabase-js@2\`, allows \`https://admiral-post.com\` and \`https://www.admiral-post.com\` (plus localhost development origins), responds to preflight and requires JSON POST.
+- Caps request body at 12 KB, honors honeypot field \`website\`, validates \`name\`, \`phone\`, \`email\`, \`country\`, \`weight\`, \`agree/consent\`, reads \`contents ?? type\`, \`message\`, \`language\`.
+- Uses server-side Supabase service role/secret key from environment, then a best-effort 8-requests-in-15-minutes hashed-IP counter in \`public.request_rate_limits\`.
+- **Writes to \`public.quote_requests\` only**, with \`source='website'\`, \`status='new'\`; no direct \`ops_orders\` call and no order/account link.
+- Accepts \`Authorization\` header from the website but the function does **not** call \`auth.getUser(token)\` to validate signed-in identity; a new authenticated order must derive user UUID from a validated token, not caller JSON.
+- **Pickup city/address/date are not independently saved** by the function; the website includes them in the \`message\` text. New canonical Ops mapping should write them to \`city_text\`, \`address\`, \`planned_date\`.
+- Current function requires **email**, while the active website's form notes that email is optional for pickup. Resolve this mismatch during direct-intake validation.
+- Current rate limiting is best effort: failing to update \`request_rate_limits\` does not block intake. Server-side secret/salt use and header trust require review, but no change to production until guarded rollout.
+- The \`quote_to_ops\` database trigger currently creates a risk of double orders if new direct intake is added without disabling the legacy write *for new requests*. Do not create a new quote and a direct Ops order for the same submission.
+- Return a compatible success message and safe order confirmation; existing deployed response is \`201\` with \`ok: true\` and localized \`message\`.
+
+There is no evidence from the pasted excerpt of a notification handler, pricing validation or a specific background outbox scheduler; inspect those separately rather than assuming they exist.
+
+Before coding direct intake, inspect live constraints/RLS/triggers of \`public.ops_orders\`, and the actual \`quote_to_ops\` definition and pending queue without exposing any customer rows or secrets.
+
+**Do not change production now**. User explicitly chooses no separate TEST environment, but preflight and full restorable backup are still required for a controlled production cutover.
