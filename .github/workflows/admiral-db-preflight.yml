@@ -13,6 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate migration files and generate deterministic manifest
+        run: |
+          python3 scripts/validate_migrations.py
+          test -s dist/admiralpost-db-migrations.json
       - name: Inspect production host without touching database or website
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
