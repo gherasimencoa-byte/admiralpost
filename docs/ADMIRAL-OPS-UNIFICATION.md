@@ -131,3 +131,23 @@ Read-only production \`pg_constraint\`, \`information_schema.columns\`, \`pg_tri
 **Repository function definitions are not proof of current Production function bodies.** Read \`pg_get_functiondef\` on the two small trusted Ops functions in live Docker PostgreSQL before deploying to verify the \`external_ref\` branch.
 
 No SQL changes made or authorized by the above read-only checks.
+
+## Live legacy outbox reconciliation result (operator, 2026-11-16)
+
+Read-only query in Docker Supabase PostgreSQL 17, database \`postgres\`, on \`admiral_integrations.ops_outbox\` returned:
+
+| Metric | Count |
+|---|---:|
+| Total rows | 16 |
+| \`delivered_at IS NOT NULL\` | 16 |
+| \`delivered_at IS NULL\` | 0 |
+| \`ops_order_id IS NOT NULL\` | 16 |
+| Undelivered and attempts > 0 | 0 |
+
+Separate read-only query of \`public.ops_orders\` with \`brand='admiral'\` returned:
+- \`source='site'\`: 11 orders, all 11 with \`external_ref LIKE 'admiral:%'\`.
+- \`source='ai'\`: 5 orders, all 5 with \`external_ref LIKE 'admiral:%'\`.
+
+**Interpretation:** the 16 historical outbox entries have all been delivered and linked to Ops, with no currently pending entries as of the query. This is a point-in-time snapshot, not a guarantee there can be no newly queued requests before cutover. No bulk migration/backfill/import is requested or authorized. Do not drop/disable the queue or its trigger while the live \`submit-quote\` still writes to \`quote_requests\`. Recheck counts immediately before and after website cutover, then retire only the legacy active pathway, preserving the archive and rollback.
+
+**Next prerequisite:** Prepare a deployable versioned direct-intake function and secure user/order link, with backup and deterministic roll-back, before any Production switch.
