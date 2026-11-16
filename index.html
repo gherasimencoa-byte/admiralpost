@@ -1977,6 +1977,10 @@ body { color:#25364b; line-height:1.65; }
           pendingPayloadHash = null;
           if (window.AdmiralPickup) window.AdmiralPickup.done(result, payload, pickup);
           else { statusEl.textContent = "Спасибо! Заявка отправлена. Оператор свяжется с вами."; statusEl.classList.add("success"); }
+          // Successful submission ends this request. An identical new form submission
+          // must receive a fresh idempotency key; failed retries retain the old key.
+          pendingKey = null;
+          pendingPayloadHash = null;
           form.reset();
           if (window.AdmiralPickup) window.AdmiralPickup.reset();
         } catch (error) {
