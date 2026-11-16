@@ -57,10 +57,40 @@ User-provided schema inventory confirms \`public.ops_orders\` has all the main c
 3. Add authenticated customer history reader with an explicit user/order link and brand boundaries.
 4. Adapt AdmiralPost admin list/actions to the Ops order model, keeping the separate \`shipments\`/owner-access features working. Check status mappings; Ops statuses differ from quote statuses.
 5. Keep Eva chat integration; verify chat creates no duplicate order.
-6. Deploy intake and account-read functions to TEST, backup, test duplicate clicks, anonymous/authenticated customer, operator visibility, admin permissions and rollback.
+6. Deploy intake and account-read functions to Production, backup, test duplicate clicks, anonymous/authenticated customer, operator visibility, admin permissions and rollback.
 7. **Only then** switch website UI to the new intake and Ops account/admin endpoints. The old \`quote_requests\` trigger remains idle when no longer inserting there; disable legacy outbox delivery only after checking pending items.
 8. Validate real end-to-end intake and website/ops reads, monitor, retain rollback path.
 
 ## After successful cutover
 
 Then implement coordinated Github website + Ops SQL/Edge Function deploy with DB backup, migration journal, tested rollbacks and pre-release compatibility. This is **not** done yet. New frontend commits must not deploy automatically until their dependent functions/DB changes are already deployed and tested.
+
+## Architecture correction: use the existing AlilPost.ge pattern (2026-11-16)
+
+Verified against **\`icetii/Alilpost-GE\` main** files \`migrations/ops_0001_shared_orders.sql\`, \`public/crm/lib/ops-order.php\`, \`public/crm/lib/customers.php\`:
+
+- AlilPost.ge does **not** add a \`customer_user_id\` to \`public.ops_orders\`.
+- It stores the canonical order in \`ops_orders\` and a \`alilpost_site.order_details\` record keyed by that order id.
+- It stores the optional authenticated customer link in \`alilpost_site.customer_order_links(order_id bigint, customer_id bigint)\`; site PHP customer views JOIN these by session customer ID.
+- The site's PostgreSQL \`create_site_order\` function performs order creation and supplemental metadata insertion under one transaction, guarded by an idempotency request key.
+- AdmiralPost uses **Supabase Auth UUID user IDs**, not AlilPost.ge's self-managed bigint \`customer_accounts.id\`. Reuse the **pattern**, not its exact code or foreign-key type.
+
+**Proposed minimal AdmiralPost linkage** (to review against current live authentication/RLS/grants first):
+\`admiral_site.customer_order_links(order_id bigint PRIMARY KEY REFERENCES public.ops_orders(id), user_id uuid NOT NULL REFERENCES auth.users(id))\`.
+Create link on an authenticated order submission, based on verified JWT identity (never a client-supplied UUID). For anonymous submissions retain order without an account link until a secure ownership-verification flow exists. The customer read endpoint must filter by verified \`auth.uid()\` and \`brand='admiral'\`; no raw phone/email-based owner assertions.
+
+No extra column needs to be added to \`public.ops_orders\` for customer linkage. Add \`admiral_site.order_details\` only if required for site-specific request fields, tracking, or the idempotency handshake. New \`ops_orders\` already has the necessary normal pickup fields including \`client_email\` and \`client_comment\`.
+
+## Production-only deployment decision (2026-11-16)
+
+The operator explicitly chose **no separate TEST deployment**. Adapt the plan:
+
+1. Read-only inspect actual running \`submit-quote\` function and shared DB security/trigger conditions on Production.
+2. Create and verify a restorable pre-change full PostgreSQL 17 backup and website/Edge Function code backup; retain old deployment files and original code.
+3. Apply only reversible, additive schema/function changes on Production; do **not** delete historical rows or change the legacy outbox while old website still uses it.
+4. Deploy the new Ops intake/read logic first under a new endpoint or a disabled route, without affecting current submissions.
+5. Switch the AdmiralPost site atomically to the new route, preserving rollback to the old site+function. Never expose server-side keys.
+6. Run **minimal monitored production smoke checks**, including a controlled order creation marked for reconciliation, retry idempotency, customer-privacy access, admin access and operator visibility. Remove/close any test-generated business order according to the existing operator workflow; never leave an unidentified live job.
+7. After monitoring and verifying no duplicate outbox delivery, retire the legacy *write path*. Preserve old tables/data.
+
+**Skipping TEST is not the same as skipping validation.** If any prerequisite/backup/recoverability check fails, abort the live switch.
