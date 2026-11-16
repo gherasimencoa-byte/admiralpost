@@ -136,10 +136,33 @@
     turns.push({token:S.token,chat:S.chat?.id,text,answer,at:new Date().toISOString()});turns=turns.slice(-30);
     try{sessionStorage.setItem(ns+'routeTurns',JSON.stringify(turns));}catch{}
   }
+  async function parcelWeightReply(text,codes){
+    if(codes.length!==1)return null;
+    const tariffKey={UA:'ukraine',RU:'russia',US:'usa',CA:'canada',MD:'moldova',BY:'belarus',GE:'georgia'}[codes[0]];
+    if(!tariffKey)return null;
+    const weights=[...text.matchAll(/(\d+(?:[.,]\d+)?)\s*(?:кг|килограмм[а-я]*|kg(?:s)?|kilograms?|ק["״]?ג|קילו)(?!\p{L})/giu)];
+    const limitQuestion=/максимальн|лимит.{0,12}вес|ограничени.{0,12}вес|до скольки кг|сколько (?:кг|килограмм[а-я]*) можно|max(?:imum)? (?:parcel |package )?weight|weight limit|משקל מרבי|משקל מקסימלי/iu.test(text);
+    if(!limitQuestion && !weights.length)return null;
+    if(weights.length>1 || /документ|document|מסמכ|тамож|пошлин|customs|срок|сколько дней|how long|курьер|pickup|когда|книг|лекарств|medicine|размер|габарит|\d\s*[xх×*]\s*\d/iu.test(text))return null;
+    if(!globalThis.AdmiralPricing)await import(new URL('shipping-pricing.js',base).href);
+    const pricing=globalThis.AdmiralPricing, limit=pricing.tariffs[tariffKey].limit;
+    const weight=weights.length?Number(weights[0][1].replace(',','.')):null;
+    const name=countryNames.of(codes[0]);
+    const header={ru:name+' — до '+limit+' кг на одну посылку.',en:name+': up to '+limit+' kg per parcel.',he:name+' — עד '+limit+' ק״ג לחבילה.'}[lang];
+    if(!weight)return header;
+    if(weight>limit)return header+' '+{ru:'Посылка весом '+weight+' кг превышает этот лимит.',en:'A '+weight+' kg parcel exceeds this limit.',he:'חבילה במשקל '+weight+' ק״ג חורגת מהמגבלה.'}[lang];
+    const price=pricing.quote(tariffKey,weight).total;
+    return header+' '+{ru:'Посылку весом '+weight+' кг не нужно делить из-за веса. При расчётном весе '+weight+' кг доставка стоит '+price+' ₪.',en:'A '+weight+' kg parcel is within the limit. Shipping at a chargeable weight of '+weight+' kg costs ₪'+price+'.',he:'חבילה במשקל '+weight+' ק״ג עומדת במגבלה. עלות המשלוח למשקל חיוב של '+weight+' ק״ג היא '+price+' ₪.'}[lang];
+  }
   async function guardReply(text){
     const allowed=await destinations();
-    if(countryCodes(text).length)return decision(text,allowed);
+    const current=countryCodes(text);
+    if(current.length)return decision(text,allowed) || await parcelWeightReply(text,current);
     const prior=transcript().reverse().find(m=>m.author==='visitor'&&countryCodes(m.body).length);
+    if(prior && !/(?:достав|отправ|посылк).{0,30}\sв\s+\p{L}|(?:ship|deliver|send).{0,25}\bto\s+\p{L}/iu.test(text)){
+      const previous=countryCodes(prior.body);
+      if(previous.every(code=>allowed.has(code))){const weightReply=await parcelWeightReply(text,previous);if(weightReply)return weightReply;}
+    }
     if((shippingQuestion.test(text) && !prior && /(?:цен|стои|сколько|куда|хочу отправ|заказать достав|рассчит|сколько|price|quote|how much|ship to|עלות|מחיר)/iu.test(text)) || (shippingQuestion.test(text) && /(?:достав|отправ|посылк).{0,28}\sв\s+\p{L}|(?:ship|deliver|send).{0,25}\bto\s+\p{L}/iu.test(text)))return routeText.ask;
     if(prior && (shippingQuestion.test(text)||/\d\s*(?:кг|kg|קג)|^(?:да|yes|כן)$/i.test(text)))return decision(prior.body,allowed);
     return null;
