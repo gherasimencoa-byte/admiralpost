@@ -95,3 +95,51 @@ sudo docker exec -u postgres supabase-db \
 This is metadata only; it does not read customer rows or modify any table. If local connection authentication fails, stop and report the error without sharing passwords or credentials.
 
 **Critical**: An Edge Function such as `submit-quote` has its own deployed code; SQL migrations do not automatically update it. The final solution must coordinate any AdmiralPost function deployments with the site+DB version.
+
+## Verified PostgreSQL database inventory (operator, 2026-11-16)
+
+Administrator read-only results from `sudo docker exec -u postgres supabase-db psql ...`:
+
+- Container PostgreSQL version: **17.6**.
+- Non-template databases: **`postgres`** and **`_supabase`**.
+- The `postgres` database contains `public.quote_requests`, `public.customer_profiles`, `public.customer_addresses`, `admiral_integrations.ops_outbox`, plus AlilPost and Ops tables.
+- `_supabase` has none of the searched AdmiralPost/Ops/customer tables.
+- The **candidate target** for AdmiralPost-specific migrations is Docker `supabase-db`, database **`postgres`**, not host PostgreSQL 16.
+- Shared `public` schema creates an isolation risk: an unrestricted database owner or global `public` DDL permissions would also expose AlilPost Ops. Restrict database migration role to the *specific AdmiralPost objects* and verify object dependencies/ownership first.
+- The table names alone do **not** confirm which project owns every customer/quote object. Inspect read-only schema metadata and function/trigger dependencies before creating any grants or migration journal.
+
+### Next read-only target-object inventory
+
+```bash
+sudo docker exec -u postgres supabase-db psql -X -w -U postgres -d postgres -P pager=off -c "
+SELECT n.nspname AS schema_name,
+       c.relname AS object_name,
+       c.relkind AS kind,
+       pg_get_userbyid(c.relowner) AS owner,
+       c.relrowsecurity AS rls_enabled
+FROM pg_class AS c
+JOIN pg_namespace AS n ON n.oid = c.relnamespace
+WHERE (n.nspname = 'public' AND c.relname IN
+         ('quote_requests','customer_profiles','customer_addresses'))
+   OR (n.nspname = 'admiral_integrations')
+ORDER BY n.nspname, c.relname;
+" -c "
+SELECT n.nspname AS schema_name, p.proname AS function_name,
+       pg_get_userbyid(p.proowner) AS owner,
+       pg_get_function_identity_arguments(p.oid) AS arguments
+FROM pg_proc AS p
+JOIN pg_namespace AS n ON n.oid=p.pronamespace
+WHERE n.nspname = 'admiral_integrations'
+   OR (n.nspname = 'public' AND p.proname ILIKE '%quote%')
+ORDER BY n.nspname,p.proname;
+" -c "
+SELECT event_object_schema, event_object_table, trigger_name
+FROM information_schema.triggers
+WHERE (event_object_schema='public' AND event_object_table IN
+  ('quote_requests','customer_profiles','customer_addresses'))
+  OR event_object_schema='admiral_integrations'
+ORDER BY event_object_schema,event_object_table,trigger_name;
+"
+```
+
+No customer rows, passwords, key material, role grants, NGINX configuration, or table contents are requested.
