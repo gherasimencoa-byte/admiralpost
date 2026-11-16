@@ -69,3 +69,29 @@ sudo nginx -T 2>/dev/null | grep -n -A 18 -B 4 'server_name supabase.alilpost.ge
 ```
 
 Check which PostgreSQL database serves the actual Supabase API, and how AdmiralPost-specific tables/functions map into it. Do not run any SQL DDL, DML, grant, or dump until reviewed.
+
+## Important correction: Supabase runs PostgreSQL 17 in Docker
+
+On 2026-11-16, the administrator confirmed:
+
+- `sudo pg_lsclusters` shows the **separate host PostgreSQL 16/main on port 5432**.
+- Docker has `supabase-db` image `supabase/postgres:17.6.1.136`, `supabase-rest`, `supabase-edge-functions`, `supabase-envoy` and other Supabase services.
+- NGINX for `supabase.alilpost.ge` proxies `/rest/v1`, `/auth/v1`, `/functions/v1` and other Supabase API paths to `127.0.0.1:8000`.
+
+**Never run AdmiralPost migrations or database backups against the host PostgreSQL 16 merely because port 5432 is listening.** The likely target is the PostgreSQL 17 Docker container `supabase-db`, subject to confirmation of the actual Supabase connection and database ownership. Docker `exec` must be allowed only for the dedicated, constrained server-side installer, not through a broad `sudo docker` grant to the GitHub deploy account.
+
+### Next administrator discovery (read-only, no records)
+
+Run from the Scaleway server administrator shell:
+
+```bash
+sudo docker exec -u postgres supabase-db \
+  psql -X -w -U postgres -d postgres -v ON_ERROR_STOP=1 \
+  -c "SELECT current_database() AS database_name, current_user AS connected_as, current_setting('server_version') AS pg_version;" \
+  -c "SELECT datname FROM pg_database WHERE datistemplate = false ORDER BY datname;" \
+  -c "SELECT n.nspname AS schema_name, c.relname AS object_name, pg_get_userbyid(c.relowner) AS owner FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE c.relkind IN ('r','p','v') AND (c.relname ILIKE '%quote%' OR c.relname ILIKE '%customer%' OR c.relname ILIKE 'ops_%' OR n.nspname ILIKE '%admiral%') ORDER BY n.nspname,c.relname LIMIT 80;"
+```
+
+This is metadata only; it does not read customer rows or modify any table. If local connection authentication fails, stop and report the error without sharing passwords or credentials.
+
+**Critical**: An Edge Function such as `submit-quote` has its own deployed code; SQL migrations do not automatically update it. The final solution must coordinate any AdmiralPost function deployments with the site+DB version.
