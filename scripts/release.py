@@ -10,7 +10,7 @@ from pathlib import Path, PurePosixPath
 ROOT = Path(__file__).resolve().parents[1]
 
 EXCLUDED = {
-    ".github", "scripts", "tests", "docs",
+    ".github", "scripts", "tests", "docs", "db",
     "dist", "reports", ".git"
 }
 
