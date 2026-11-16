@@ -70,10 +70,10 @@ jobs:
             if command -v pg_lsclusters >/dev/null 2>&1; then pg_lsclusters -h || true; fi
             systemctl is-active postgresql 2>/dev/null || true
             echo "===== ENDPOINT DNS ADDRESSES ====="
-            getent ahostsv4 supabase.alilpost.ge 2>/dev/null | awk '{print $1}' | sort -u || true
+            getent ahostsv4 supabase.alilpost.ge 2>/dev/null | cut -c1-50 | sort -u || true
             echo "===== LOCAL INTERFACES (ADDRESS ONLY) ====="
             if command -v ip >/dev/null 2>&1; then
-              ip -4 -o addr show scope global 2>/dev/null | awk '{print $4}' || true
+              ip -4 -o addr show scope global 2>/dev/null | cut -c1-150 || true
             fi
             echo "===== POSTGRES CONNECTION READ ONLY / NO CREDENTIALS ====="
             for mode in local tcp; do
