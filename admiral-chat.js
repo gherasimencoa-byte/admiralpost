@@ -68,7 +68,7 @@
   const button=(text,fn,cls='')=>{const b=el('button',cls,text);b.type='button';b.onclick=fn;return b;};
   const avatar=()=>{const img=el('img','avatar');img.src=new URL('consultant-eva.jpeg',base).href;img.alt='';return img;};
   const style=el('style');style.textContent=`
-:host{all:initial;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#102e53;--navy:#102e53;--orange:#f59e0b;--line:#dfe7ef}*{box-sizing:border-box}button,input,textarea{font:inherit}button,a,input,textarea{outline-offset:3px}button{cursor:pointer}button:disabled{opacity:.55;cursor:wait}button:focus-visible,a:focus-visible{outline:3px solid #f59e0b}a{color:#245484}button{touch-action:manipulation}.launcher{position:fixed;right:20px;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:10020;display:flex;align-items:center;gap:10px;border:2px solid #fff;background:var(--navy);color:white;border-radius:40px;padding:7px 20px 7px 7px;box-shadow:0 8px 28px #102e5333;font-size:15px;font-weight:650;min-height:58px}.avatar{height:42px;width:42px;border-radius:50%;object-fit:cover;object-position:50% 12%;background:white;flex-shrink:0}.badge{position:absolute;inset:-5px -3px auto auto;background:#e65d20;color:white;min-width:22px;height:22px;display:grid;place-items:center;border-radius:20px;border:2px solid white;font-size:11px}.window{position:fixed;z-index:10030;right:20px;bottom:20px;width:min(420px,calc(100vw - 24px));height:min(690px,calc(100dvh - 40px));display:flex;flex-direction:column;background:#f5f7fa;border:1px solid #dfe7ef;border-radius:24px;overflow:hidden;box-shadow:0 20px 65px #102e5333;font-size:14px;line-height:1.5}.header{background:var(--navy);color:white;padding:18px;display:flex;gap:12px;align-items:center;flex-shrink:0}.identity{flex:1;min-width:0}.brand{font-size:18px;letter-spacing:.2px;font-weight:750}.status{font-size:12px;color:#d6e3ef;margin-top:2px}.close{background:transparent;border:0;color:white;width:40px;height:40px;font-size:27px;border-radius:50%}.close:hover{background:#ffffff15}.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:20px 16px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin}.message{max-width:90%;padding:12px 14px;border-radius:17px;white-space:pre-wrap;overflow-wrap:anywhere}.assistant{align-self:flex-start;background:white;border:1px solid #e8edf2;border-end-start-radius:5px}.customer{align-self:flex-end;background:#e5eef8;border-end-end-radius:5px}.system{align-self:center;text-align:center;color:#607184;font-size:12px;max-width:95%;padding:4px}.name{font-size:11px;font-weight:650;color:#4b637b;display:block;margin-bottom:4px}.time{display:block;font-size:10px;color:#8190a0;text-align:end;margin-top:5px}.actions{display:flex;gap:7px;flex-wrap:wrap;padding:10px 14px;background:#fff;border-top:1px solid var(--line);flex-shrink:0}.chip{background:#fff;border:1px solid #d9e2ec;color:var(--navy);border-radius:18px;padding:7px 11px;font-size:12px;min-height:34px}.chip:hover{background:#edf3f9}.compose{padding:10px 14px;display:flex;align-items:flex-end;gap:8px;background:white}.compose textarea{flex:1;width:0;resize:none;border:1px solid #d8e1ea;border-radius:16px;padding:11px 12px;min-height:44px;max-height:100px;background:#f9fbfd;color:var(--navy);font-size:16px}.send{flex-shrink:0;background:var(--orange);border:0;color:#102e53;border-radius:50%;width:44px;height:44px;display:grid;place-items:center}.send svg{width:20px;height:20px}.footer{display:flex;justify-content:space-between;padding:0 18px 12px;background:white;font-size:11px;color:#8290a0;flex-shrink:0}.footer a{color:#218447;text-decoration:none}.notice{font-size:11px;color:#718094;line-height:1.5;margin:0}.card{background:white;border:1px solid var(--line);border-radius:16px;padding:16px}.card h2{font-size:17px;margin:0 0 10px}.primary{border:0;background:var(--navy);color:white;border-radius:12px;padding:12px 16px;width:100%;margin-top:10px;font-weight:650}.link{background:transparent;border:0;color:#456683;text-decoration:underline;padding:8px 0;font-size:12px}.field{display:block;font-size:12px;font-weight:600;margin-top:11px}.field input{display:block;width:100%;border:1px solid #d6e0e9;border-radius:10px;padding:10px;font-size:16px;font-weight:400;margin-top:4px;color:#102e53}.field input:focus{outline:2px solid #4b7398}.consent{display:flex;align-items:flex-start;gap:8px;margin-top:15px;font-size:12px}.consent input{margin-top:4px}.error{color:#a33321;font-size:12px;margin-top:8px}.typing{font-size:12px;color:#6c7f93;padding:4px;align-self:flex-start}.stars{display:flex;justify-content:center;gap:8px}.stars button{background:white;border:0;color:#d18500;font-size:26px;min-width:35px}.back{align-self:flex-start}.track-event{border-inline-start:2px solid #d5e2ef;padding:0 0 14px 12px;margin-inline-start:4px;white-space:pre-wrap}.track-event strong{display:block}.window[dir=rtl] .track-event{padding:0 12px 14px 0}.window[dir=rtl] .send svg{transform:scaleX(-1)}
+:host{all:initial;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#102e53;--navy:#102e53;--orange:#f59e0b;--line:#dfe7ef}*{box-sizing:border-box}button,input,textarea{font:inherit}button,a,input,textarea{outline-offset:3px}button{cursor:pointer}button:disabled{opacity:.55;cursor:wait}button:focus-visible,a:focus-visible{outline:3px solid #f59e0b}a{color:#245484}button{touch-action:manipulation}.launcher{position:fixed;right:20px;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:10020;display:flex;align-items:center;gap:10px;border:2px solid #fff;background:var(--navy);color:white;border-radius:40px;padding:7px 20px 7px 7px;box-shadow:0 8px 28px #102e5333;font-size:15px;font-weight:650;min-height:58px}.avatar{height:42px;width:42px;border-radius:50%;object-fit:cover;object-position:50% 12%;background:white;flex-shrink:0}.badge{position:absolute;inset:-5px -3px auto auto;background:#e65d20;color:white;min-width:22px;height:22px;display:grid;place-items:center;border-radius:20px;border:2px solid white;font-size:11px}.window{position:fixed;z-index:10030;right:20px;bottom:20px;width:min(420px,calc(100vw - 24px));height:min(690px,calc(100dvh - 40px));display:flex;flex-direction:column;background:#f5f7fa;border:1px solid #dfe7ef;border-radius:24px;overflow:hidden;box-shadow:0 20px 65px #102e5333;font-size:14px;line-height:1.5}.header{background:var(--navy);color:white;padding:18px;display:flex;gap:12px;align-items:center;flex-shrink:0}.identity{flex:1;min-width:0}.brand{font-size:18px;letter-spacing:.2px;font-weight:750}.status{font-size:12px;color:#d6e3ef;margin-top:2px}.close{background:transparent;border:0;color:white;width:40px;height:40px;font-size:27px;border-radius:50%}.close:hover{background:#ffffff15}.body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:20px 16px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin}.message{max-width:90%;padding:12px 14px;border-radius:17px;white-space:pre-wrap;overflow-wrap:anywhere}.assistant{align-self:flex-start;background:white;border:1px solid #e8edf2;border-end-start-radius:5px}.customer{align-self:flex-end;background:#e5eef8;border-end-end-radius:5px}.system{align-self:center;text-align:center;color:#607184;font-size:12px;max-width:95%;padding:4px}.name{font-size:11px;font-weight:650;color:#4b637b;display:block;margin-bottom:4px}.time{display:block;font-size:10px;color:#8190a0;text-align:end;margin-top:5px}.actions{display:flex;gap:7px;flex-wrap:wrap;padding:10px 14px;background:#fff;border-top:1px solid var(--line);flex-shrink:0}.chip{background:#fff;border:1px solid #d9e2ec;color:var(--navy);border-radius:18px;padding:7px 11px;font-size:12px;min-height:34px}.chip:hover{background:#edf3f9}.compose{padding:10px 14px;display:flex;align-items:flex-end;gap:8px;background:white}.compose textarea{flex:1;width:0;resize:none;border:1px solid #d8e1ea;border-radius:16px;padding:11px 12px;min-height:44px;max-height:100px;background:#f9fbfd;color:var(--navy);font-size:16px}.send{flex-shrink:0;background:var(--orange);border:0;color:#102e53;border-radius:50%;width:44px;height:44px;display:grid;place-items:center}.mic{width:44px;height:44px;flex-shrink:0;border:1px solid #c8d6e5;border-radius:50%;display:grid;place-items:center;color:#143456;background:white}.mic[aria-pressed=true]{background:#143456;color:white}.send svg{width:20px;height:20px}.footer{display:flex;justify-content:space-between;padding:0 18px 12px;background:white;font-size:11px;color:#8290a0;flex-shrink:0}.footer a{color:#218447;text-decoration:none}.notice{font-size:11px;color:#718094;line-height:1.5;margin:0}.card{background:white;border:1px solid var(--line);border-radius:16px;padding:16px}.card h2{font-size:17px;margin:0 0 10px}.primary{border:0;background:var(--navy);color:white;border-radius:12px;padding:12px 16px;width:100%;margin-top:10px;font-weight:650}.link{background:transparent;border:0;color:#456683;text-decoration:underline;padding:8px 0;font-size:12px}.field{display:block;font-size:12px;font-weight:600;margin-top:11px}.field input{display:block;width:100%;border:1px solid #d6e0e9;border-radius:10px;padding:10px;font-size:16px;font-weight:400;margin-top:4px;color:#102e53}.field input:focus{outline:2px solid #4b7398}.consent{display:flex;align-items:flex-start;gap:8px;margin-top:15px;font-size:12px}.consent input{margin-top:4px}.error{color:#a33321;font-size:12px;margin-top:8px}.typing{font-size:12px;color:#6c7f93;padding:4px;align-self:flex-start}.stars{display:flex;justify-content:center;gap:8px}.stars button{background:white;border:0;color:#d18500;font-size:26px;min-width:35px}.back{align-self:flex-start}.track-event{border-inline-start:2px solid #d5e2ef;padding:0 0 14px 12px;margin-inline-start:4px;white-space:pre-wrap}.track-event strong{display:block}.window[dir=rtl] .track-event{padding:0 12px 14px 0}.window[dir=rtl] .send svg{transform:scaleX(-1)}
 @media(max-width:600px){.launcher{right:12px;bottom:calc(86px + env(safe-area-inset-bottom,0px));font-size:14px;padding-right:16px;min-height:54px}.launcher .avatar{width:36px;height:36px}.window{right:0;bottom:auto;top:var(--viewport-top,0px);width:100%;max-width:100%;height:var(--viewport-height,100dvh);max-height:none;border:0;border-radius:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}.header{padding:12px 16px}.body{padding:16px 12px}.footer{padding-bottom:10px}.message{max-width:92%}}
 @media(prefers-reduced-motion:no-preference){.launcher{animation:appear .25s ease-out}.window{animation:appear .2s ease-out}@keyframes appear{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}}
 `;
@@ -136,12 +136,62 @@
     turns.push({token:S.token,chat:S.chat?.id,text,answer,at:new Date().toISOString()});turns=turns.slice(-30);
     try{sessionStorage.setItem(ns+'routeTurns',JSON.stringify(turns));}catch{}
   }
+  const rateQuestion=/цен[ауые]?|стоимост|стоит|сколько (?:будет|стои|денег|обойд)|поч[её]м|тариф|рассчит|расч[её]т|обойд[её]тся|how much|price|cost|quote|shipping rate|כמה עולה|מחיר|עלות/iu;
+  const kg=/(\d+(?:[.,]\d+)?)\s*(?:кг|килограмм[а-я]*|kgs?|kilograms?|ק["״]?ג|קילו)(?!\p{L})/giu;
+  const quoteCopy={
+    ru:['Сколько весит одна упакованная посылка, в килограммах?', 'Для этого отправления стоимость нужно уточнить у консультанта.'],
+    en:['How much does one packed parcel weigh in kilograms?', 'Please ask a consultant to confirm the price for this shipment.'],
+    he:['מה משקלה של חבילה אחת אחרי האריזה, בקילוגרמים?', 'כדי לברר את מחיר המשלוח הזה יש לפנות לנציג.']
+  }[lang];
+  const europeanTariffs=new Set('AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE'.split(' '));
+  async function parcelWeightReply(text,codes){
+    if(codes.length!==1)return null;
+    const tariffKey={UA:'ukraine',RU:'russia',US:'usa',CA:'canada',MD:'moldova',BY:'belarus',GE:'georgia'}[codes[0]] || (europeanTariffs.has(codes[0])?'europe':null);
+    if(!tariffKey)return (rateQuestion.test(text)||Array.from(text.matchAll(kg)).length)?quoteCopy[1]:null;
+    const weights=[...text.matchAll(/(\d+(?:[.,]\d+)?)\s*(?:кг|килограмм[а-я]*|kg(?:s)?|kilograms?|ק["״]?ג|קילו)(?!\p{L})/giu)];
+    const limitQuestion=/максимальн|лимит.{0,12}вес|ограничени.{0,12}вес|до скольки кг|сколько (?:кг|килограмм[а-я]*) можно|max(?:imum)? (?:parcel |package )?weight|weight limit|משקל מרבי|משקל מקסימלי/iu.test(text);
+    if(!limitQuestion && !weights.length)return null;
+    if(weights.length>1 || /документ|document|מסמכ|тамож|пошлин|customs|срок|сколько дней|how long|курьер|pickup|когда|книг|лекарств|medicine|размер|габарит|\d\s*[xх×*]\s*\d/iu.test(text))return null;
+    if(!globalThis.AdmiralPricing)await import(new URL('shipping-pricing.js',base).href);
+    const pricing=globalThis.AdmiralPricing, limit=pricing.tariffs[tariffKey].limit;
+    const weight=weights.length?Number(weights[0][1].replace(',','.')):null;
+    const name=countryNames.of(codes[0]);
+    const header={ru:name+' — до '+limit+' кг на одну посылку.',en:name+': up to '+limit+' kg per parcel.',he:name+' — עד '+limit+' ק״ג לחבילה.'}[lang];
+    if(weight===null)return header;
+    if(weight<=0)return quoteCopy[0];
+    if(weight>limit)return header+' '+{ru:'Посылка весом '+weight+' кг превышает этот лимит.',en:'A '+weight+' kg parcel exceeds this limit.',he:'חבילה במשקל '+weight+' ק״ג חורגת מהמגבלה.'}[lang];
+    const result=pricing.quote(tariffKey,weight), price=result.total;
+    return header+' '+{ru:'Посылку весом '+weight+' кг не нужно делить из-за веса. При расчётном весе '+result.billed+' кг доставка стоит '+price+' ₪.',en:'A '+weight+' kg parcel is within the limit. Shipping at a chargeable weight of '+result.billed+' kg costs ₪'+price+'.',he:'חבילה במשקל '+weight+' ק״ג עומדת במגבלה. עלות המשלוח למשקל חיוב של '+result.billed+' ק״ג היא '+price+' ₪.'}[lang];
+  }
   async function guardReply(text){
     const allowed=await destinations();
-    if(countryCodes(text).length)return decision(text,allowed);
-    const prior=transcript().reverse().find(m=>m.author==='visitor'&&countryCodes(m.body).length);
-    if((shippingQuestion.test(text) && !prior && /(?:цен|стои|сколько|куда|хочу отправ|заказать достав|рассчит|сколько|price|quote|how much|ship to|עלות|מחיר)/iu.test(text)) || (shippingQuestion.test(text) && /(?:достав|отправ|посылк).{0,28}\sв\s+\p{L}|(?:ship|deliver|send).{0,25}\bto\s+\p{L}/iu.test(text)))return routeText.ask;
-    if(prior && (shippingQuestion.test(text)||/\d\s*(?:кг|kg|קג)|^(?:да|yes|כן)$/i.test(text)))return decision(prior.body,allowed);
+    const history=transcript().filter(m=>m.author==='visitor');
+    const current=countryCodes(text);
+    const newRoute=/\s(?:в|во|из|to|into)\s+\p{L}/iu.test(text);
+    const prior=history.slice().reverse().find(m=>countryCodes(m.body).length || /\s(?:в|во|to)\s+\p{L}/iu.test(m.body));
+    const codes=current.length?current:!newRoute && prior?countryCodes(prior.body):[];
+    const previousTurn=history.at(-1)?.body||'';
+    let query=text;
+    if(/^\s*\d+(?:[.,]\d+)?\s*[?.!]?\s*$/u.test(text) && transcript().at(-1)?.body===quoteCopy[0])query=text.trim().replace(/[?!]$/u,'')+' kg';
+    const asking=rateQuestion.test(query) || !!Array.from(query.matchAll(kg)).length;
+    if(current.length || asking || shippingQuestion.test(text)){
+      const missing=codes.find(code=>!allowed.has(code));
+      if(missing)return routeText.no(countryNames.of(missing));
+    }
+    if(!codes.length && (asking || shippingQuestion.test(text)&&newRoute))return routeText.ask;
+    if(codes.length>1 && asking)return routeText.ask;
+    if(codes.length===1){
+      if(current.length && (rateQuestion.test(previousTurn)||Array.from(previousTurn.matchAll(kg)).length) && !Array.from(query.matchAll(kg)).length && !countryCodes(previousTurn).length){
+        const previousWeights=Array.from(previousTurn.matchAll(kg));
+        if(previousWeights.length===1)query+=' '+previousWeights[0][0];
+      }
+      const answer=await parcelWeightReply(query,codes);
+      if(answer)return answer;
+      if(rateQuestion.test(query) || current.length && !countryCodes(previousTurn).length && rateQuestion.test(previousTurn)){
+        if(/документ|document|מסמכ|габарит|размер|dimensions?|пошлин|customs|\d\s*[xх×*]\s*\d/iu.test(query) || Array.from(query.matchAll(kg)).length)return quoteCopy[1];
+        return quoteCopy[0];
+      }
+    }
     return null;
   }
   function merge(d){
@@ -158,7 +208,51 @@
   }
   function identity(){if(S.chat?.status==='closed')return copy.closed;if(S.chat?.mode==='human')return (S.chat.operator_name||copy.human)+' · Admiral';if(S.chat?.mode==='waiting')return copy.waiting;return copy.ai;}
   function updateStatus(){if(statusEl)statusEl.textContent=identity();}
+  const SpeechInput=window.SpeechRecognition || window.webkitSpeechRecognition;
+  const voiceCopy={
+    ru:['Продиктовать вопрос','Остановить диктовку','Говорите…','Разрешите доступ к микрофону в браузере или введите вопрос текстом.','Не удалось распознать речь. Попробуйте ещё раз или введите текст.'],
+    en:['Dictate a question','Stop dictation','Listening…','Allow microphone access in your browser or type your question.','Speech could not be recognized. Try again or type your question.'],
+    he:['הכתבת שאלה','סיום ההכתבה','מקשיבה…','אפשר לאשר גישה למיקרופון בדפדפן או להקליד שאלה.','לא ניתן היה לזהות את הדיבור. נסו שוב או הקלידו שאלה.']
+  }[lang];
+  let dictation=null;
+  function stopDictation(){
+    const active=dictation;
+    if(!active)return;
+    dictation=null;
+    active.abort();
+  }
+  function addMicrophone(input){
+    if(!SpeechInput)return;
+    const mic=el('button','mic');mic.type='button';
+    mic.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/></svg>';
+    function state(on){mic.setAttribute('aria-pressed',String(on));mic.title=voiceCopy[on?1:0];mic.setAttribute('aria-label',mic.title);input.placeholder=on?voiceCopy[2]:copy.placeholder;input.readOnly=on;}
+    state(false);
+    window.addEventListener('pagehide',stopDictation);
+    mic.onclick=()=>{
+      if(dictation){dictation.stop();return;}
+      const rec=new SpeechInput();dictation=rec;
+      rec.lang={ru:'ru-RU',en:'en-US',he:'he-IL'}[lang];
+      rec.interimResults=true;
+      const original=input.value, start=input.selectionStart, end=input.selectionEnd;
+      rec.onresult=event=>{
+        if(dictation!==rec)return;
+        const words=Array.from(event.results,result=>result[0].transcript.trim()).filter(Boolean).join(' ');
+        if(!words)return;
+        const before=original.slice(0,start),after=original.slice(end);
+        const insert=(before && !/\s$/.test(before)?' ':'')+words+(after && !/^\s/.test(after)?' ':'');
+        const fragment=insert.slice(0,Math.max(0,input.maxLength-before.length-after.length));
+        input.value=before+fragment+after;input.setSelectionRange(start+fragment.length,start+fragment.length);input.oninput();
+      };
+      function finish(){if(dictation!==rec)return;dictation=null;state(false);syncDisabled();}
+      rec.onend=finish;
+      rec.onerror=e=>{if(dictation!==rec)return;finish();if(e.error!=='aborted')showError(voiceCopy[e.error==='not-allowed'||e.error==='service-not-allowed'?3:4]);};
+      state(true);syncDisabled();
+      try{rec.start();}catch{finish();showError(voiceCopy[4]);}
+    };
+    composer.append(mic);
+  }
   function render(){
+    stopDictation();
     root.querySelector('.launcher')?.remove();root.querySelector('.window')?.remove();body=null;composer=null;statusEl=null;
     if(!S.open){launcher=button('',open,'launcher');launcher.append(avatar(),el('span','',chatTitle));launcher.setAttribute('aria-label',chatTitle);launcher.setAttribute('aria-expanded','false');if(S.unread)launcher.append(el('span','badge',String(S.unread)));root.append(launcher);return;}
     panel=el('section','window');panel.dir=lang==='he'?'rtl':'ltr';panel.lang=lang;panel.setAttribute('role','dialog');panel.setAttribute('aria-label',chatTitle);
@@ -166,12 +260,12 @@
     body=el('div','body');panel.append(body);
     actionsEl=el('nav','actions');actionsEl.setAttribute('aria-label',copy.help);panel.append(actionsEl);
     composer=el('form','compose');const input=el('textarea');input.rows=1;input.maxLength=2000;input.placeholder=copy.placeholder;input.setAttribute('aria-label',t.question);input.value=S.draft;input.oninput=()=>{S.draft=input.value;storage.set('draft',S.draft);input.style.height='auto';input.style.height=Math.min(100,input.scrollHeight)+'px';};input.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();send();}};
-    const sendButton=el('button','send');sendButton.type='submit';sendButton.setAttribute('aria-label',t.send);sendButton.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>';composer.append(input,sendButton);composer.onsubmit=e=>{e.preventDefault();send();};panel.append(composer);
+    const sendButton=el('button','send');sendButton.type='submit';sendButton.setAttribute('aria-label',t.send);sendButton.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>';composer.append(input);addMicrophone(input);composer.append(sendButton);composer.onsubmit=e=>{e.preventDefault();send();};panel.append(composer);
     const foot=el('footer','footer');foot.append(el('span','','Admiral-Post'));const wa=el('a','','WhatsApp ↗');wa.href='https://wa.me/972555171600';wa.target='_blank';wa.rel='noopener noreferrer';foot.append(wa);panel.append(foot);root.append(panel);renderView();viewport();
   }
-  function bubble(m){const n=el('article','message '+(m.author==='visitor'?'customer':m.author==='system'?'system':'assistant'));if(m.author!=='system'){n.append(el('strong','name',m.author==='visitor'?t.you:m.name||(m.author==='bot'?t.assistant:copy.human)));}const text=m.body||'';const url='https://www.admiral-post.com/documents/declaration.pdf';text.split(url).forEach((part,i)=>{if(i){const a=el('a','',t.pdf);a.href=url;a.target='_blank';a.rel='noopener';n.append(a);}n.append(document.createTextNode(part));});if(m.at)n.append(el('time','time',new Date(m.at).toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'})));return n;}
+  function bubble(m){const n=el('article','message '+(m.author==='visitor'?'customer':m.author==='system'?'system':'assistant'));if(m.author!=='system'){n.append(el('strong','name',m.author==='visitor'?t.you:m.name||(m.author==='bot'?t.assistant:copy.human)));}const raw=m.body||'';const unverified=m.author==='bot' && m.id!=null && /(?:\d[\d., ]*\s*(?:₪|шекел|ILS\b|NIS\b|shekel|שקל)|₪\s*\d)/iu.test(raw);const text=unverified?quoteCopy[1]:raw;const url='https://www.admiral-post.com/documents/declaration.pdf';text.split(url).forEach((part,i)=>{if(i){const a=el('a','',t.pdf);a.href=url;a.target='_blank';a.rel='noopener';n.append(a);}n.append(document.createTextNode(part));});if(m.at)n.append(el('time','time',new Date(m.at).toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'})));return n;}
   function renderView(){
-    if(!body)return;body.replaceChildren();actionsEl.replaceChildren();composer.hidden=S.view!=='chat';composer.style.display=S.view==='chat'?'':'none';
+    if(!body)return;if(S.view!=='chat'&&dictation){stopDictation();const input=composer.querySelector('textarea');input.readOnly=false;input.placeholder=copy.placeholder;const mic=composer.querySelector('.mic');mic.setAttribute('aria-pressed','false');mic.title=voiceCopy[0];mic.setAttribute('aria-label',mic.title);}body.replaceChildren();actionsEl.replaceChildren();composer.hidden=S.view!=='chat';composer.style.display=S.view==='chat'?'':'none';
     if(S.view!=='chat'){body.append(button('← '+copy.back,()=>{S.view='chat';renderView();},'chip back'));if(S.view==='order')return orderForm();if(S.view==='contact')return contactForm();if(S.view==='track')return trackingForm();}
     const log=el('div');log.style.display='contents';log.setAttribute('role','log');log.setAttribute('aria-live','polite');log.setAttribute('aria-label',copy.back);
     if(!S.messages.length)log.append(bubble({author:'bot',body:copy.hello,name:copy.ai}));for(const m of transcript()){if(m.author==='system'&&/Сообщение получено вне рабочего времени/.test(m.body))continue;log.append(bubble(m));}body.append(log);if(S.ready && returning)showReturn(log);
@@ -184,11 +278,11 @@
     actionsEl.append(button(copy.quote,()=>quick(copy.quoteText),'chip'),button(copy.track,()=>{S.view='track';renderView();},'chip'),button(copy.order,openOrder,'chip'),button(copy.handoff,handoff,'chip'));
     for(const b of actionsEl.querySelectorAll('button')){if([copy.quote,copy.order].includes(b.textContent))b.disabled=S.busy||!S.ready;}syncDisabled();body.scrollTop=body.scrollHeight;
   }
-  function syncDisabled(){if(!composer)return;composer.querySelector('button').disabled=!S.ready||S.busy||(!S.consent&&!['human','waiting'].includes(S.chat?.mode));composer.querySelector('textarea').disabled=!S.ready||(!S.consent&&!['human','waiting'].includes(S.chat?.mode));}
+  function syncDisabled(){if(!composer)return;const mic=composer.querySelector('.mic');if(mic)mic.disabled=!S.ready||S.busy||(!S.consent&&!['human','waiting'].includes(S.chat?.mode));composer.querySelector('.send').disabled=!!dictation||!S.ready||S.busy||(!S.consent&&!['human','waiting'].includes(S.chat?.mode));composer.querySelector('textarea').disabled=!S.ready||(!S.consent&&!['human','waiting'].includes(S.chat?.mode));}
   function showError(message){if(body){const n=el('div','error',message);n.setAttribute('role','alert');body.append(n);body.scrollTop=body.scrollHeight;}}
   function quick(text){if(!S.consent){S.draft=text;storage.set('draft',text);render();return;}send(text);}
   async function send(text,retry=false){
-    text=(text??S.draft).trim();if(!text||S.busy||!S.ready)return;if(!S.consent&&!['human','waiting'].includes(S.chat?.mode)){renderView();return;}
+    if(dictation)return;text=(text??S.draft).trim();if(!text||S.busy||!S.ready)return;if(!S.consent&&!['human','waiting'].includes(S.chat?.mode)){renderView();return;}
     markVisit();returning=false;
     if(!S.pending||S.pending.text!==text)S.pending={text,id:crypto.randomUUID()};
     S.busy=true;S.aiError=false;S.view='chat';renderView();

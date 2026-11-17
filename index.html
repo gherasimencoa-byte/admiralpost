@@ -1173,6 +1173,7 @@ body { color:#25364b; line-height:1.65; }
 <script src="shipping-pricing.js"></script>
 <link rel="stylesheet" href="/media/route-film.css?v=2">
 <script defer src="/media/route-film.js?v=2"></script>
+<script src="/admiral-order-api.js" defer></script>
 </head>
 <body>
   <!-- Хедер -->
@@ -1849,7 +1850,7 @@ body { color:#25364b; line-height:1.65; }
         validateAll(){ for (let n = 1; n <= 3; n++) { if (!validate(n)) { go(n); validate(n); return false; } } return true; },
         reset(){ press($('pkWeights'), null); $('pkDates').dataset.initialized = 'false'; $('pickupDate').value = ''; buildDates(); price = null; $('pkPrice').hidden = true; go(1); },
         done(result, payload, pickup){
-          const no = result && result.request_number ? result.request_number : '';
+          const no = result && result.order_id ? '№' + result.order_id : '';
           $('pkDoneNo').textContent = no;
           const title = $('pkDone').querySelector('h3');
           if (title) title.textContent = no ? 'Заявка ' + no + ' принята' : 'Заявка отправлена';
@@ -1890,9 +1891,6 @@ body { color:#25364b; line-height:1.65; }
           }
         }).catch(()=>{});
       }
-      // Stable request ID avoids duplicate Ops orders after a network retry.
-      let pendingKey = null;
-      let pendingPayloadHash = null;
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         statusEl.textContent = "";
@@ -1929,20 +1927,8 @@ body { color:#25364b; line-height:1.65; }
         const button = form.querySelector('button[type="submit"]');
         if (button) button.disabled = true;
         try {
-          const payloadJson = JSON.stringify(payload);
-          const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(payloadJson));
-          const payloadHash = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
-          if (pendingPayloadHash !== payloadHash) {
-            pendingKey = crypto.randomUUID();
-            pendingPayloadHash = payloadHash;
-          }
-          payload.request_key = pendingKey;
-          const session=customerDb?(await customerDb.auth.getSession()).data.session:null;
-          const response = await fetch(cfg.url.replace(/\/$/, "") + "/functions/v1/admiral-submit-order", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "apikey": cfg.publishableKey, ...(session?.access_token?{"Authorization":"Bearer "+session.access_token}:{}) },
-            body: JSON.stringify(payload)
-          });
+          
+          const response = await window.AdmiralOrderApi.send(payload, customerDb);
           const result = await response.json().catch(() => ({}));
           // A 400 may indicate an invalid address, weight or other field; email is optional for pickup.
           if (response.status === 400) {
@@ -1973,14 +1959,8 @@ body { color:#25364b; line-height:1.65; }
             throw new Error(result.error || "Проверьте обязательные поля и попробуйте снова.");
           }
           if (!response.ok) throw new Error(result.error || "Не удалось отправить заявку.");
-          pendingKey = null;
-          pendingPayloadHash = null;
           if (window.AdmiralPickup) window.AdmiralPickup.done(result, payload, pickup);
           else { statusEl.textContent = "Спасибо! Заявка отправлена. Оператор свяжется с вами."; statusEl.classList.add("success"); }
-          // Successful submission ends this request. An identical new form submission
-          // must receive a fresh idempotency key; failed retries retain the old key.
-          pendingKey = null;
-          pendingPayloadHash = null;
           form.reset();
           if (window.AdmiralPickup) window.AdmiralPickup.reset();
         } catch (error) {
