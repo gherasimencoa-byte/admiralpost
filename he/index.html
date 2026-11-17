@@ -1528,7 +1528,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
               <ol class="pk-steps" aria-hidden="true"><li class="on">1. חבילה</li><li>2. איסוף</li><li>3. פרטים</li></ol>
 
               <fieldset class="pk-step" data-step="1">
-                <legend class="sr-only">Шаг 1 из 3: посылка</legend>
+                <legend class="sr-only">שלב 1 מתוך 3: פרטי החבילה</legend>
                 <div class="form-group">
                   <label for="country">מדינת יעד *</label>
                   <select id="country" name="country" required>
@@ -1561,7 +1561,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
               </fieldset>
 
               <fieldset class="pk-step" data-step="2" hidden>
-                <legend class="sr-only">Шаг 2 из 3: адрес и день забора</legend>
+                <legend class="sr-only">שלב 2 מתוך 3: כתובת ומועד האיסוף</legend>
                 <div class="form-group" id="savedAddressGroup" hidden>
                   <label for="savedPickupAddress">כתובת שמורה</label>
                   <select id="savedPickupAddress"><option value="">הזנת כתובת ידנית</option></select>
@@ -1585,7 +1585,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
               </fieldset>
 
               <fieldset class="pk-step" data-step="3" hidden>
-                <legend class="sr-only">Шаг 3 из 3: контакты</legend>
+                <legend class="sr-only">שלב 3 מתוך 3: פרטי קשר</legend>
                 <div class="form-row">
                   <div class="form-group">
                     <label for="name">שם מלא *</label>
@@ -1857,7 +1857,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
           $('pkDoneNo').textContent = no;
           const title = $('pkDone').querySelector('h3');
           if (title) title.textContent = no ? 'בקשה ' + no + ' התקבלה' : 'הבקשה נשלחה';
-          $('pkDoneText').textContent = [payload.country + ', ' + payload.weight + ' кг', pickup.price != null ? 'מחיר משוער ₪' + pickup.price : '', [pickup.city, pickup.address].filter(Boolean).join(', '), pickup.dateLabel ? 'יום מועדף: ' + pickup.dateLabel : ''].filter(Boolean).join(' · ');
+          $('pkDoneText').textContent = [payload.country + ', ' + payload.weight + ' ק״ג', pickup.price != null ? 'מחיר משוער ₪' + pickup.price : '', [pickup.city, pickup.address].filter(Boolean).join(', '), pickup.dateLabel ? 'יום מועדף: ' + pickup.dateLabel : ''].filter(Boolean).join(' · ');
           $('pkDoneWa').href = 'https://wa.me/972522323554?text=' + encodeURIComponent('שלום! שלחתי בקשה ' + no + ' לאיסוף חבילה: ' + [pickup.city, pickup.dateLabel].filter(Boolean).join(', ') + '.');
           form.hidden = true; $('pkDone').hidden = false; $('pkDone').focus(); $('pkDone').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
@@ -1876,7 +1876,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
         customerDb=window.supabase.createClient(customerCfg.url,customerCfg.publishableKey);
         customerDb.auth.getUser().then(async ({data:{user}})=>{
           if(!user)return;
-          if(user.דוא״ל)form.דוא״ל.value=user.דוא״ל;
+          if(user.email)form.email.value=user.email;
           const {data:profile}=await customerDb.from('customer_profiles').select('full_name,phone').eq('user_id',user.id).maybeSingle();
           if(profile?.full_name)form.name.value=profile.full_name;
           if(profile?.phone)form.phone.value=profile.phone;
@@ -1887,7 +1887,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
               const option=document.createElement('option');
               const structured=[address.country,address.region,address.city,[address.street,address.house_number].filter(Boolean).join(' ')].filter(Boolean).join(', ');
               option.value=structured||address.address_text||'';option.dataset.city=address.city||'';option.dataset.street=[address.street,address.house_number].filter(Boolean).join(' ')||address.address_text||'';
-              option.textContent=(address.label||'Адрес')+' — '+option.value;
+              option.textContent=(address.label||'כתובת')+' — '+option.value;
               if(option.value)select.appendChild(option);
             }
             if(select.options.length>1)document.getElementById('savedAddressGroup').hidden=false;
@@ -1912,7 +1912,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
           type: form.type.value.trim(),
           name: form.name.value.trim(),
           phone: form.phone.value.trim(),
-          דוא״ל: form.דוא״ל.value.trim(),
+          email: form.email.value.trim(),
           pickup_city: pickup.city || "",
           pickup_address: pickup.address || "",
           pickup_date: pickup.date || "",
@@ -1939,7 +1939,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
             const names = {
               name: "שם", phone: "טלפון", country: "מדינת יעד",
               weight: "משקל", pickup_city: "עיר האיסוף",
-              pickup_address: "רחוב ובניין", דוא״ל: "דוא״ל", agree: "הסכמה"
+              pickup_address: "רחוב ובניין", email: "דוא״ל", agree: "הסכמה"
             };
             const fields = Array.isArray(result.invalid_fields)
               ? result.invalid_fields.filter(key => Object.prototype.hasOwnProperty.call(names, key)) : [];
