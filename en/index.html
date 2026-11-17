@@ -248,7 +248,7 @@
               <ol class="pk-steps" aria-hidden="true"><li class="on">1. Parcel</li><li>2. Pickup</li><li>3. Contact</li></ol>
 
               <fieldset class="pk-step" data-step="1">
-                <legend class="sr-only">Шаг 1 из 3: посылка</legend>
+                <legend class="sr-only">Step 1 of 3: Parcel</legend>
                 <div class="form-group">
                   <label for="country">Destination *</label>
                   <select id="country" name="country" required>
@@ -281,7 +281,7 @@
               </fieldset>
 
               <fieldset class="pk-step" data-step="2" hidden>
-                <legend class="sr-only">Шаг 2 из 3: адрес и день забора</legend>
+                <legend class="sr-only">Step 2 of 3: Pickup address and date</legend>
                 <div class="form-group" id="savedAddressGroup" hidden>
                   <label for="savedPickupAddress">Saved address</label>
                   <select id="savedPickupAddress"><option value="">Enter manually</option></select>
@@ -305,7 +305,7 @@
               </fieldset>
 
               <fieldset class="pk-step" data-step="3" hidden>
-                <legend class="sr-only">Шаг 3 из 3: контакты</legend>
+                <legend class="sr-only">Step 3 of 3: Contact details</legend>
                 <div class="form-row">
                   <div class="form-group">
                     <label for="name">Your name *</label>
@@ -505,7 +505,7 @@
           $('pkDoneNo').textContent = no;
           const title = $('pkDone').querySelector('h3');
           if (title) title.textContent = no ? 'Request ' + no + ' received' : 'Request submitted';
-          $('pkDoneText').textContent = [payload.country + ', ' + payload.weight + ' кг', pickup.price != null ? 'estimated ₪' + pickup.price : '', [pickup.city, pickup.address].filter(Boolean).join(', '), pickup.dateLabel ? 'preferred date: ' + pickup.dateLabel : ''].filter(Boolean).join(' · ');
+          $('pkDoneText').textContent = [payload.country + ', ' + payload.weight + ' kg', pickup.price != null ? 'estimated ₪' + pickup.price : '', [pickup.city, pickup.address].filter(Boolean).join(', '), pickup.dateLabel ? 'preferred date: ' + pickup.dateLabel : ''].filter(Boolean).join(' · ');
           $('pkDoneWa').href = 'https://wa.me/972522323554?text=' + encodeURIComponent('Hello! I submitted request ' + no + ' for parcel pickup: ' + [pickup.city, pickup.dateLabel].filter(Boolean).join(', ') + '.');
           form.hidden = true; $('pkDone').hidden = false; $('pkDone').focus(); $('pkDone').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
@@ -535,7 +535,7 @@
               const option=document.createElement('option');
               const structured=[address.country,address.region,address.city,[address.street,address.house_number].filter(Boolean).join(' ')].filter(Boolean).join(', ');
               option.value=structured||address.address_text||'';option.dataset.city=address.city||'';option.dataset.street=[address.street,address.house_number].filter(Boolean).join(' ')||address.address_text||'';
-              option.textContent=(address.label||'Адрес')+' — '+option.value;
+              option.textContent=(address.label||'Address')+' — '+option.value;
               if(option.value)select.appendChild(option);
             }
             if(select.options.length>1)document.getElementById('savedAddressGroup').hidden=false;
