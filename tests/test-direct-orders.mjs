@@ -34,5 +34,25 @@ export async function run(){
     }
     assert(!text.includes('/functions/v1/submit-quote'));
   }
-  return ['PASS retries survive reload without storing customer fields','PASS success resets key; errors retain key','PASS signed-in identity changes request key','PASS all three language forms use direct endpoint helper',`PASS ${scripts} inline scripts parse`];
+
+  // EN and HE must use the same three-step pickup payload and validations as RU.
+  for (const locale of ['en','he']) {
+    const html=await fs.readFile(new URL('../'+locale+'/index.html',import.meta.url),'utf8');
+    const form=html.slice(html.indexOf('<form id="orderForm"'),html.indexOf('</form>',html.indexOf('<form id="orderForm"'))+7);
+    assert(form.startsWith('<form id="orderForm"'),locale+' pickup form missing');
+    assert.equal((form.match(/class="pk-step"/g)||[]).length,3,locale+' requires three steps');
+    for (const id of ['country','weight','type','pickupCity','pickupAddress','pickupDate','name','phone','email','agree','formStatus']) {
+      assert(html.includes('id="'+id+'"'),locale+' missing '+id);
+    }
+    assert(/id="email"[^>]*name="email"[^>]*(?!required)/.test(form),locale+' email field missing');
+    const emailInput=form.match(/<input[^>]*id="email"[^>]*>/)?.[0]||'';
+    assert(!emailInput.includes(' required'),locale+' email must be optional');
+    for (const snippet of ['kind: "pickup"','pickup_city:','pickup_address:','pickup_date:','estimated_price:','window.AdmiralOrderApi.send(payload, customerDb)','window.AdmiralPickup =','weight > 8','language: "'+locale+'"']) {
+      assert(html.includes(snippet),locale+' missing pickup behavior '+snippet);
+    }
+    assert(!html.includes('id="quoteForm"'),locale+' legacy quote form still present');
+    assert(!html.includes('supabase.co/functions/v1/'),locale+' should not use legacy cloud API');
+  }
+
+  return ['PASS retries survive reload without storing customer fields','PASS success resets key; errors retain key','PASS signed-in identity changes request key','PASS all three language forms use direct endpoint helper','PASS EN and HE three-step courier forms match current pickup order contract',`PASS ${scripts} inline scripts parse`];
 }
