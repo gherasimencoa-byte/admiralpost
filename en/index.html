@@ -167,6 +167,56 @@
 <script defer src="/media/route-film.js?v=2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/admiral-order-api.js" defer></script>
+<style id="pickup-i18n-form-style">
+#orderForm .form-group{margin-bottom:15px}
+#orderForm label{display:block;font-weight:600;color:#17365b;margin-bottom:6px}
+#orderForm .form-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#orderForm input:not([type="checkbox"]):not([type="hidden"]),#orderForm select,#orderForm textarea{display:block;width:100%;border:1px solid #bdccdd;border-radius:10px;background:white;color:#17365b;font:inherit;min-height:46px;padding:10px 12px}
+#orderForm textarea{min-height:75px}
+#orderForm small{display:block;font-size:12px;color:#64748b}
+#orderForm .checkbox-row{display:flex;align-items:flex-start;gap:10px;margin:14px 0}
+#orderForm .checkbox-row label{font-size:13px;line-height:1.5}
+#orderForm button{cursor:pointer}
+#orderForm .form-status.error{color:#b42318;font-weight:600}
+#orderForm .form-status.success{color:#1d6b3a}
+#orderForm .btn-outline,.pk-done .btn-outline{background:#fff;color:#17365b;border:1px solid #bdccdd}
+#orderForm fieldset{border:0;padding:0;margin:0;min-width:0}
+#orderForm .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.pk-steps{display:flex;gap:6px;list-style:none;padding:0;margin:0 0 6px;font-size:13px;font-weight:700;color:#7b8798}
+.pk-steps li{flex:1;padding:8px 6px;border-radius:10px;background:#eef2f7;text-align:center}
+.pk-steps li.on{background:#0d2b52;color:#fff}.pk-steps li.done{background:#dcefe2;color:#1d6b3a}
+.pk-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.pk-chips button{min-height:44px;padding:8px 14px;border:1px solid #c9d4e2;border-radius:12px;background:#fff;color:#17365b;font:inherit;font-weight:600;cursor:pointer}
+.pk-chips button[aria-pressed="true"]{background:#0d2b52;border-color:#0d2b52;color:#fff}
+.pk-price{padding:12px 14px;border-radius:12px;background:#fff6e9;border:1px solid #ffd9a8;color:#17365b;font-weight:600}
+.pk-price b{font-size:20px}.pk-price.warn{background:#fef3f2;border-color:#f7c1bb}
+.pk-nav{display:flex;gap:10px;flex-wrap:wrap}.pk-nav .btn{flex:1;min-height:48px;font-size:16px;font-weight:700;border-radius:12px;text-align:center}
+.pk-nav .btn-outline{flex:0 0 auto}
+#orderForm .pk-nav .btn[type="submit"]{width:auto}
+#orderForm .checkbox-row input{width:20px;height:20px;flex:0 0 20px}
+#orderForm [hidden],.pk-done[hidden]{display:none!important}
+.pk-more{margin-bottom:10px}.pk-more summary{cursor:pointer;font-weight:600;color:#17365b;padding:8px 0}
+.pk-done{padding:6px 0;outline:0}.pk-done h3{color:#1d6b3a}
+#orderForm [aria-invalid="true"]{border-color:#d92d20;box-shadow:0 0 0 3px #d92d2022}
+/* Courier mobile refinement: resilient long buttons, compact spacing, explicit success. */
+@media(max-width:640px){
+  .quote-form-card{padding:20px 18px}
+  #orderForm .form-group{margin-bottom:10px}
+  #orderForm .pk-chips{gap:6px}
+  #orderForm .pk-chips button{padding:8px 11px;font-size:14px}
+  #orderForm .pk-nav{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:8px}
+  #orderForm .pk-nav .btn{min-width:0;width:100%;padding:10px 8px;font-size:14px;line-height:1.3;white-space:normal}
+  #orderForm .pk-nav .btn:only-child{grid-column:1/-1}
+  .pk-done .pk-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .pk-done .pk-nav .btn{min-width:0;white-space:normal;overflow-wrap:anywhere;padding:12px 8px;font-size:14px;line-height:1.35;display:flex;justify-content:center;align-items:center;text-align:center}
+  #ap-cookie{max-width:380px;padding:11px 12px!important;font-size:12px!important;box-shadow:0 5px 16px #0d2b522b}
+  #ap-cookie p{margin:6px 0!important;line-height:1.4}
+  #ap-cookie .ap-actions{margin-top:8px;flex-wrap:nowrap}
+  #ap-cookie button{font-size:12px!important;padding:8px 7px!important;flex:1}
+}
+@media(max-width:760px){#orderForm .form-row{display:grid;grid-template-columns:1fr;gap:0}#orderForm .form-group{margin-bottom:9px}#orderForm label{font-size:14px}#orderForm input:not([type="checkbox"]),#orderForm select{padding:10px 12px}#orderForm textarea{padding:10px 12px}}
+
+</style>
 </head><body>
 <header class="header"><div class="container head"><a class="brand" href="/en/#top" aria-label="Admiral Post International Express"><img src="/logo-admiral-post.png" alt="Admiral Post logo" width="58" height="58"><span>ADMIRAL POST<small>INTERNATIONAL EXPRESS</small></span></a><nav><a href="/en/#services">Services</a><a href="/en/#how">How it works</a><a href="/en/#rates">Rates</a><a href="/en/#quote">Get a quote</a><a href="/en/#contacts">Contact</a></nav><a class="account-nav-link" href="/account.html" aria-label="My account">◉ My account</a><div class="langs"><a href="/">RU</a><a class="active" href="/en/">EN</a><a href="/he/">HE</a></div></div></header>
 <main id="top"><section class="hero"><div class="container"><div><h1>International parcel delivery from Israel</h1><p>Reliable. Fast. To your loved ones. Send parcels, personal belongings, gifts and documents to supported destinations, with help at every step.</p><div class="hero-actions"><a class="btn" href="/en/#quote">Request a delivery →</a><a class="btn alt" href="/en/#rates">Calculate price</a><a class="btn whatsapp-hero" href="https://wa.me/972522323554" target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a></div><form class="hero-tracking" id="trackForm" onsubmit="event.preventDefault(); return runTracking('trackingNumber', 'trackMessage', 'en', event.submitter || event.currentTarget.querySelector('button[type=submit]'));" role="search" aria-label="Quick parcel tracking">
@@ -194,7 +244,100 @@
 
 <section class="alt" id="visuals"><div class="container"><h2 class="section-title">Your parcel’s journey</h2><p class="subtitle">A simple overview of the shipping stages and indicative sea-delivery time. The typical estimate is 21–35 days; actual transit time depends on route schedules, customs clearance and local delivery.</p><div class="visuals"><div class="panel"><h3>Shipping stages</h3><div class="route-flow"><div class="node"><strong>📦</strong>Acceptance</div><div class="node"><strong>↗</strong>Sorting</div><div class="node"><strong>✈️</strong>Sea transit & customs</div><div class="node"><strong>🏠</strong>Delivery</div></div><div class="destination-network" aria-label="Shipping destinations"><div class="origin-node">🇮🇱 Israel</div><div class="network-lines">↗　↗　↗　↗　↗　↗</div><div class="destination-nodes"><span>🇷🇺 Russia</span><span>🇺🇦 Ukraine</span><span>🇲🇩 Moldova</span><span>🇬🇪 Georgia</span><span>🇪🇺 Europe</span><span>🇺🇸 USA / Canada</span></div></div></div><div class="panel"><h3>Indicative sea delivery time</h3><div class="bars"><div class="barrow"><span>Russia / CIS</span><div class="track"><div class="fill" style="width:65%"></div></div><span class="days">21–35 days</span></div><div class="barrow"><span>Ukraine</span><div class="track"><div class="fill" style="width:65%"></div></div><span class="days">21–35 days</span></div><div class="barrow"><span>Europe / USA / Canada</span><div class="track"><div class="fill" style="width:80%"></div></div><span class="days">21–35 days</span></div></div><p class="note">Sea delivery usually takes 21–35 days. Actual transit time depends on route schedules, customs clearance and local delivery. Please confirm before booking.</p></div></div></div></section>
 
-<section class="alt" id="quote"><div class="container"><h2 class="section-title">Request a shipping quote</h2><p class="subtitle">Send us your details and our team can confirm destination availability, restrictions and pricing.</p><form id="quoteForm" class="panel quote-form-card"><div class="form-grid"><div class="field"><label for="country">Destination *</label><select id="country" required><option value="">Select destination</option><option>Russia</option><option>Ukraine</option><option>Moldova</option><option>Georgia</option><option>Europe</option><option>USA</option><option>Canada</option><option>Other</option></select></div><div class="field"><label for="weight">Parcel weight (kg) *</label><input id="weight" type="number" min="0.1" step="0.1" placeholder="e.g. 5" required inputmode="decimal"></div><div class="field"><label for="contents">Parcel contents</label><input id="contents" placeholder="Clothing, gifts, documents…"></div><div class="field"><label for="name">Your name *</label><input id="name" required placeholder="Full name" autocomplete="name"></div><div class="field"><label for="phone">Phone / WhatsApp *</label><input id="phone" required type="tel" placeholder="+972…" autocomplete="tel" inputmode="tel"></div><div class="field"><label for="email">Email *</label><input id="email" required type="email" placeholder="you@example.com" autocomplete="email"></div><div class="field full"><label for="message">Additional details</label><textarea id="message" rows="3" placeholder="Anything we should know about the parcel?"></textarea></div><div class="field full"><label><input type="checkbox" id="consent" required style="width:auto"> I agree to be contacted about this quote request. *</label></div><div class="field full"><div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden"><label>Leave blank<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div><button class="btn" type="submit">Send quote request</button><p id="quoteMessage" class="note" aria-live="polite">Submit your parcel details to request confirmation of the price and available route.</p></div></div></form></div></section>
+<section class="alt" id="quote"><div class="container"><h2 class="section-title">Request courier pickup</h2><p class="subtitle">Arrange pickup from your address in Israel in three easy steps. The operator will confirm the requested date.</p><form id="orderForm" class="form" novalidate>
+              <ol class="pk-steps" aria-hidden="true"><li class="on">1. Parcel</li><li>2. Pickup</li><li>3. Contact</li></ol>
+
+              <fieldset class="pk-step" data-step="1">
+                <legend class="sr-only">Step 1 of 3: Parcel</legend>
+                <div class="form-group">
+                  <label for="country">Destination *</label>
+                  <select id="country" name="country" required>
+                    <option value="">Select a destination</option>
+                    <option value="Россия">Russia</option>
+                    <option value="Беларусь">Belarus</option>
+                    <option value="Украина">Ukraine</option>
+                    <option value="Молдова">Moldova</option>
+                    <option value="Грузия">Georgia</option>
+                    <option value="Европа">Europe</option>
+                    <option value="США">USA</option>
+                    <option value="Канада">Canada</option>
+                    <option value="Другое">Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="weight">Estimated weight, kg *</label>
+                  <div class="pk-chips" id="pkWeights">
+                    <button type="button" data-w="2">up to 2</button><button type="button" data-w="5">up to 5</button><button type="button" data-w="10">up to 10</button><button type="button" data-w="20">up to 20</button>
+                  </div>
+                  <input type="number" id="weight" name="weight" inputmode="decimal" step="0.1" min="0.1" required placeholder="Or exact weight, e.g. 7" />
+                  <small>The courier will confirm the weight at pickup.</small>
+                </div>
+                <div class="pk-price" id="pkPrice" role="status" aria-live="polite" hidden></div>
+                <div class="form-group">
+                  <label for="type">Contents</label>
+                  <input type="text" id="type" name="type" placeholder="Personal belongings, gifts, documents (optional)" />
+                </div>
+                <div class="pk-nav"><button type="button" class="btn btn-primary" data-pk-next>Next: address and date →</button></div>
+              </fieldset>
+
+              <fieldset class="pk-step" data-step="2" hidden>
+                <legend class="sr-only">Step 2 of 3: Pickup address and date</legend>
+                <div class="form-group" id="savedAddressGroup" hidden>
+                  <label for="savedPickupAddress">Saved address</label>
+                  <select id="savedPickupAddress"><option value="">Enter manually</option></select>
+                </div>
+                <div class="form-group">
+                  <label for="pickupCity">City in Israel *</label>
+                  <input type="text" id="pickupCity" name="pickup_city" list="pkCities" autocomplete="address-level2" required placeholder="Start typing: Haifa, Ashdod…" />
+                  <datalist id="pkCities"><option value="Haifa"></option><option value="Ashdod"></option><option value="Tel Aviv"></option><option value="Jerusalem"></option><option value="Holon"></option><option value="Netanya"></option><option value="Beer Sheva"></option><option value="Eilat"></option></datalist>
+                </div>
+                <div class="form-group">
+                  <label for="pickupAddress">Street, building, apartment *</label>
+                  <input type="text" id="pickupAddress" name="pickup_address" autocomplete="street-address" required placeholder="E.g. Herzl 15, apt 4" />
+                </div>
+                <div class="form-group">
+                  <label id="pkDatesLabel">Preferred pickup day</label>
+                  <div class="pk-chips" id="pkDates" role="group" aria-labelledby="pkDatesLabel"></div>
+                  <input type="hidden" id="pickupDate" name="pickup_date" />
+                  <small>An operator will confirm your day by phone.</small>
+                </div>
+                <div class="pk-nav"><button type="button" class="btn btn-outline" data-pk-back>← Back</button><button type="button" class="btn btn-primary" data-pk-next>Next: contacts →</button></div>
+              </fieldset>
+
+              <fieldset class="pk-step" data-step="3" hidden>
+                <legend class="sr-only">Step 3 of 3: Contact details</legend>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="name">Your name *</label>
+                    <input type="text" id="name" name="name" autocomplete="name" required placeholder="How should we address you?" />
+                  </div>
+                  <div class="form-group">
+                    <label for="phone">Phone *</label>
+                    <input type="tel" id="phone" name="phone" autocomplete="tel" inputmode="tel" required placeholder="+972..." />
+                  </div>
+                </div>
+                <details class="pk-more">
+                  <summary>Email and notes (optional)</summary>
+                  <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" autocomplete="email" placeholder="name@example.com" />
+                  </div>
+                  <div class="form-group">
+                    <label for="message">Notes</label>
+                    <textarea id="message" name="message" placeholder="Floor, entry code, instructions"></textarea>
+                  </div>
+                </details>
+                <div class="checkbox-row">
+                  <input type="checkbox" id="agree" name="agree" required />
+                  <label for="agree">
+                    I have read the shipping restrictions and consent to the processing of my details to arrange this pickup.
+                  </label>
+                </div>
+                <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden"><label>Leave blank<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+                <div class="pk-nav"><button type="button" class="btn btn-outline" data-pk-back>← Back</button><button type="submit" class="btn btn-primary">Request courier</button></div>
+              </fieldset>
+              <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
+            </form><div id="pkDone" class="pk-done" hidden tabindex="-1"><h3 id="pkDoneTitle">Request received <span id="pkDoneNo"></span></h3><p id="pkDoneText"></p><p class="muted">Our operator will call to confirm the pickup day and address. Prepare the parcel and the recipient details.</p><div class="pk-nav"><a class="btn btn-primary" id="pkDoneWa" target="_blank" rel="noopener noreferrer" href="https://wa.me/972522323554">Message on WhatsApp</a><button type="button" class="btn btn-outline" id="pkDoneAgain">Another parcel</button></div></div></div></section>
 <section id="contacts"><div class="container"><h2 class="section-title">Contact Admiral Post</h2><p class="subtitle">Contact us to confirm service availability and get a quote.</p><div class="cards"><div class="card"><h3>Israel office</h3><p>Ben-Gurion Airport<br>Hativ-8 St, Overseas Building, Room 507<br>Lod 7010000, Israel</p></div><div class="card"><h3>Phone / WhatsApp</h3><p><a href="tel:+972522323554">+972 52 232 3554</a><br><a href="https://wa.me/972522323554" target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a></p></div><div class="card"><h3>Email</h3><p><a href="mailto:info@admiral-express.com">info@admiral-express.com</a><br>Support in English, Russian and Hebrew.</p></div></div></div></section>
 <section class="alt"><div class="container faq"><h2 class="section-title">Frequently asked questions</h2><details><summary>Which destinations do you serve?</summary><p>Ask us to confirm current availability for Russia, Ukraine, Moldova, Georgia, Europe, the USA, Canada and other destinations.</p></details><details><summary>Can I send personal belongings and gifts?</summary><p>Many everyday personal items may be accepted, but contents must be checked against route-specific restrictions before shipping.</p></details><details><summary>How long does delivery take?</summary><p>Delivery time depends on destination, route, customs and carrier workload. The chart above is indicative only; please request a current estimate.</p></details><details><summary>How do I track my parcel?</summary><p>Use the tracking field above. Live tracking results require connection to the company’s tracking system.</p></details></div></section></main>
 <footer><div class="container foot"><span>© <span id="year"></span> Admiral Post. All rights reserved.</span><span><a href="/en/#contacts">Contact</a> · <a href="/en/#quote">Request a quote</a></span></div></footer>
@@ -272,7 +415,214 @@
       }
       return false;
     }
-document.getElementById('quoteForm').addEventListener('submit',async function(e){e.preventDefault();const form=e.currentTarget,msg=document.getElementById('quoteMessage'),cfg=window.ADMIRAL_SUPABASE_CONFIG||{};msg.textContent='';if(!cfg.url||!cfg.publishableKey){msg.textContent='The online form is not connected yet. Please contact us on WhatsApp or at info@admiral-express.com.';return;}const payload={country:document.getElementById('country').value,weight:document.getElementById('weight').value,contents:document.getElementById('contents').value,name:document.getElementById('name').value,phone:document.getElementById('phone').value,email:document.getElementById('email').value,message:document.getElementById('message').value,consent:document.getElementById('consent').checked,website:form.website?.value||'',language:'en'};const button=form.querySelector('button[type="submit"]');button.disabled=true;try{const response = await window.AdmiralOrderApi.send(payload);const result=await response.json().catch(()=>({}));if(!response.ok)throw new Error(result.error||'Could not submit request.');msg.textContent='Thank you. Your request has been sent to our team.';form.reset();}catch(err){msg.textContent=err.message||'Please contact us on WhatsApp.';}finally{button.disabled=false;}});</script>
+    (function(){
+      const form = document.getElementById('orderForm'); if (!form) return;
+      const $ = (id) => document.getElementById(id);
+      const steps = [...form.querySelectorAll('.pk-step')], marks = [...form.querySelectorAll('.pk-steps li')];
+      const KEYS = {'Россия':'russia','Беларусь':'belarus','Украина':'ukraine','Молдова':'moldova','Грузия':'georgia','Европа':'europe','США':'usa','Канада':'canada'};
+      const WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      let current = 1, price = null;
+      const press = (box, btn) => box.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      function go(n){
+        current = n;
+        steps.forEach((f) => { f.hidden = Number(f.dataset.step) !== n; });
+        marks.forEach((m, i) => { m.className = i + 1 === n ? 'on' : i + 1 < n ? 'done' : ''; });
+        $('formStatus').textContent = ''; $('formStatus').className = 'form-status';
+      }
+      function validate(n){
+        const fields = [...steps[n - 1].querySelectorAll('input[required],select[required]')];
+        let first = null;
+        fields.forEach((el) => {
+          const ok = el.type === 'checkbox' ? el.checked : el.value.trim() !== '' && el.checkValidity();
+          el.setAttribute('aria-invalid', String(!ok)); if (!ok && !first) first = el;
+        });
+        if (n === 1 && !first && price && price.over) first = $('weight');
+        if (first) { first.setAttribute('aria-invalid', 'true'); first.focus(); }
+        return !first;
+      }
+      function refreshPrice(){
+        const box = $('pkPrice'), key = KEYS[$('country').value], w = Number($('weight').value);
+        price = null; box.className = 'pk-price';
+        if (!$('country').value || !(w > 0)) { box.hidden = true; return; }
+        box.hidden = false;
+        if (!key || !window.AdmiralPricing) { box.textContent = 'The operator will confirm a price for this destination.'; return; }
+        const t = AdmiralPricing.tariffs[key];
+        if (w > t.limit) { price = { over: true }; box.className = 'pk-price warn'; box.textContent = 'Maximum weight for this destination is ' + t.limit + ' kg. Please split the contents into separate parcels.'; return; }
+        const q = AdmiralPricing.quote(key, w); price = { total: q.total };
+        box.innerHTML = 'Estimated <b>₪' + q.total + '</b> for ' + q.billed + ' kg, typical sea delivery 21–35 days';
+      }
+      function buildDates(){
+        const box = $('pkDates');
+        const previousDate = $('pickupDate').value;
+        const weight = Number($('weight').value);
+        // Parcels up to and including 8 kg: daily pickup. Over 8 kg: Friday/Saturday only.
+        const heavy = Number.isFinite(weight) && weight > 8;
+        const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Jerusalem' }).format(new Date());
+        box.textContent = '';
+        const add = (label, iso) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.dataset.iso = iso; b.setAttribute('aria-pressed', 'false'); box.appendChild(b); return b; };
+        let firstBtn = null, previousBtn = null;
+        for (let i = 1, n = 0; n < 5 && i <= 35; i++) {
+          const d = new Date(Date.parse(today + 'T12:00:00Z') + i * 864e5), dow = d.getUTCDay();
+          if (heavy && dow !== 5 && dow !== 6) continue;
+          const iso = d.toISOString().slice(0, 10);
+          const b = add(WD[dow] + ' ' + iso.slice(8, 10) + '.' + iso.slice(5, 7), iso);
+          if (!firstBtn) firstBtn = b;
+          if (previousDate === iso) previousBtn = b;
+          n++;
+        }
+        const anytime = add('Any day', '');
+        const chosen = previousDate === '' && box.dataset.initialized === 'true'
+          ? anytime : (previousBtn || firstBtn);
+        press(box, chosen);
+        $('pickupDate').value = chosen ? chosen.dataset.iso : '';
+        box.dataset.initialized = 'true';
+        const hint = box.parentElement.querySelector('small');
+        if (hint) hint.textContent = (heavy
+          ? 'Parcels over 8 kg: pickup on Fridays and Saturdays.'
+          : 'Parcels up to and including 8 kg: daily pickup.')
+          + ' Our operator will confirm the date and time.';
+      }
+      $('pkWeights').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; $('weight').value = b.dataset.w; press($('pkWeights'), b); refreshPrice(); buildDates(); });
+      $('weight').addEventListener('input', () => { press($('pkWeights'), null); refreshPrice(); buildDates(); });
+      $('country').addEventListener('change', refreshPrice);
+      $('pkDates').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; press($('pkDates'), b); $('pickupDate').value = b.dataset.iso; });
+      $('savedPickupAddress').addEventListener('change', (e) => { const o = e.target.selectedOptions[0]; if (!o || !o.value) return; $('pickupCity').value = o.dataset.city || ''; $('pickupAddress').value = o.dataset.street || o.value; });
+      form.addEventListener('click', (e) => {
+        if (e.target.closest('[data-pk-next]')) { if (validate(current)) { go(current + 1); const f = steps[current - 1].querySelector('input:not([type=hidden]),select'); if (f) f.focus({ preventScroll: true }); form.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }
+        else if (e.target.closest('[data-pk-back]')) go(current - 1);
+      });
+      form.addEventListener('input', (e) => { if (e.target.getAttribute && e.target.getAttribute('aria-invalid') === 'true') e.target.setAttribute('aria-invalid', 'false'); });
+      $('pkDoneAgain').addEventListener('click', () => { $('pkDone').hidden = true; form.hidden = false; go(1); });
+      buildDates();
+      window.AdmiralPickup = {
+        go(n){ go(n); refreshPrice(); },
+        collect(){ const b = $('pkDates').querySelector('[aria-pressed="true"]'); const iso = $('pickupDate').value;
+          return { city: $('pickupCity').value.trim(), address: $('pickupAddress').value.trim(), date: iso, dateLabel: iso && b ? b.textContent : '', price: price && price.total != null ? price.total : null }; },
+        validateAll(){ for (let n = 1; n <= 3; n++) { if (!validate(n)) { go(n); validate(n); return false; } } return true; },
+        reset(){ press($('pkWeights'), null); $('pkDates').dataset.initialized = 'false'; $('pickupDate').value = ''; buildDates(); price = null; $('pkPrice').hidden = true; go(1); },
+        done(result, payload, pickup){
+          const no = result && result.order_id ? '№' + result.order_id : '';
+          $('pkDoneNo').textContent = no;
+          const title = $('pkDone').querySelector('h3');
+          if (title) title.textContent = no ? 'Request ' + no + ' received' : 'Request submitted';
+          $('pkDoneText').textContent = [payload.country + ', ' + payload.weight + ' kg', pickup.price != null ? 'estimated ₪' + pickup.price : '', [pickup.city, pickup.address].filter(Boolean).join(', '), pickup.dateLabel ? 'preferred date: ' + pickup.dateLabel : ''].filter(Boolean).join(' · ');
+          $('pkDoneWa').href = 'https://wa.me/972522323554?text=' + encodeURIComponent('Hello! I submitted request ' + no + ' for parcel pickup: ' + [pickup.city, pickup.dateLabel].filter(Boolean).join(', ') + '.');
+          form.hidden = true; $('pkDone').hidden = false; $('pkDone').focus(); $('pkDone').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      };
+    })();
+
+    // Заявки отправляются в защищённую Supabase Edge Function. В localStorage PII не сохраняются.
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("orderForm");
+      const statusEl = document.getElementById("formStatus");
+      if (!form || !statusEl) return;
+      // Prefill contact details from the signed-in customer's own profile.
+      const customerCfg=window.ADMIRAL_SUPABASE_CONFIG||{};
+      let customerDb=null;
+      if(window.supabase&&customerCfg.url&&customerCfg.publishableKey){
+        customerDb=window.supabase.createClient(customerCfg.url,customerCfg.publishableKey);
+        customerDb.auth.getUser().then(async ({data:{user}})=>{
+          if(!user)return;
+          if(user.email)form.email.value=user.email;
+          const {data:profile}=await customerDb.from('customer_profiles').select('full_name,phone').eq('user_id',user.id).maybeSingle();
+          if(profile?.full_name)form.name.value=profile.full_name;
+          if(profile?.phone)form.phone.value=profile.phone;
+          const {data:addresses,error:addressError}=await customerDb.from('customer_addresses').select('id,label,address_text,country,region,city,street,house_number').eq('user_id',user.id).order('created_at',{ascending:false});
+          if(!addressError&&addresses?.length){
+            const select=document.getElementById('savedPickupAddress');
+            for(const address of addresses){
+              const option=document.createElement('option');
+              const structured=[address.country,address.region,address.city,[address.street,address.house_number].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+              option.value=structured||address.address_text||'';option.dataset.city=address.city||'';option.dataset.street=[address.street,address.house_number].filter(Boolean).join(' ')||address.address_text||'';
+              option.textContent=(address.label||'Address')+' — '+option.value;
+              if(option.value)select.appendChild(option);
+            }
+            if(select.options.length>1)document.getElementById('savedAddressGroup').hidden=false;
+          }
+        }).catch(()=>{});
+      }
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        statusEl.textContent = "";
+        statusEl.className = "form-status";
+        const cfg = window.ADMIRAL_SUPABASE_CONFIG || {};
+        if (!cfg.url || !cfg.publishableKey) {
+          statusEl.textContent = "Online requests are temporarily unavailable. Contact WhatsApp or info@admiral-express.com.";
+          statusEl.classList.add("error");
+          return;
+        }
+        const pickup = window.AdmiralPickup ? window.AdmiralPickup.collect() : {};
+        const payload = {
+          kind: "pickup",
+          country: form.country.value.trim(),
+          weight: form.weight.value.trim(),
+          type: form.type.value.trim(),
+          name: form.name.value.trim(),
+          phone: form.phone.value.trim(),
+          email: form.email.value.trim(),
+          pickup_city: pickup.city || "",
+          pickup_address: pickup.address || "",
+          pickup_date: pickup.date || "",
+          estimated_price: pickup.price ?? null,
+          message: [form.message.value.trim(), pickup.city || pickup.address ? 'Pickup address: ' + [pickup.city, pickup.address].filter(Boolean).join(', ') : '', pickup.date ? 'Preferred pickup date: ' + pickup.dateLabel : ''].filter(Boolean).join('\n'),
+          agree: form.agree.checked,
+          website: (form.website?.value || ""),
+          language: "en"
+        };
+        if (window.AdmiralPickup && !window.AdmiralPickup.validateAll()) {
+          statusEl.textContent = "Check the highlighted fields.";
+          statusEl.classList.add("error");
+          return;
+        }
+        const button = form.querySelector('button[type="submit"]');
+        if (button) button.disabled = true;
+        try {
+          
+          const response = await window.AdmiralOrderApi.send(payload, customerDb);
+          const result = await response.json().catch(() => ({}));
+          // A 400 may indicate an invalid address, weight or other field; email is optional for pickup.
+          if (response.status === 400) {
+            // The API returns identifiers only; never echo personal data in errors.
+            const names = {
+              name: "name", phone: "phone", country: "destination",
+              weight: "weight", pickup_city: "pickup city",
+              pickup_address: "street and building", email: "email", agree: "consent"
+            };
+            const fields = Array.isArray(result.invalid_fields)
+              ? result.invalid_fields.filter(key => Object.prototype.hasOwnProperty.call(names, key)) : [];
+            if (fields.length) {
+              const first = fields[0];
+              const targetId = {pickup_city:"pickupCity",pickup_address:"pickupAddress"}[first] || first;
+              const target = document.getElementById(targetId);
+              const step = ["country","weight"].includes(first) ? 1
+                : ["pickup_city","pickup_address"].includes(first) ? 2 : 3;
+              if (window.AdmiralPickup) window.AdmiralPickup.go(step);
+              fields.forEach(key => {
+                const id = {pickup_city:"pickupCity",pickup_address:"pickupAddress"}[key] || key;
+                document.getElementById(id)?.setAttribute("aria-invalid","true");
+              });
+              statusEl.textContent = "Please check: " + fields.map(key => names[key]).join(", ") + ".";
+              statusEl.classList.add("error");
+              target?.focus({preventScroll:false});
+              return;
+            }
+            throw new Error(result.error || "Check required fields and try again.");
+          }
+          if (!response.ok) throw new Error(result.error || "Could not submit request.");
+          if (window.AdmiralPickup) window.AdmiralPickup.done(result, payload, pickup);
+          else { statusEl.textContent = "Thank you! Your request is submitted. An operator will contact you."; statusEl.classList.add("success"); }
+          form.reset();
+          if (window.AdmiralPickup) window.AdmiralPickup.reset();
+        } catch (error) {
+          statusEl.textContent = error.message || "Submission failed. Please contact us on WhatsApp.";
+          statusEl.classList.add("error");
+        } finally {
+          if (button) button.disabled = false;
+        }
+      });
+    });
+</script>
 
 <a class="whatsapp-float" href="https://wa.me/972522323554" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp"><span class="wa-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16.04 3.2A12.72 12.72 0 0 0 5.1 22.42L3.4 28.6l6.34-1.66A12.7 12.7 0 1 0 16.04 3.2Zm0 23.1a10.3 10.3 0 0 1-5.25-1.43l-.38-.23-3.76.98 1-3.66-.25-.4a10.34 10.34 0 1 1 8.64 4.74Zm5.67-7.74c-.31-.16-1.84-.91-2.13-1.02-.29-.1-.5-.16-.71.16-.21.31-.81 1.02-.99 1.23-.18.2-.36.23-.67.08-.31-.16-1.31-.49-2.5-1.55-.92-.82-1.54-1.83-1.72-2.14-.18-.31-.02-.48.14-.63.14-.14.31-.36.46-.54.16-.18.21-.31.31-.52.1-.2.05-.39-.03-.54-.08-.15-.71-1.7-.97-2.33-.25-.6-.51-.52-.71-.53h-.61c-.21 0-.54.08-.82.39-.28.31-1.08 1.06-1.08 2.59s1.11 3 1.26 3.21c.16.2 2.18 3.33 5.28 4.67.74.32 1.32.51 1.77.65.74.23 1.41.2 1.94.12.59-.09 1.84-.75 2.1-1.48.26-.72.26-1.34.18-1.48-.08-.13-.28-.21-.59-.36Z"/></svg></span><span class="wa-label">Chat on WhatsApp</span></a>
 <aside id="ap-cookie" role="region" aria-label="Cookie preferences" hidden><strong>Cookie preferences</strong><p>Essential storage supports site functionality. Optional analytics cookies are used only with your consent.</p><div class="ap-actions"><button type="button" class="ap-accept" id="ap-cookie-accept">Allow analytics</button><button type="button" class="ap-reject" id="ap-cookie-reject">Essential only</button></div></aside><button type="button" id="ap-cookie-reopen" aria-label="Cookie preferences">Cookies</button><script>(function(){const key='admiralpost-cookie-consent-v1',box=document.getElementById('ap-cookie'),reopen=document.getElementById('ap-cookie-reopen');let choice=null;try{choice=localStorage.getItem(key)}catch(e){}box.hidden=choice==='analytics'||choice==='essential';function save(value){try{localStorage.setItem(key,value)}catch(e){}box.hidden=true;window.dispatchEvent(new CustomEvent('admiralpost:consent',{detail:{analytics:value==='analytics'}}))}document.getElementById('ap-cookie-accept').addEventListener('click',()=>save('analytics'));document.getElementById('ap-cookie-reject').addEventListener('click',()=>save('essential'));reopen.addEventListener('click',()=>{box.hidden=false});window.admiralPostAnalyticsAllowed=function(){try{return localStorage.getItem(key)==='analytics'}catch(e){return false}}})();</script>
