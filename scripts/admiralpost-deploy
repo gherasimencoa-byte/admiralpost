@@ -1,0 +1,299 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 077
+
+BASE="/srv/admiralpost"
+RELEASES="$BASE/releases"
+CURRENT="$BASE/current"
+INCOMING="/var/lib/admiralpost-deploy/incoming"
+BACKUPS="/var/backups/admiralpost-deploy"
+LOCK="/run/lock/admiralpost-deploy.lock"
+
+WORK=""
+STAGE=""
+TARGET=""
+OLD_TARGET=""
+SWITCHED=0
+CREATED=0
+DB_COMMITTED=0
+NEW_LINK="$BASE/.current-next-$$"
+
+log(){ printf '[admiralpost-deploy] %s\n' "$*"; }
+die(){ log "ERROR: $*"; exit 1; }
+
+cleanup(){
+    [[ -z "$WORK" ]] || rm -rf -- "$WORK"
+    [[ -z "$STAGE" ]] || rm -rf -- "$STAGE"
+    rm -f -- "$NEW_LINK"
+}
+
+rollback(){
+    local rc=$?
+    trap - EXIT
+
+    if (( rc != 0 )); then
+        if (( DB_COMMITTED )); then
+            log "Database migrations committed; shared database is NOT automatically restored"
+        fi
+        if (( SWITCHED )); then
+            log "Deployment failed; restoring $OLD_TARGET"
+            if ln -s "$OLD_TARGET" "$NEW_LINK" &&
+               mv -Tf "$NEW_LINK" "$CURRENT"; then
+                SWITCHED=0
+                log "Rollback successful"
+            else
+                log "CRITICAL: automatic rollback failed"
+            fi
+        fi
+
+        if (( CREATED )) &&
+           [[ -n "$TARGET" && "$TARGET" != "$OLD_TARGET" ]]; then
+            if [[ ! -L "$CURRENT" ||
+                  "$(readlink -f "$CURRENT")" != "$TARGET" ]]; then
+                rm -rf -- "$TARGET"
+            fi
+        fi
+    fi
+
+    cleanup
+    exit "$rc"
+}
+
+trap rollback EXIT
+
+[[ $EUID -eq 0 ]] || die "Must run as root"
+[[ $# -eq 0 ]] || die "Arguments are not accepted"
+
+for cmd in python3 sha256sum tar curl flock; do
+    command -v "$cmd" >/dev/null || die "Missing command: $cmd"
+done
+
+exec 9>"$LOCK"
+flock -n 9 || die "Another deployment is running"
+# Serialize backups, SQL and publication with the existing Ops deployment.
+exec 8>/run/lock/alilpost-ops-deploy.lock
+flock -w 600 8 || die "Ops deployment is busy"
+
+[[ -d "$INCOMING" && -d "$RELEASES" && -d "$BACKUPS" ]] ||
+    die "Required directories missing"
+
+[[ -L "$CURRENT" ]] || die "Current symlink missing"
+
+OLD_TARGET="$(readlink -f "$CURRENT")"
+
+[[ "$OLD_TARGET" == "$RELEASES/"* &&
+   -d "$OLD_TARGET" &&
+   -s "$OLD_TARGET/index.html" ]] ||
+    die "Current release is invalid"
+
+for f in "$INCOMING/release.zip" "$INCOMING/release.sha256"; do
+    [[ -f "$f" && ! -L "$f" ]] || die "Missing or unsafe file: $f"
+done
+
+WORK="$(mktemp -d /var/tmp/admiralpost-deploy.XXXXXX)"
+
+mv "$INCOMING/release.zip" "$WORK/release.zip"
+mv "$INCOMING/release.sha256" "$WORK/release.sha256"
+chmod 0600 "$WORK/release.zip" "$WORK/release.sha256"
+
+cd "$WORK"
+
+EXPECTED="$(awk 'NR==1 {print $1}' release.sha256)"
+[[ "$EXPECTED" =~ ^[a-f0-9]{64}$ ]] ||
+    die "Invalid SHA256 file"
+
+printf '%s  %s\n' "$EXPECTED" release.zip |
+    sha256sum -c - >/dev/null ||
+    die "Archive SHA256 mismatch"
+
+RELEASE_META="$(python3 - "$WORK/release.zip" <<'PY'
+import hashlib
+import json
+import re
+import stat
+import sys
+import zipfile
+
+with zipfile.ZipFile(sys.argv[1]) as z:
+    infos = z.infolist()
+    names = []
+
+    if not infos:
+        raise SystemExit("Empty archive")
+
+    if sum(i.file_size for i in infos) > 200 * 1024 * 1024:
+        raise SystemExit("Archive is too large")
+
+    for info in infos:
+        name = info.filename
+
+        if info.is_dir():
+            raise SystemExit("Directory entries are not allowed")
+
+        if (name.startswith("/") or "\\" in name or
+            any(p in ("", ".", "..") for p in name.split("/"))):
+            raise SystemExit("Unsafe ZIP path: " + name)
+
+        if name == ".well-known" or name.startswith(".well-known/"):
+            raise SystemExit("ACME directory must not be included")
+
+        if info.flag_bits & 1:
+            raise SystemExit("Encrypted ZIP entries are not allowed")
+
+        mode = (info.external_attr >> 16) & 0xFFFF
+        kind = stat.S_IFMT(mode)
+
+        if kind not in (0, stat.S_IFREG):
+            raise SystemExit("Non-regular file: " + name)
+
+        if name.startswith('migrations/') and not re.fullmatch(r'migrations/\d{14}_[a-z0-9_]+\.sql',name):
+            raise SystemExit('Invalid migration path')
+        if name.lower().endswith('.sql') and not name.startswith('migrations/'):
+            raise SystemExit('SQL outside migration directory')
+        names.append(name)
+
+    if len(names) != len(set(names)):
+        raise SystemExit("Duplicate ZIP entries")
+
+    if not {"manifest.json", "VERSION", "index.html"}.issubset(names):
+        raise SystemExit("Required release files missing")
+
+    manifest = json.loads(z.read("manifest.json"))
+    version = z.read("VERSION").decode().strip()
+
+    if not re.fullmatch(r"\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?", version):
+        raise SystemExit("Invalid version")
+
+    if manifest.get("version") != version:
+        raise SystemExit("Version mismatch")
+
+    commit = manifest.get("source_commit")
+
+    if not isinstance(commit, str) or not re.fullmatch(r"[a-f0-9]{40}", commit):
+        raise SystemExit("Invalid source commit")
+
+    files = manifest.get("files")
+
+    if not isinstance(files, dict) or set(files) != set(names) - {"manifest.json"}:
+        raise SystemExit("Manifest file list mismatch")
+
+    payload_hash = hashlib.sha256(
+        json.dumps(files, sort_keys=True).encode()
+    ).hexdigest()
+
+    if manifest.get("payload_sha256") != payload_hash:
+        raise SystemExit("Manifest payload hash mismatch")
+
+    for name, expected in files.items():
+        if not isinstance(expected, str) or not re.fullmatch(r"[a-f0-9]{64}", expected):
+            raise SystemExit("Invalid file hash: " + name)
+
+        if hashlib.sha256(z.read(name)).hexdigest() != expected:
+            raise SystemExit("File hash mismatch: " + name)
+
+    print(version + "|" + commit)
+PY
+)" || die "Release validation failed"
+
+IFS='|' read -r VERSION SOURCE_COMMIT <<< "$RELEASE_META"
+
+RELEASE_ID="${VERSION}-${SOURCE_COMMIT:0:12}"
+TARGET="$RELEASES/$RELEASE_ID"
+
+[[ ! -e "$TARGET" ]] || die "Release already exists: $RELEASE_ID"
+
+log "Validated release $RELEASE_ID"
+
+BACKUP="$BACKUPS/admiralpost-$(basename "$OLD_TARGET")-before-$RELEASE_ID-$(date -u +%Y%m%dT%H%M%SZ)-$$.tar.gz"
+
+tar -czf "$BACKUP" -C "$OLD_TARGET" .
+tar -tzf "$BACKUP" >/dev/null ||
+    die "Backup verification failed"
+
+sha256sum "$BACKUP" > "$BACKUP.sha256"
+chmod 0600 "$BACKUP" "$BACKUP.sha256"
+
+(cd "$BACKUPS" &&
+ sha256sum -c "$(basename "$BACKUP").sha256" >/dev/null) ||
+    die "Backup checksum verification failed"
+
+log "Backup created and verified"
+
+log "Database backup running"
+systemctl start alilpost-backup.service
+[[ "$(systemctl show alilpost-backup.service -p Result --value)" == "success" ]] || die "Database backup failed"
+python3 - <<'PY'
+from pathlib import Path
+log=Path('/var/log/alilpost-backup.log').read_text().rsplit('=== BACKUP START',1)[-1]
+if 'REMOTE SHA256 VERIFICATION: OK' not in log or 'BACKUP SUCCESS' not in log:
+    raise SystemExit('Database backup unverified')
+PY
+log "Database backup verified"
+
+STAGE="$RELEASES/.staging-$RELEASE_ID-$$"
+mkdir -m 0755 "$STAGE"
+
+python3 - "$WORK/release.zip" "$STAGE" "$WORK" <<'PY'
+import sys
+import zipfile
+
+with zipfile.ZipFile(sys.argv[1]) as z:
+    from pathlib import Path
+    private=Path(sys.argv[3]);(private/'migrations').mkdir()
+    for name in z.namelist():
+        target=private if name.startswith('migrations/') else Path(sys.argv[2])
+        z.extract(name,target)
+PY
+
+chown -R root:root "$STAGE"
+find "$STAGE" -type d -exec chmod 0755 {} +
+find "$STAGE" -type f -exec chmod 0644 {} +
+
+[[ -s "$STAGE/index.html" ]] ||
+    die "Missing index.html after extraction"
+
+mv "$STAGE" "$TARGET"
+STAGE=""
+CREATED=1
+
+log "Release installed: $RELEASE_ID"
+
+# Run only the trusted installed executor, never code supplied inside the ZIP.
+mkdir -m 0700 "$WORK/scripts"
+cp /srv/admiralpost/scripts/apply-migrations.py "$WORK/scripts/apply-migrations.py"
+python3 -I "$WORK/scripts/apply-migrations.py" docker exec -i supabase-db psql -X -qAt -v ON_ERROR_STOP=1 -U supabase_admin -d postgres
+DB_COMMITTED=1
+printf "NOTIFY pgrst, 'reload schema';\n" | docker exec -i supabase-db psql -X -qAt -v ON_ERROR_STOP=1 -U supabase_admin -d postgres
+log "Database migrations verified"
+
+ln -s "$TARGET" "$NEW_LINK"
+mv -Tf "$NEW_LINK" "$CURRENT"
+SWITCHED=1
+
+log "Production symlink switched"
+
+for HOST in admiral-post.com www.admiral-post.com; do
+    BODY="$WORK/health-$HOST.html"
+
+    HTTP_CODE="$(curl --noproxy '*' -sS \
+        -o "$BODY" \
+        -w '%{http_code}' \
+        --connect-timeout 5 \
+        --max-time 20 \
+        --resolve "$HOST:443:127.0.0.1" \
+        "https://$HOST/index.html")" ||
+        die "HTTPS health request failed: $HOST"
+
+    [[ "$HTTP_CODE" == "200" ]] ||
+        die "Unexpected HTTP status $HTTP_CODE for $HOST"
+
+    cmp -s "$BODY" "$TARGET/index.html" ||
+        die "Served index.html differs from release: $HOST"
+
+    log "HTTPS health OK: $HOST"
+done
+
+log "SUCCESS version=$RELEASE_ID backup=$BACKUP"
+
+trap - EXIT
+cleanup

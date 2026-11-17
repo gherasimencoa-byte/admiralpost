@@ -43,6 +43,12 @@ jobs:
       - name: Verify direct order forms
         run: node --input-type=module -e "import('./tests/test-direct-orders.mjs').then(async m => console.log((await m.run()).join('\n')))"
 
+      - name: Test SQL deployment in isolated PostgreSQL
+        run: |
+          test -x /usr/lib/postgresql/16/bin/initdb || { sudo apt-get update && sudo apt-get install -y postgresql-16; }
+          python3 scripts/test-migrations.py
+          python3 scripts/test-deploy-migrations.py
+
       - name: Build and verify release
         run: |
           set -euo pipefail

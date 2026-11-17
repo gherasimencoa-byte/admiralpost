@@ -84,7 +84,10 @@ def main():
         if path.is_symlink() or not path.is_file():
             raise ValueError("Missing file or symlink: " + name)
 
-        if name != "VERSION" and path.suffix.lower() not in ALLOWED:
+        is_migration = bool(re.fullmatch(r'migrations/\d{14}_[a-z0-9_]+\.sql',name))
+        if name.startswith('migrations/') and not is_migration:
+            raise ValueError('Invalid migration filename: '+name)
+        if name != "VERSION" and not is_migration and path.suffix.lower() not in ALLOWED:
             raise ValueError("Unexpected file type: " + name)
 
         size = path.stat().st_size
@@ -189,3 +192,4 @@ if __name__ == "__main__":
     except Exception as exc:
         print("BUILD FAILED:", exc, file=sys.stderr)
         sys.exit(1)
+
