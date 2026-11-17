@@ -1129,6 +1129,8 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
 <script src="../shipping-pricing.js"></script>
 <link rel="stylesheet" href="/media/route-film.css?v=2">
 <script defer src="/media/route-film.js?v=2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/admiral-order-api.js" defer></script>
 </head>
 <body>
   <!-- כותרת האתר -->
@@ -1757,12 +1759,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
         const button = form.querySelector('button[type="submit"]');
         if (button) button.disabled = true;
         try {
-          const response = await fetch(cfg.url.replace(/\/$/, "") + "/functions/v1/submit-quote", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "apikey": cfg.publishableKey },
-            body: JSON.stringify(payload)
-          });
-          const result = await response.json().catch(() => ({}));
+          const response = await window.AdmiralOrderApi.send(payload);const result = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(result.error || "לא ניתן לשלוח את הבקשה.");
           statusEl.textContent = "תודה! הבקשה נשלחה. נציג יצור איתכם קשר.";
           statusEl.classList.add("success");

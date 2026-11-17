@@ -35,6 +35,14 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Verify direct order forms
+        run: node --input-type=module -e "import('./tests/test-direct-orders.mjs').then(async m => console.log((await m.run()).join('\n')))"
+
       - name: Build and verify release
         run: |
           set -euo pipefail
@@ -163,3 +171,4 @@ jobs:
 
           ssh "${SSH_OPTS[@]}" "$REMOTE" \
             'sudo /usr/local/sbin/admiralpost-deploy'
+
