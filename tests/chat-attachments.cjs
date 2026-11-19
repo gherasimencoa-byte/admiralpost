@@ -7,7 +7,7 @@ const fs=require('node:fs/promises');const path=require('node:path');const asser
  for(const lang of ['ru','en','he']){
   const context=await browser.newContext({viewport:{width:360,height:740},acceptDownloads:true});
   const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  let fail=true,capability=true,messages=[],uploadIds=[];
+  let chatMode='ai',fail=true,capability=true,messages=[],uploadIds=[];
   await page.route('https://chat.test/**',async route=>{
    const url=new URL(route.request().url());
    if(url.pathname==='/')return route.fulfill({contentType:'text/html',body:`<!doctype html><html lang="${lang}"><body><script src="/admiral-chat.js" data-key="test" data-open="true"></script></body></html>`});
@@ -22,8 +22,9 @@ const fs=require('node:fs/promises');const path=require('node:path');const asser
     if(fail){fail=false;return route.fulfill({status:503,json:{error:'failure'}});}
     messages=[{id:1,author:'visitor',body:b.body,attachment:{name:b.file.name,size:b.file.size,mime:'application/pdf'},at:new Date().toISOString()}];
    }else b=req.postDataJSON();
+   if(b.action==='resume_ai')chatMode='ai';
    if(b.action==='attachment_url')return route.fulfill({json:{url:'https://supabase.alilpost.ge/download.pdf'}});
-   return route.fulfill({json:{token:'test-token',settings:{attachments:capability},chat:messages.length?{id:1,status:'waiting',mode:'ai'}:null,messages,visitor:{},online:false}});
+   return route.fulfill({json:{token:'test-token',settings:{attachments:capability,resume_ai:true},chat:messages.length?{id:1,status:'waiting',mode:chatMode}:null,messages,visitor:{},online:false}});
   });
   await page.goto('https://chat.test/');await page.locator('.attach').waitFor();
   assert.equal(await page.locator('.attach').isDisabled(),true);
@@ -46,6 +47,7 @@ const fs=require('node:fs/promises');const path=require('node:path');const asser
   const layout=await page.locator('.compose').evaluate(n=>({width:n.clientWidth,scroll:n.scrollWidth,input:n.querySelector('textarea').getBoundingClientRect().width}));
   assert.ok(layout.scroll<=layout.width);assert.ok(layout.input>=100);
   await page.reload();await page.locator('.attachment-link').waitFor();
+  chatMode='waiting';await page.reload();await page.locator('.resume-ai').waitFor();await page.locator('.resume-ai').click();await page.waitForFunction(()=>!document.querySelector('#admiral-chat-root').shadowRoot.querySelector('.resume-ai'));
   capability=false;await page.reload();await page.locator('.attachment-link').waitFor();assert.equal(await page.locator('.attach').count(),0);
   assert.deepEqual(errors,[]);console.log(lang+': attachment selection, remove, retry, persistence, capability gate, mobile layout passed');
   await context.close();
