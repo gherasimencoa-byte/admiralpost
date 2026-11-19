@@ -1223,7 +1223,7 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
         </div>
         <form class="hero-tracking" id="heroTrackForm" onsubmit="event.preventDefault(); return runTracking('tracking-number', 'tracking-result', 'he', event.submitter || event.currentTarget.querySelector('button[type=submit]'));" role="search" aria-label="מעקב מהיר אחר חבילה">
           <span class="hero-tracking-icon" aria-hidden="true">⌕</span>
-          <input type="text" id="tracking-number" placeholder="הזינו מספר מעקב" aria-label="הזינו מספר מעקב" autocomplete="off" required>
+          <input type="text" id="tracking-number" placeholder="הזינו מספר מעקב" aria-label="הזינו מספר מעקב" autocomplete="off" maxlength="50" autocapitalize="characters" spellcheck="false" required>
           <button type="submit">מעקב</button>
           <p class="hero-tracking-hint">הזינו מספר מעקב כדי לראות את התוצאה כאן.</p>
           <div id="tracking-result" class="tracking-result hero-tracking-result" aria-live="polite"></div>
@@ -1685,83 +1685,105 @@ html[dir="rtl"] .whatsapp-float { direction:rtl; }
       if (y) y.textContent = new Date().getFullYear();
     });
 
-    // Отслеживание (пока заглушка)
         function handleTracking(event) {
       event.preventDefault();
       const button = event.submitter || event.currentTarget.querySelector('button[type="submit"]');
       return runTracking("tracking-number", "tracking-result", "he", button);
     }
 
+    // Track ID search: the same lookup as alilpost.ge (own orders, AlilPost CRM, Meest, Nova Poshta, Unipost, Russian Post).
+    const ADMIRAL_TRACKING_URL = "https://alilpost.ge/api/tracking";
+    const trackingRuns = {};
     async function runTracking(inputId, resultId, lang, button) {
       const input = document.getElementById(inputId);
       const result = document.getElementById(resultId);
-      const number = input ? input.value.trim() : "";
-      const text = {
-        ru: {loading:"Ищем отправление…", empty:"По этому номеру пока нет событий отслеживания.", error:"Не удалось получить статус. Попробуйте позже или свяжитесь с поддержкой.", latest:"Последний статус", history:"История отправления", parcel:"Номер отправления", location:"Место", date:"Дата"},
-        en: {loading:"Looking up your shipment…", empty:"No tracking events were found for this number.", error:"Could not retrieve tracking details. Please try again later or contact support.", latest:"Latest status", history:"Shipment history", parcel:"Shipment number", location:"Location", date:"Date"},
-        he: {loading:"מחפשים את המשלוח…", empty:"לא נמצאו אירועי מעקב למספר הזה.", error:"לא ניתן לקבל את פרטי המעקב כרגע. נסו שוב מאוחר יותר או פנו לתמיכה.", latest:"הסטטוס האחרון", history:"היסטוריית המשלוח", parcel:"מספר משלוח", location:"מיקום", date:"תאריך"}
-      }[lang] || {};
-      if (!number) {
-        result.textContent = lang === "ru" ? "Введите номер трека." : (lang === "he" ? "הזינו מספר מעקב." : "Please enter a tracking number.");
-        return false;
+      if (!input || !result) return false;
+      const texts = {
+        ru: {enter:"Введите номер трека.", invalid:"Проверьте номер: допустимы латинские буквы, цифры и дефис (от 4 до 50 символов).", loading:"Проверяем статус отправления…", empty:"Статусы пока не найдены. Проверьте номер или повторите поиск позже.", error:"Не удалось получить статус. Попробуйте позже.", timeout:"Проверка занимает слишком много времени. Попробуйте позже.", history:"История отправления", parcel:"Номер отправления", updated:"Обновление статуса", whatsapp:"Связаться в WhatsApp ↗"},
+        en: {enter:"Please enter a tracking number.", invalid:"Check the number: use Latin letters, digits and hyphens (4 to 50 characters).", loading:"Checking your shipment status…", empty:"No statuses found yet. Check the number or try again later.", error:"Could not retrieve the status. Please try again later.", timeout:"The check is taking too long. Please try again later.", history:"Shipment history", parcel:"Shipment number", updated:"Status update", whatsapp:"Contact us on WhatsApp ↗"},
+        he: {enter:"הזינו מספר מעקב.", invalid:"בדקו את המספר: אותיות לטיניות, ספרות ומקף בלבד (4 עד 50 תווים).", loading:"בודקים את סטטוס המשלוח…", empty:"עדיין לא נמצאו סטטוסים. בדקו את המספר או נסו שוב מאוחר יותר.", error:"לא ניתן לקבל את הסטטוס כרגע. נסו שוב מאוחר יותר.", timeout:"הבדיקה נמשכת זמן רב מדי. נסו שוב מאוחר יותר.", history:"היסטוריית המשלוח", parcel:"מספר משלוח", updated:"עדכון סטטוס", whatsapp:"פנו אלינו בוואטסאפ ↗"}
+      };
+      const text = texts[lang] || texts.en;
+      const state = trackingRuns[resultId] || (trackingRuns[resultId] = {seq: 0, controller: null});
+      if (!input.dataset.trackingBound) {
+        input.dataset.trackingBound = "1";
+        input.addEventListener("input", () => {
+          state.seq++;
+          if (state.controller) state.controller.abort();
+          result.replaceChildren();
+          if (button) button.disabled = false;
+        });
       }
+      const number = input.value.trim();
+      input.value = number;
+      if (!number) { result.textContent = text.enter; return false; }
+      if (!/^[A-Za-z0-9-]{4,50}$/.test(number)) { result.textContent = text.invalid; return false; }
+      if (state.controller) state.controller.abort();
+      const controller = new AbortController();
+      state.controller = controller;
+      const current = ++state.seq;
       result.replaceChildren();
       result.textContent = text.loading;
       if (button) button.disabled = true;
+      const timer = setTimeout(() => controller.abort(), 25000);
       try {
-        const response = await fetch("https://supabase.alilpost.ge/functions/v1/track-meest", {
+        const response = await fetch(ADMIRAL_TRACKING_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json", "apikey": "sb_publishable_liWk9p2ZzdsX8lIvqWRp2A_rYm0iERW" },
-          body: JSON.stringify({ trackNumber: number })
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ number: number, lang: lang === "ru" ? "ru" : "en" }),
+          credentials: "omit",
+          signal: controller.signal
         });
         const data = await response.json().catch(() => ({}));
+        if (current !== state.seq) return false;
         if (!response.ok) {
-          if (response.status === 404) throw new Error(text.empty);
-          if (response.status === 503) throw new Error(text.error);
-          throw new Error(text.error);
+          if (response.status === 422) throw new Error(text.invalid);
+          throw new Error(lang === "ru" && data.error ? data.error : text.error);
         }
-        const events = Array.isArray(data.result) ? data.result : [];
-        if (!events.length) {
-          result.textContent = text.empty;
-          return false;
-        }
+        const events = Array.isArray(data.events) ? data.events : [];
+        if (!events.length) { result.textContent = text.empty; return false; }
         result.replaceChildren();
-        const locale = lang === "ru" ? "RU" : "EN";
-        const getText = (obj) => obj && (obj["descr" + locale] || obj.descrEN || obj.descrRU || obj.descrUA) || "";
-        const latest = events[0];
         const heading = document.createElement("h3");
         heading.className = "tracking-current";
-        heading.textContent = getText(latest.eventDescr) || (lang === "ru" ? "Статус обновлён" : (lang === "he" ? "הסטטוס עודכן" : "Status updated"));
-        result.appendChild(heading);
+        heading.textContent = events[0].message || text.updated;
         const parcel = document.createElement("p");
         parcel.className = "tracking-parcel";
-        parcel.textContent = text.parcel + ": " + (latest.parcelNumber || data.parcelNumber || number);
-        result.appendChild(parcel);
+        parcel.textContent = text.parcel + ": " + number;
         const historyTitle = document.createElement("h4");
         historyTitle.className = "tracking-history-title";
         historyTitle.textContent = text.history;
-        result.appendChild(historyTitle);
         const history = document.createElement("div");
         history.className = "tracking-events";
         events.forEach((item) => {
           const card = document.createElement("article");
           card.className = "tracking-event";
           const date = document.createElement("time");
-          date.textContent = item.eventDateTime || "";
+          date.textContent = item.datetime || "";
           const status = document.createElement("strong");
-          status.textContent = getText(item.eventDescr) || (item.eventCodeUPU || ("Status " + item.eventCode));
-          const parts = [getText(item.eventCityDescr), getText(item.eventCountryDescr), getText(item.eventDetailDescr)].filter(Boolean);
-          const place = document.createElement("p");
-          place.textContent = parts.join(" · ");
+          status.textContent = item.message || text.updated;
           card.append(date, status);
-          if (place.textContent) card.appendChild(place);
+          const location = [item.country, item.city].filter(Boolean).join(", ");
+          if (location) {
+            const place = document.createElement("p");
+            place.textContent = location;
+            card.appendChild(place);
+          }
           history.appendChild(card);
         });
-        result.appendChild(history);
+        result.append(heading, parcel, historyTitle, history);
       } catch (error) {
-        result.textContent = error && error.message ? error.message : text.error;
+        if (current !== state.seq) return false;
+        result.replaceChildren();
+        result.append((error && error.name === "AbortError") ? text.timeout : ((error && error.message) || text.error), " ");
+        const link = document.createElement("a");
+        link.href = "https://wa.me/972522323554";
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = text.whatsapp;
+        result.appendChild(link);
       } finally {
-        if (button) button.disabled = false;
+        clearTimeout(timer);
+        if (current === state.seq && button) button.disabled = false;
       }
       return false;
     }
