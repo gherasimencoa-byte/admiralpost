@@ -80,8 +80,8 @@
 .hero-tracking button{flex:0 0 auto;border:1px solid #ff8a00;border-radius:10px;background:#ff8a00;color:#fff;font:inherit;font-size:16px;font-weight:500;padding:12px 20px;min-height:46px;cursor:pointer;transition:background .15s ease}
 .hero-tracking button:hover{background:#e97800}
 .hero-tracking button:disabled{opacity:.65;cursor:wait}
-.hero-tracking-hint{flex:1 0 100%;margin:0 0 0 32px;font-size:12px;line-height:1.4;color:#64748b}
-.hero-tracking-result{flex:1 0 100%;margin:0 0 0 32px;font-size:13px;color:#14243a;overflow-wrap:anywhere}
+.hero-tracking-hint{flex:1 1 100%;min-width:0;margin:0;margin-inline-start:32px;font-size:12px;line-height:1.4;color:#64748b}
+.hero-tracking-result{flex:1 1 100%;min-width:0;margin:0;margin-inline-start:32px;font-size:13px;color:#14243a;overflow-wrap:anywhere}
 /* Tracking results live on the light hero surface, not the dark tracking panel. */
 .hero-tracking-result .tracking-current { color:#0d2b52; }
 .hero-tracking-result .tracking-history-title { color:#0d2b52; }
@@ -89,11 +89,12 @@
 .hero-tracking-result .tracking-event { background:#f6f9fd; border:1px solid #dce5f0; color:#1d314e; }
 .hero-tracking-result .tracking-event strong { color:#0d2b52; }
 .hero-tracking-result .tracking-event p { color:#41546c; }
+.hero-tracking-result .tracking-event strong a { color:#e97800; text-decoration:underline; }
 .hero-tracking-result .tracking-event time { color:#53657a; display:block; margin-bottom:4px; }
-.hero-tracking-result .tracking-events { max-height:420px; overflow-y:auto; scrollbar-width:thin; padding-inline-end:3px; }
+.hero-tracking-result .tracking-events { max-height:420px; overflow-y:auto; scrollbar-width:thin; padding-inline-end:8px; }
 .hero-tracking-result .tracking-event { overflow-wrap:anywhere; }
 
-@media(max-width:600px){.hero-tracking{gap:5px;padding:6px 7px 9px 11px}.hero-tracking button{padding:10px 13px;min-height:44px;font-size:15px}.hero-tracking-hint,.hero-tracking-result{margin-left:30px}}
+@media(max-width:600px){.hero-tracking{gap:5px;padding:6px 7px 9px 11px}.hero-tracking button{padding:10px 13px;min-height:44px;font-size:15px}.hero-tracking-hint,.hero-tracking-result{margin-inline-start:30px}}
 </style>
 
 <style id="hero-button-attention">
@@ -345,6 +346,32 @@
     // Track ID search: the same lookup as alilpost.ge (own orders, AlilPost CRM, Meest, Nova Poshta, Unipost, Russian Post).
     const ADMIRAL_TRACKING_URL = "https://alilpost.ge/api/tracking";
     const trackingRuns = {};
+    // Carrier messages may contain HTML-escaped markup (e.g. a Nova Poshta link); show it as text plus safe https links only.
+    function trackingMessage(raw) {
+      const parse = (html) => new DOMParser().parseFromString(String(html), "text/html").body;
+      let body = parse(raw);
+      if (/<[a-z]/i.test(body.textContent)) body = parse(body.textContent);
+      const fragment = document.createDocumentFragment();
+      const walk = (node) => {
+        node.childNodes.forEach((child) => {
+          if (child.nodeType === Node.TEXT_NODE) { fragment.append(child.textContent); return; }
+          if (child.nodeType !== Node.ELEMENT_NODE) return;
+          const href = child.tagName === "A" ? (child.getAttribute("href") || "").trim() : "";
+          if (/^https:\/\//i.test(href)) {
+            const link = document.createElement("a");
+            link.href = href;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = child.textContent.trim() || href;
+            fragment.append(link);
+          } else {
+            walk(child);
+          }
+        });
+      };
+      walk(body);
+      return fragment;
+    }
     async function runTracking(inputId, resultId, lang, button) {
       const input = document.getElementById(inputId);
       const result = document.getElementById(resultId);
@@ -396,7 +423,7 @@
         result.replaceChildren();
         const heading = document.createElement("h3");
         heading.className = "tracking-current";
-        heading.textContent = events[0].message || text.updated;
+        heading.textContent = trackingMessage(events[0].message || "").textContent.trim() || text.updated;
         const parcel = document.createElement("p");
         parcel.className = "tracking-parcel";
         parcel.textContent = text.parcel + ": " + number;
@@ -411,7 +438,8 @@
           const date = document.createElement("time");
           date.textContent = item.datetime || "";
           const status = document.createElement("strong");
-          status.textContent = item.message || text.updated;
+          const message = trackingMessage(item.message || "");
+          if (message.textContent.trim()) status.appendChild(message); else status.textContent = text.updated;
           card.append(date, status);
           const location = [item.country, item.city].filter(Boolean).join(", ");
           if (location) {
