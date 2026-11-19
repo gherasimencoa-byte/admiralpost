@@ -361,7 +361,7 @@
     actionsEl=el('nav','actions');actionsEl.setAttribute('aria-label',copy.help);panel.append(actionsEl);
     fileTray=el('div','file-tray');fileTray.setAttribute('aria-live','polite');panel.append(fileTray);renderFileTray();composer=el('form','compose');const input=el('textarea');input.rows=1;input.maxLength=2000;input.placeholder=copy.placeholder;input.setAttribute('aria-label',t.question);input.value=S.draft;input.oninput=()=>{S.draft=input.value;storage.set('draft',S.draft);input.style.height='auto';input.style.height=Math.min(100,input.scrollHeight)+'px';};input.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();send();}};
     const sendButton=el('button','send');sendButton.type='submit';sendButton.setAttribute('aria-label',t.send);sendButton.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>';composer.append(input);addAttachmentPicker();addMicrophone(input);composer.append(sendButton);composer.onsubmit=e=>{e.preventDefault();send();};panel.append(composer);
-    const foot=el('footer','footer');foot.append(el('span','','Admiral-Post'));const wa=el('a','','WhatsApp ↗');wa.href='https://wa.me/972555171600';wa.target='_blank';wa.rel='noopener noreferrer';foot.append(wa);panel.append(foot);root.append(panel);renderView();viewport();
+    const foot=el('footer','footer');foot.append(el('span','','Admiral-Post'));const wa=el('a','','WhatsApp ↗');wa.href='https://wa.me/972522323554';wa.target='_blank';wa.rel='noopener noreferrer';foot.append(wa);panel.append(foot);root.append(panel);renderView();viewport();
   }
   function bubble(m){const n=el('article','message '+(m.author==='visitor'?'customer':m.author==='system'?'system':'assistant'));if(m.author!=='system'){n.append(el('strong','name',m.author==='visitor'?t.you:m.name||(m.author==='bot'?t.assistant:copy.human)));}const raw=m.body||'';const unverified=m.author==='bot' && m.id!=null && /(?:\d[\d., ]*\s*(?:₪|шекел|ILS\b|NIS\b|shekel|שקל)|₪\s*\d)/iu.test(raw);const text=unverified?quoteCopy[1]:raw;const url='https://www.admiral-post.com/documents/declaration.pdf';text.split(url).forEach((part,i)=>{if(i){const a=el('a','',t.pdf);a.href=url;a.target='_blank';a.rel='noopener';n.append(a);}n.append(document.createTextNode(part));});if(m.attachment){const link=button('📎 '+m.attachment.name+' · '+Math.ceil(m.attachment.size/1024)+' KB',()=>openAttachment(m,link),'attachment-link');link.title=fileCopy[5];n.append(link);}if(m.at)n.append(el('time','time',new Date(m.at).toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'})));return n;}
   function renderView(){
@@ -376,6 +376,7 @@
     if(S.chat?.mode==='waiting'){body.append(el('p','notice',S.online?copy.online:copy.offline));if(!S.visitor.phone)body.append(button(copy.contact,()=>{S.view='contact';renderView();},'chip'));}
     if(S.chat?.status==='closed'&&!S.chat.rated){const c=el('div','card');c.append(el('p','notice',copy.rating));const stars=el('div','stars');for(let i=1;i<=5;i++)stars.append(button('★',async()=>{try{await api('rate',{rating:i});S.chat.rated=true;c.replaceChildren(el('p','notice',copy.rated));}catch{showError(t.error);}},''));c.append(stars);body.append(c);}
     actionsEl.append(button(copy.quote,()=>quick(copy.quoteText),'chip'),button(copy.track,()=>{S.view='track';renderView();},'chip'),button(copy.order,openOrder,'chip'),button(copy.handoff,handoff,'chip'));
+    if(S.chat?.mode==='waiting'&&S.chat.status!=='closed'&&canResume){const resume=button(returnCopy[1],resumeEva,'chip resume-ai');resume.disabled=S.busy;actionsEl.append(resume);}
     for(const b of actionsEl.querySelectorAll('button')){if([copy.quote,copy.order].includes(b.textContent))b.disabled=S.busy||!S.ready;}syncDisabled();body.scrollTop=body.scrollHeight;
   }
   function syncDisabled(){if(!composer)return;const attach=composer.querySelector('.attach');if(attach)attach.disabled=!!dictation||!S.ready||S.busy||(!S.consent&&!['human','waiting'].includes(S.chat?.mode));const mic=composer.querySelector('.mic');if(mic)mic.disabled=!S.ready||S.busy||(!S.consent&&!['human','waiting'].includes(S.chat?.mode));composer.querySelector('.send').disabled=!!dictation||!S.ready||S.busy||(!S.consent&&!['human','waiting'].includes(S.chat?.mode));composer.querySelector('textarea').disabled=(S.busy&&!!selectedFile)||!S.ready||(!S.consent&&!['human','waiting'].includes(S.chat?.mode));}
@@ -395,6 +396,12 @@
     catch(e){showError(e.status?e.message:copy.network);S.busy=false;body?.querySelector('.typing')?.remove();syncDisabled();return;}
     finally{S.busy=false;}
     if(composer)composer.querySelector('textarea').value=S.draft;renderView();schedule();
+  }
+  async function resumeEva(){
+    if(S.busy||!S.ready)return;S.busy=true;renderView();let failed=false;
+    try{merge(await api('resume_ai',{chat_id:S.chat.id,after:S.last}));returning=false;S.aiError=false;}
+    catch{failed=true;}
+    finally{S.busy=false;renderView();if(failed)showError(copy.network);schedule();}
   }
   async function handoff(){if(!S.ready)return;try{const d=await api('handoff',{body:copy.handoffText,request_id:crypto.randomUUID(),after:S.last});merge(d);S.aiError=false;S.view='chat';renderView();schedule();}catch(e){showError(e.message);}}
   async function openOrder(){if(!S.ready||S.busy)return;if(!S.chat){quick(copy.orderText);return;}S.view='order';renderView();try{const d=await api('application');merge(d);if(S.view==='order')renderView();}catch(e){showError(e.message);}}
