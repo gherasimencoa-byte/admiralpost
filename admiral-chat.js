@@ -163,7 +163,46 @@
     const result=pricing.quote(tariffKey,weight), price=result.total;
     return header+' '+{ru:'Посылку весом '+weight+' кг не нужно делить из-за веса. При расчётном весе '+result.billed+' кг доставка стоит '+price+' ₪.',en:'A '+weight+' kg parcel is within the limit. Shipping at a chargeable weight of '+result.billed+' kg costs ₪'+price+'.',he:'חבילה במשקל '+weight+' ק״ג עומדת במגבלה. עלות המשלוח למשקל חיוב של '+result.billed+' ק״ג היא '+price+' ₪.'}[lang];
   }
+  // Track ID lookup: same service as the site search (alilpost.ge: AlilPost, Meest, Nova Poshta, Unipost, Russian Post).
+  const TRACKING_API='https://alilpost.ge/api/tracking';
+  const trackCopy={
+    ru:{ask:'Пришлите, пожалуйста, трек-номер посылки (например, CV000616265IL), и я проверю её статус.',status:n=>'Статус отправления '+n+':',history:'Ранее:',empty:n=>'По номеру '+n+' пока нет статусов. Проверьте номер или повторите поиск позже. Если посылка уже в пути, позовите консультанта.',error:'Сейчас не удаётся проверить статус. Попробуйте ещё раз чуть позже или позовите консультанта.'},
+    en:{ask:'Please send me your tracking number (for example, CV000616265IL) and I’ll check the status.',status:n=>'Status of shipment '+n+':',history:'Earlier:',empty:n=>'No statuses found yet for '+n+'. Check the number or try again later. If the parcel is already on its way, ask for a consultant.',error:'I can’t check the status right now. Please try again a bit later or ask for a consultant.'},
+    he:{ask:'שלחו לי בבקשה את מספר המעקב של החבילה (לדוגמה CV000616265IL) ואבדוק את הסטטוס.',status:n=>'סטטוס המשלוח '+n+':',history:'קודם לכן:',empty:n=>'עדיין אין סטטוסים למספר '+n+'. בדקו את המספר או נסו שוב מאוחר יותר. אם החבילה כבר בדרך, בקשו נציג.',error:'כרגע אין אפשרות לבדוק את הסטטוס. נסו שוב מעט מאוחר יותר או בקשו נציג.'}
+  }[lang];
+  const trackIntent=/трек|отслед|где\s+(?:моя\s+|мой\s+)?(?:посылк|отправлени|груз)|статус\s+(?:посылк|отправлени|заказ)|track|where\s+is\s+my\s+(?:parcel|package|shipment)|מעקב|איפה\s+(?:ה)?חבילה/iu;
+  function trackNumberIn(text){
+    const tokens=String(text).match(/[A-Za-z0-9-]{8,50}/g)||[];
+    const mixed=tokens.find(x=>/[A-Za-z]/.test(x)&&(x.match(/\d/g)||[]).length>=5);
+    if(mixed)return mixed.toUpperCase();
+    if(!trackIntent.test(text))return null;
+    return tokens.find(x=>/^\d{10,20}$/.test(x)&&!new RegExp('\\+\\s*'+x).test(text))||null;
+  }
+  function trackingText(raw){
+    let doc=new DOMParser().parseFromString(String(raw||''),'text/html').body;
+    if(/<[a-z]/i.test(doc.textContent))doc=new DOMParser().parseFromString(doc.textContent,'text/html').body;
+    return doc.textContent.replace(/\s+/g,' ').trim();
+  }
+  async function trackingLookup(number){
+    const r=await fetch(TRACKING_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({number,lang:lang==='ru'?'ru':'en'}),credentials:'omit',signal:AbortSignal.timeout(25000)});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw Object.assign(Error(d.error||'tracking'),{status:r.status});
+    return (Array.isArray(d.events)?d.events:[]).map(e=>({message:trackingText(e.message),datetime:String(e.datetime||''),place:[e.country,e.city].filter(Boolean).join(', ')}));
+  }
+  async function trackingReply(text){
+    const number=trackNumberIn(text);
+    if(!number)return trackIntent.test(text)&&!/\d/.test(text)?trackCopy.ask:null;
+    try{
+      const events=await trackingLookup(number);
+      if(!events.length)return trackCopy.empty(number);
+      const line=e=>[e.datetime,e.message,e.place].filter(Boolean).join(' · ');
+      const [last,...rest]=events;
+      return trackCopy.status(number)+'\n'+(last.message||'—')+(last.datetime||last.place?'\n'+[last.datetime,last.place].filter(Boolean).join(' · '):'')+(rest.length?'\n\n'+trackCopy.history+'\n'+rest.slice(0,3).map(line).join('\n'):'');
+    }catch(e){return e&&e.status===422?trackCopy.empty(number):trackCopy.error;}
+  }
   async function guardReply(text){
+    const tracked=await trackingReply(text);
+    if(tracked)return tracked;
     const allowed=await destinations();
     const history=transcript().filter(m=>m.author==='visitor');
     const current=countryCodes(text);
@@ -315,7 +354,7 @@
       try{const allowed=await destinations();const denied=decision(draft.destination,allowed);if(denied||!countryCodes(draft.destination).length){err.textContent=denied||routeText.ask;submit.disabled=false;return;}const d=await api('submit',{draft,after:S.last});merge(d);S.view='chat';renderView();}catch(e){err.textContent=e.status?e.message:copy.submitError;submit.disabled=false;}};
   }
   function contactForm(){const c=el('div','card');c.append(el('h2','',copy.contact),el('p','notice',copy.contactNote));const form=el('form');const name=field(form,'name',t.customer_name);name.value=S.visitor.name||'';name.maxLength=120;const phone=field(form,'phone',t.phone,'tel');phone.value=S.visitor.phone||'';phone.maxLength=40;const submit=el('button','primary',t.send);submit.type='submit';const err=el('div','error');form.append(submit,err);c.append(form);body.append(c);form.onsubmit=async e=>{e.preventDefault();if(!/^\+?[\d\s()-]{9,25}$/.test(phone.value)||phone.value.replace(/\D/g,'').length<9){err.textContent=t.phoneError;return;}submit.disabled=true;try{await api('introduce',{name:name.value,phone:phone.value});S.visitor={name:name.value,phone:phone.value};S.view='chat';renderView();body.append(el('p','notice',copy.saved));}catch(e){err.textContent=e.message;submit.disabled=false;}};}
-  function trackingForm(){const c=el('div','card');c.append(el('h2','',copy.track));const form=el('form');const number=field(form,'trackNumber',copy.trackNumber);number.maxLength=80;number.pattern='[A-Za-z0-9-]+';const submit=el('button','primary',copy.track);submit.type='submit';form.append(submit);const result=el('div');c.append(form,result);body.append(c);form.onsubmit=async e=>{e.preventDefault();submit.disabled=true;result.replaceChildren(el('p','notice',copy.loading));try{const r=await fetch('https://supabase.alilpost.ge/functions/v1/track-meest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({trackNumber:number.value.trim()}),signal:AbortSignal.timeout(45000)});const d=await r.json();if(r.status===404){result.replaceChildren(el('p','notice',copy.trackEmpty));return;}if(!r.ok||d.error)throw Error();result.replaceChildren();const desc=v=>typeof v==='string'?v:v?.[lang]||v?.en||v?.ru||Object.values(v||{})[0]||'';for(const event of d.result||[]){const item=el('div','track-event');item.append(el('strong','',desc(event.eventDescr)),el('span','',event.eventDateTime+'\n'+[desc(event.eventCountryDescr),desc(event.eventCityDescr)].filter(Boolean).join(', ')));result.append(item);}if(!d.result?.length)result.append(el('p','notice',copy.trackEmpty));}catch{result.replaceChildren(el('p','error',copy.trackError));}finally{submit.disabled=false;}};}
+  function trackingForm(){const c=el('div','card');c.append(el('h2','',copy.track));const form=el('form');const number=field(form,'trackNumber',copy.trackNumber);number.maxLength=50;number.minLength=4;number.pattern='[A-Za-z0-9-]+';number.autocomplete='off';number.spellcheck=false;const submit=el('button','primary',copy.track);submit.type='submit';form.append(submit);const result=el('div');c.append(form,result);body.append(c);form.onsubmit=async e=>{e.preventDefault();number.value=number.value.trim();if(!form.reportValidity())return;submit.disabled=true;result.replaceChildren(el('p','notice',copy.loading));try{const events=await trackingLookup(number.value);result.replaceChildren();for(const event of events){const item=el('div','track-event');item.append(el('strong','',event.message||'—'),el('span','',[event.datetime,event.place].filter(Boolean).join('\n')));result.append(item);}if(!events.length)result.append(el('p','notice',copy.trackEmpty));}catch(err){result.replaceChildren(el('p','error',err&&err.status===422?copy.trackEmpty:copy.trackError));}finally{submit.disabled=false;}};}
   function open(){if(S.ready)markVisit();previousFocus=document.activeElement;S.open=true;S.unread=0;storage.set('o','1');render();panel.querySelector('.close').focus();schedule();}
   function close(){S.open=false;storage.set('o',null);render();launcher?.focus();schedule();}
   root.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.open){e.preventDefault();close();}if(e.key==='Tab'&&S.open){const items=[...panel.querySelectorAll('button:not(:disabled),a,input:not(:disabled),textarea:not(:disabled)')].filter(n=>n.getClientRects().length);const first=items[0],last=items[items.length-1];if(e.shiftKey&&root.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&root.activeElement===last){e.preventDefault();first.focus();}}});
