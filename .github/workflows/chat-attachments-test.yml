@@ -1,0 +1,20 @@
+name: Chat attachment checks
+on:
+  pull_request:
+    paths: ['admiral-chat.js', 'tests/chat-attachments.cjs', '.github/workflows/chat-attachments-test.yml']
+permissions:
+  contents: read
+jobs:
+  chat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/chat-test playwright@1.62.1
+      - run: /tmp/chat-test/node_modules/.bin/playwright install --with-deps chromium
+      - run: node --check admiral-chat.js && node tests/chat-attachments.cjs
+        env:
+          NODE_PATH: /tmp/chat-test/node_modules
